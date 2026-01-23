@@ -1,0 +1,111 @@
+// RUN_PIPELINE_TILL: BACKEND
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
+fun barRegular(f: () -> Unit) {}
+
+fun baz(s: String) {}
+
+class MutableObject(var mutableField: String = "initial")
+
+private fun testStable() = barRegular {
+    var another = "hello"
+
+    barRegular {
+        println(another)
+    }
+}
+
+private fun testUnstable() = barRegular {
+    var another = "hello"
+
+    barRegular {
+        println(<!CV_DIAGNOSTIC!>another<!>)
+    }
+
+    another = "hi"
+}
+
+private fun testNotCaptured() {
+    barRegular {
+        var another = "hello"
+        println(another)
+    }
+}
+
+private fun testUnstableNotCaptured() {
+    barRegular {
+        var isEmpty = true
+        barRegular {
+            <!CV_DIAGNOSTIC!>isEmpty<!> = false
+        }
+        if (isEmpty) {
+            println("Empty")
+        }
+    }
+}
+
+private fun testSimpleCapturedCase(){
+    var first = true
+    barRegular {
+        barRegular {
+            if (<!CV_DIAGNOSTIC!>first<!>) {
+                <!CV_DIAGNOSTIC!>first<!> = false
+            }
+        }
+    }
+}
+
+fun testReturnAnonymousFunction(): (String) -> Unit {
+    var isScheduled = false
+    return { t ->
+        if (!<!CV_DIAGNOSTIC!>isScheduled<!>) {
+            <!CV_DIAGNOSTIC!>isScheduled<!> = true
+            barRegular {
+                baz(t)
+                <!CV_DIAGNOSTIC!>isScheduled<!> = false
+            }
+        }
+    }
+}
+
+fun testEffectivelyImmutableObject(): Unit {
+    var mutObj = MutableObject()
+    barRegular {
+        baz(mutObj.mutableField)
+        println(mutObj.toString())
+    }
+}
+
+fun testMutableObject(): Unit {
+    var immutObj = MutableObject()
+    barRegular {
+        baz(immutObj.mutableField)
+        println(immutObj.toString())
+    }
+
+    var mutObj = MutableObject()
+
+    barRegular {
+        <!CV_DIAGNOSTIC!>mutObj<!> = MutableObject("process")
+        println(<!CV_DIAGNOSTIC!>mutObj<!>.mutableField)
+    }
+
+    barRegular {
+        println(<!CV_DIAGNOSTIC!>mutObj<!>.toString())
+    }
+
+    var x = "bla"
+
+    barRegular {
+        <!CV_DIAGNOSTIC!>x<!> = "3"
+    }
+
+    barRegular {
+        println(<!CV_DIAGNOSTIC!>x<!>)
+    }
+}
+
+/* GENERATED_FIR_TAGS: assignment, functionDeclaration, functionalType, lambdaLiteral, localProperty,
+propertyDeclaration, stringLiteral */
