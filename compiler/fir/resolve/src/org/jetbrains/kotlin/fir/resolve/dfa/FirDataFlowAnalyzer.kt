@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.fir.resolve.substitution.chain
 import org.jetbrains.kotlin.fir.resolve.substitution.substitutorByMap
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.FirAbstractBodyResolveTransformer
 import org.jetbrains.kotlin.fir.resolve.transformers.unwrapAtoms
+import org.jetbrains.kotlin.fir.scopes.impl.FirLocalScope
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirEnumEntrySymbol
@@ -267,6 +268,8 @@ abstract class FirDataFlowAnalyzer(
     private val any = components.session.builtinTypes.anyType.coneType
     private val nullableNothing = components.session.builtinTypes.nullableNothingType.coneType
 
+    private val localScopes get() = components.towerDataContext.localScopes
+
     // ----------------------------------- Requests -----------------------------------
 
     private fun DataFlowVariable.getStability(flow: Flow, targetTypes: Set<ConeKotlinType>?): SmartcastStability {
@@ -299,6 +302,14 @@ abstract class FirDataFlowAnalyzer(
             }
         return buildSmartCastStatement(flow, variable, typeStatement)
     }
+
+    private operator fun FirLocalScope.contains(symbol: FirBasedSymbol<*>): Boolean =
+        symbol in properties.values || symbol in classLikeSymbols.values || functions.keys.any { symbol in functions[it] }
+
+    private operator fun FirLocalScope.contains(variable: RealVariable): Boolean =
+        (variable.symbol.origin.fromSource && variable.symbol in this) ||
+                variable.dispatchReceiver?.let { it in this } == true ||
+                variable.extensionReceiver?.let { it in this } == true
 
     open fun extractTypeStatementFrom(flow: Flow, variable: DataFlowVariable): TypeStatement? = flow.getTypeStatement(variable)
 
@@ -380,6 +391,12 @@ abstract class FirDataFlowAnalyzer(
                 function.lambdaArgumentParent?.let {
                     processConditionalContract(flow, it, null, targetLambdaArgument = function)
                 }
+            }
+
+            for (parameter in function.valueParameters) {
+                val domain = Domain.fresh()
+                val variable = RealVariable(parameter.symbol, false, null, null, parameter.returnTypeRef.coneType)
+                logicSystem.addReferenceToDomain(flow, domain, DomainReference.Original(variable))
             }
         }
     }
@@ -1245,8 +1262,7 @@ abstract class FirDataFlowAnalyzer(
                     hasAnyContractsToProcess = true
                 }
                 targetLambdaArgument != null && effect is ConeHoldsInEffectDeclaration
-                    && effect.valueParameterReference.parameterIndex == indexOfLambdaArgument ->
-                {
+                        && effect.valueParameterReference.parameterIndex == indexOfLambdaArgument -> {
                     conditionalHoldsIn.add(effect)
                     hasAnyContractsToProcess = true
                 }
@@ -1367,6 +1383,9 @@ abstract class FirDataFlowAnalyzer(
 
     fun exitLocalVariableDeclaration(variable: FirProperty, hadExplicitType: Boolean) {
         graphBuilder.exitVariableDeclaration(variable).mergeIncomingFlow { _, flow ->
+            getLocal(variable.symbol, create = true)?.let {
+                logicSystem.addReferenceToDomain(flow, Domain.Unreachable, DomainReference.Original(it))
+            }
             val initializer = variable.initializer ?: return@mergeIncomingFlow
             exitVariableInitialization(flow, initializer, variable, assignmentLhs = null, hadExplicitType)
         }
@@ -1386,6 +1405,12 @@ abstract class FirDataFlowAnalyzer(
                 val variable = flow.getRealVariableWithoutUnwrappingAlias(assignment.lValue)
                 if (variable != null) {
                     logicSystem.recordNewAssignment(flow, variable, context.newAssignmentIndex())
+                }
+                flow.getOrCreateVariable(assignment.lValue)?.let { variable ->
+                    logicSystem.removePreviousDomainReferences(flow, variable)
+                    flow.getOrCreateVariable(assignment.rValue)?.let { value ->
+                        logicSystem.addReferenceToDomain(flow, value, DomainReference.Expression(variable, assignment))
+                    }
                 }
             }
             processConditionalContract(flow, assignment, callArgsExit = null)
@@ -1453,6 +1478,11 @@ abstract class FirDataFlowAnalyzer(
             // `propertyVariable` can be an alias to `initializerVariable`, in which case this will add
             // a redundant type statement which is fine...probably
             flow.addTypeStatement(flow.unwrapVariable(propertyVariable) typeEq initializer.resolvedType)
+        }
+
+        logicSystem.removePreviousDomainReferences(flow, propertyVariable)
+        flow.getOrCreateVariable(initializer)?.let {
+            logicSystem.addReferenceToDomain(flow, it, DomainReference.Expression(propertyVariable, initializer))
         }
     }
 

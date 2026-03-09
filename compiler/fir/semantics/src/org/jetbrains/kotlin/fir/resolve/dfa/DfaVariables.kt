@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.fir.declarations.utils.isFinal
 import org.jetbrains.kotlin.fir.declarations.utils.isReplSnippetDeclaration
 import org.jetbrains.kotlin.fir.declarations.utils.visibility
 import org.jetbrains.kotlin.fir.expressions.FirExpression
+import org.jetbrains.kotlin.fir.expressions.FirStatement
 import org.jetbrains.kotlin.fir.expressions.isImplicitWhenSubjectVariable
 import org.jetbrains.kotlin.fir.resolve.toSymbol
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
@@ -26,6 +27,8 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.types.SmartcastStability
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 sealed class DataFlowVariable {
     abstract val originalType: ConeKotlinType
@@ -176,4 +179,36 @@ private fun FirVariable.isInCurrentOrFriendModule(session: FirSession): Boolean 
     val propertyModuleData = originalOrSelf().moduleData
     val currentModuleData = session.moduleData
     return currentModuleData.canSeeInternalsOf(propertyModuleData)
+}
+
+sealed interface Domain {
+    object Unreachable : Domain
+
+    // we use identity to differentiate domains
+    class Known() : Domain {
+        override fun equals(other: Any?): Boolean = this === other
+        override fun hashCode(): Int = System.identityHashCode(this)
+    }
+
+    companion object {
+        fun fresh(): Domain = Known()
+    }
+}
+
+sealed class DomainReference {
+    sealed class WithVariable: DomainReference() {
+        abstract val variable: DataFlowVariable
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    operator fun contains(variable: DataFlowVariable): Boolean {
+        contract {
+            returns(true) implies (this@DomainReference is DomainReference.WithVariable)
+        }
+        return this is WithVariable && this.variable == variable
+    }
+
+    data class Original(override val variable: RealVariable) : DomainReference.WithVariable()
+    data class Expression(override val variable: DataFlowVariable, val expression: FirStatement) : DomainReference.WithVariable()
+    data class Potential(val call: FirExpression) : DomainReference()
 }
