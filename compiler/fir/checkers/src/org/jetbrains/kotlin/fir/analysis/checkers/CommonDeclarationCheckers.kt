@@ -73,7 +73,6 @@ object CommonDeclarationCheckers : DeclarationCheckers() {
         FirOperatorModifierChecker,
         FirTailrecFunctionChecker,
         FirVersionOverloadsChecker,
-        FirCapturedVariableStabilityFunctionChecker,
     )
 
     override val simpleFunctionCheckers: Set<FirSimpleFunctionChecker> = setOf(
@@ -195,6 +194,7 @@ object CommonDeclarationCheckers : DeclarationCheckers() {
 
     override val variableAssignmentCfaBasedCheckers: Set<AbstractFirPropertyInitializationChecker> = setOf(
         FirPropertyInitializationAnalyzer,
+        FirCapturedVariableStabilityFunctionChecker,
     )
 
     override val typeParameterCheckers: Set<FirTypeParameterChecker> = setOf(
