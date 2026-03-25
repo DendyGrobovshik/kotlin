@@ -55,7 +55,7 @@ KaConstructorSymbol:
           getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
           getContainingJvmClassName: ClassC
           getContainingModule: KaSourceModule "Sources of main"
-          deprecationStatus: null
+          deprecation: null
           importableFqName: null
         callableId: /ClassC.paramProp
         contextParameters: []
@@ -90,7 +90,7 @@ KaConstructorSymbol:
           getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
           getContainingJvmClassName: ClassC
           getContainingModule: KaSourceModule "Sources of main"
-          deprecationStatus: null
+          deprecation: null
           importableFqName: null
         hasBackingField: true
         hasGetter: true
@@ -127,7 +127,7 @@ KaConstructorSymbol:
         getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
         getContainingJvmClassName: ClassC
         getContainingModule: KaSourceModule "Sources of main"
-        deprecationStatus: null
+        deprecation: null
         javaGetterName: getParamProp
         javaSetterName: null
         isInline: false
@@ -157,14 +157,14 @@ KaConstructorSymbol:
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingJvmClassName: ClassC
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
   ]
   visibility: PUBLIC
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ClassC
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: ClassC
 
 KaConstructorSymbol:
@@ -193,7 +193,7 @@ KaConstructorSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ClassC
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: ClassC
 
 KaClassInitializerSymbol:
@@ -207,7 +207,7 @@ KaClassInitializerSymbol:
   visibility: LOCAL
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: null
 
 KaLocalVariableSymbol:
@@ -235,7 +235,7 @@ KaLocalVariableSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: null
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: null
 
 KaNamedFunctionSymbol:
@@ -286,7 +286,7 @@ KaNamedFunctionSymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ClassC
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   returnType: KaUsualClassType:
     annotations: []
@@ -324,7 +324,7 @@ KaNamedFunctionSymbol:
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingJvmClassName: ClassC
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
   ]
   visibility: PUBLIC
@@ -336,7 +336,7 @@ KaNamedFunctionSymbol:
   getContainingJvmClassName: ClassC
   canBeOperator: false
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   returnValueStatus: Unspecified
   importableFqName: null
 
@@ -355,7 +355,7 @@ KaTypeParameterSymbol:
   visibility: LOCAL
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: null
 
 KaNamedFunctionSymbol:
@@ -402,7 +402,7 @@ KaNamedFunctionSymbol:
   getContainingJvmClassName: ClassC.Nested
   canBeOperator: false
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   returnValueStatus: Unspecified
   importableFqName: null
 
@@ -445,14 +445,14 @@ KaNamedClassSymbol:
       visibility: LOCAL
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
   ]
   visibility: PUBLIC
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: ClassC.Nested
 
 KaKotlinPropertySymbol:
@@ -486,7 +486,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ClassC
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   callableId: /ClassC.baz
   contextParameters: []
@@ -521,7 +521,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ClassC
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   hasBackingField: true
   hasGetter: true
@@ -594,7 +594,7 @@ KaKotlinPropertySymbol:
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingJvmClassName: null
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
     receiverParameter: null
     returnType: KaUsualClassType:
@@ -632,7 +632,7 @@ KaKotlinPropertySymbol:
         getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
         getContainingJvmClassName: null
         getContainingModule: KaSourceModule "Sources of main"
-        deprecationStatus: null
+        deprecation: null
         importableFqName: null
     ]
     visibility: PUBLIC
@@ -643,7 +643,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ClassC
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   typeParameters: []
   visibility: PUBLIC
@@ -654,7 +654,7 @@ KaKotlinPropertySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ClassC
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   javaGetterName: getBaz
   javaSetterName: setBaz
   isInline: false
@@ -688,7 +688,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: ClassC
 
 KaKotlinPropertySymbol:
@@ -718,7 +718,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   callableId: /prop
   contextParameters: []
@@ -749,7 +749,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   hasBackingField: true
   hasGetter: true
@@ -782,7 +782,7 @@ KaKotlinPropertySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ExternalDeclarationsKt
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   javaGetterName: getProp
   javaSetterName: null
   isInline: false
@@ -812,7 +812,7 @@ KaEnumEntrySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: EnumE
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: EnumE.EnumA
 
 KaEnumEntrySymbol:
@@ -839,7 +839,7 @@ KaEnumEntrySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: EnumE
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: EnumE.EnumB
 
 KaNamedClassSymbol:
@@ -875,7 +875,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: EnumE
 
 KaEnumEntrySymbol:
@@ -902,7 +902,7 @@ KaEnumEntrySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: EnumNotExternal
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: EnumNotExternal.EnumA2
 
 KaNamedClassSymbol:
@@ -938,7 +938,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: EnumNotExternal
 
 KaConstructorSymbol:
@@ -998,7 +998,7 @@ KaConstructorSymbol:
           getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
           getContainingJvmClassName: NotExternalC
           getContainingModule: KaSourceModule "Sources of main"
-          deprecationStatus: null
+          deprecation: null
           importableFqName: null
         callableId: /NotExternalC.paramProp2
         contextParameters: []
@@ -1033,7 +1033,7 @@ KaConstructorSymbol:
           getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
           getContainingJvmClassName: NotExternalC
           getContainingModule: KaSourceModule "Sources of main"
-          deprecationStatus: null
+          deprecation: null
           importableFqName: null
         hasBackingField: true
         hasGetter: true
@@ -1070,7 +1070,7 @@ KaConstructorSymbol:
         getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
         getContainingJvmClassName: NotExternalC
         getContainingModule: KaSourceModule "Sources of main"
-        deprecationStatus: null
+        deprecation: null
         javaGetterName: getParamProp2
         javaSetterName: null
         isInline: false
@@ -1100,14 +1100,14 @@ KaConstructorSymbol:
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingJvmClassName: NotExternalC
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
   ]
   visibility: PUBLIC
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: NotExternalC
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: NotExternalC
 
 KaConstructorSymbol:
@@ -1136,7 +1136,7 @@ KaConstructorSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: NotExternalC
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   importableFqName: NotExternalC
 
 KaNamedClassSymbol:
@@ -1167,7 +1167,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: NotExternalC
 
 KaNamedFunctionSymbol:
@@ -1210,7 +1210,7 @@ KaNamedFunctionSymbol:
   getContainingJvmClassName: InterfaceI
   canBeOperator: false
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   returnValueStatus: Unspecified
   importableFqName: null
 
@@ -1242,7 +1242,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: InterfaceI
 
 KaNamedClassSymbol:
@@ -1273,7 +1273,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: SealedC.SealedO
 
 KaNamedClassSymbol:
@@ -1304,7 +1304,7 @@ KaNamedClassSymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingModule: KaSourceModule "Sources of main"
   annotationApplicableTargets: null
-  deprecationStatus: null
+  deprecation: null
   importableFqName: SealedC
 
 KaKotlinPropertySymbol:
@@ -1334,7 +1334,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   callableId: /propWithExternalGetter
   contextParameters: []
@@ -1365,7 +1365,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   hasBackingField: true
   hasGetter: true
@@ -1398,7 +1398,7 @@ KaKotlinPropertySymbol:
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ExternalDeclarationsKt
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   javaGetterName: getPropWithExternalGetter
   javaSetterName: null
   isInline: false
@@ -1431,7 +1431,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   callableId: /propWithExternalAccessors
   contextParameters: []
@@ -1462,7 +1462,7 @@ KaKotlinPropertySymbol:
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   hasBackingField: true
   hasGetter: true
@@ -1535,7 +1535,7 @@ KaKotlinPropertySymbol:
       getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
       getContainingJvmClassName: null
       getContainingModule: KaSourceModule "Sources of main"
-      deprecationStatus: null
+      deprecation: null
       importableFqName: null
     receiverParameter: null
     returnType: KaUsualClassType:
@@ -1573,21 +1573,21 @@ KaKotlinPropertySymbol:
         getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
         getContainingJvmClassName: null
         getContainingModule: KaSourceModule "Sources of main"
-        deprecationStatus: null
+        deprecation: null
         importableFqName: null
     ]
     visibility: PUBLIC
     getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
     getContainingJvmClassName: ExternalDeclarationsKt
     getContainingModule: KaSourceModule "Sources of main"
-    deprecationStatus: null
+    deprecation: null
     importableFqName: null
   typeParameters: []
   visibility: PUBLIC
   getContainingFileSymbol: KaFileSymbol(externalDeclarations.kt)
   getContainingJvmClassName: ExternalDeclarationsKt
   getContainingModule: KaSourceModule "Sources of main"
-  deprecationStatus: null
+  deprecation: null
   javaGetterName: getPropWithExternalAccessors
   javaSetterName: setPropWithExternalAccessors
   isInline: false
