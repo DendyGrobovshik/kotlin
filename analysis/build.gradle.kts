@@ -1,5 +1,21 @@
-tasks.register("analysisAllTests") {
+tasks.register("analysisApiArtifactTests") {
+    group = "verification"
+
     dependsOn(
+        ":prepare:analysis-api:kotlin-analysis-api:check",
+        ":prepare:analysis-api:kotlin-analysis-api-surface:check",
+        ":prepare:analysis-api:kotlin-analysis-api-platform-interface:check",
+        ":prepare:analysis-api:kotlin-analysis-api-implementation:check",
+        ":prepare:analysis-api:kotlin-analysis-api-intellij-api-surface-components:check",
+        ":prepare:analysis-api:kotlin-analysis-api-intellij-implementation-components:check",
+    )
+}
+
+tasks.register("analysisAllTests") {
+    group = "verification"
+
+    dependsOn(
+        ":analysis:analysisApiArtifactTests",
         ":analysis:analysis-api:check",
         ":analysis:analysis-api-fir:check",
         ":analysis:analysis-api-impl-base:check",
