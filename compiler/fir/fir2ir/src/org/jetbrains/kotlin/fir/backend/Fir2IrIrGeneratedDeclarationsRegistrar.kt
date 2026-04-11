@@ -393,7 +393,7 @@ class Fir2IrIrGeneratedDeclarationsRegistrar(private val components: Fir2IrCompo
                     dispatchReceiver = receiver
                 }
             }
-            is IrConstructorCall -> this.toFirAnnotation()
+            is IrAnnotation -> this.toFirAnnotation()
             is IrVararg -> {
                 val varargElements = this.elements.map { element ->
                     when (element) {
@@ -431,8 +431,8 @@ class Fir2IrIrGeneratedDeclarationsRegistrar(private val components: Fir2IrCompo
         }
     }
 
-    private fun IrConstructorCall.toFirAnnotation(): FirAnnotation {
-        val annotationClassId = this.symbol.owner.constructedClass.classId!!
+    private fun IrAnnotation.toFirAnnotation(): FirAnnotation {
+        val annotationClassId = this.classId
         return buildAnnotation {
             annotationTypeRef = annotationClassId
                 .toLookupTag()
@@ -441,7 +441,7 @@ class Fir2IrIrGeneratedDeclarationsRegistrar(private val components: Fir2IrCompo
             argumentMapping = buildAnnotationArgumentMapping {
                 for ([i, argument] in this@toFirAnnotation.arguments.withIndex()) {
                     if (argument == null) continue
-                    val argName = this@toFirAnnotation.symbol.owner.parameters[i].name
+                    val argName = this@toFirAnnotation.classSymbol.owner.primaryConstructor!!.parameters[i].name
                     this.mapping[argName] = argument.toFirExpression()
                 }
             }
@@ -486,7 +486,7 @@ class Fir2IrIrGeneratedDeclarationsRegistrar(private val components: Fir2IrCompo
             return extractGeneratedIrDeclarations(declaration).isNotEmpty()
         }
 
-        private fun extractGeneratedIrDeclarations(declaration: FirDeclaration): List<IrConstructorCall> {
+        private fun extractGeneratedIrDeclarations(declaration: FirDeclaration): List<IrAnnotation> {
             when (declaration.origin) {
                 is FirDeclarationOrigin.Synthetic,
                 is FirDeclarationOrigin.Delegated

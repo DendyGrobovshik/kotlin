@@ -653,30 +653,33 @@ class IrSourcePrinterVisitor(
         println(")")
     }
 
+    override fun visitAnnotation(expression: IrAnnotation) {
+        val name = expression.classSymbol.owner.name
+        print("@")
+        print(name)
+
+        val printArgumentList = expression.arguments.any { it != null }
+        if (printArgumentList) {
+            expression.printArgumentList(
+                forceParameterNames = true,
+                forceSingleLine = true
+            )
+        }
+    }
+
     override fun visitConstructorCall(expression: IrConstructorCall) {
         val constructedClass = expression.symbol.owner.constructedClass
         val name = constructedClass.name
-        val isAnnotation = constructedClass.isAnnotationClass
-        if (isAnnotation) {
-            print("@")
-        }
         expression.dispatchReceiver?.let {
             it.print()
             print(".")
         }
         print(name)
 
-        val printArgumentList = if (isAnnotation) {
-            expression.arguments.any { it != null }
-        } else {
-            true
-        }
-        if (printArgumentList) {
-            expression.printArgumentList(
-                forceParameterNames = isAnnotation,
-                forceSingleLine = isAnnotation
-            )
-        }
+        expression.printArgumentList(
+            forceParameterNames = false,
+            forceSingleLine = false
+        )
     }
 
     override fun visitStringConcatenation(expression: IrStringConcatenation) {
@@ -1471,7 +1474,7 @@ class IrSourcePrinterVisitor(
             }
         }
 
-    private fun renderTypeAnnotations(annotations: List<IrConstructorCall>) =
+    private fun renderTypeAnnotations(annotations: List<IrAnnotation>) =
         if (annotations.isEmpty())
             ""
         else
@@ -1479,15 +1482,11 @@ class IrSourcePrinterVisitor(
                 "@[${renderAsAnnotation(it)}]"
             }
 
-    private fun renderAsAnnotation(irAnnotation: IrConstructorCall): String =
+    private fun renderAsAnnotation(irAnnotation: IrAnnotation): String =
         StringBuilder().also { it.renderAsAnnotation(irAnnotation) }.toString()
 
-    private fun StringBuilder.renderAsAnnotation(irAnnotation: IrConstructorCall) {
-        val annotationClassName = try {
-            irAnnotation.symbol.owner.parentAsClass.name.asString()
-        } catch (e: Exception) {
-            "<unbound>"
-        }
+    private fun StringBuilder.renderAsAnnotation(irAnnotation: IrAnnotation) {
+        val annotationClassName = irAnnotation.classId.shortClassName.asString()
         append(annotationClassName)
 
         if (irAnnotation.arguments.isEmpty()) return
@@ -1562,7 +1561,7 @@ class IrSourcePrinterVisitor(
     private fun StringBuilder.renderAsAnnotationArgument(irElement: IrElement?) {
         when (irElement) {
             null -> append("<null>")
-            is IrConstructorCall -> renderAsAnnotation(irElement)
+            is IrAnnotation -> renderAsAnnotation(irElement)
             is IrConst -> {
                 append('\'')
                 append(irElement.value.toString())

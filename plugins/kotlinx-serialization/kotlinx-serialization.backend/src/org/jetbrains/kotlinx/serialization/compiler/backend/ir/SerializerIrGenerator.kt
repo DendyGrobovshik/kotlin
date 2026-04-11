@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.declarations.*
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.impl.*
@@ -187,7 +187,7 @@ open class SerializerIrGenerator(
     }
 
     protected fun IrBlockBodyBuilder.copySerialInfoAnnotationsToDescriptor(
-        annotations: List<IrConstructorCall>,
+        annotations: List<IrAnnotation>,
         receiver: IrVariable,
         method: IrFunctionSymbol
     ) {

@@ -1276,14 +1276,14 @@ private fun IrElement.toConstantValue(): ConstantValue<*> {
 
         is IrClassReference -> KClassValue((classType.classifierOrFail.owner as IrClass).toIrBasedDescriptor().classId!!, /*TODO*/0)
 
-        is IrConstructorCall -> AnnotationValue(this.toAnnotationDescriptor())
+        is IrAnnotation -> AnnotationValue(this.toAnnotationDescriptor())
 
         else -> error("$this is not expected: ${this.dump()}")
     }
 }
 
-private fun IrConstructorCall.toAnnotationDescriptor(): AnnotationDescriptor {
-    val annotationClass = symbol.owner.parentAsClass
+private fun IrAnnotation.toAnnotationDescriptor(): AnnotationDescriptor {
+    val annotationClass = classSymbol.owner
 
     @OptIn(ObsoleteDescriptorBasedAPI::class)
     if (annotationClass.symbol.descriptor == ErrorUtils.errorClass || type is IrErrorType) {
@@ -1298,7 +1298,7 @@ private fun IrConstructorCall.toAnnotationDescriptor(): AnnotationDescriptor {
     }
     return AnnotationDescriptorImpl(
         annotationClass.defaultType.toIrBasedKotlinType(),
-        symbol.owner.parameters.memoryOptimizedMap { it.name to arguments[it.indexInParameters] }
+        annotationClass.primaryConstructor!!.parameters.memoryOptimizedMap { it.name to arguments[it.indexInParameters] }
             .filter { it.second != null }
             .associate { it.first to it.second!!.toConstantValue() },
         source
@@ -1307,5 +1307,5 @@ private fun IrConstructorCall.toAnnotationDescriptor(): AnnotationDescriptor {
 
 private fun IrDeclaration.toAnnotations(): Annotations {
     val ownerAnnotations = (this as? IrAnnotationContainer)?.annotations ?: return Annotations.EMPTY
-    return Annotations.create(ownerAnnotations.memoryOptimizedMap(IrConstructorCall::toAnnotationDescriptor))
+    return Annotations.create(ownerAnnotations.memoryOptimizedMap(IrAnnotation::toAnnotationDescriptor))
 }

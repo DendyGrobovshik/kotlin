@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.descriptors.annotations.KotlinRetention
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.types.*
@@ -572,7 +573,7 @@ internal abstract class IrExpectActualMatchingContext(
         expectAnnotation: AnnotationCallInfo, actualAnnotation: AnnotationCallInfo,
         collectionArgumentsCompatibilityCheckStrategy: ExpectActualCollectionArgumentsCompatibilityCheckStrategy,
     ): Boolean {
-        fun AnnotationCallInfo.getIrElement(): IrConstructorCall = (this as AnnotationCallInfoImpl).irElement
+        fun AnnotationCallInfo.getIrElement(): IrAnnotation = (this as AnnotationCallInfoImpl).irElement
 
         return areIrExpressionConstValuesEqual(
             expectAnnotation.getIrElement(),
@@ -585,11 +586,11 @@ internal abstract class IrExpectActualMatchingContext(
         return expectToActualClassMap[classId]?.classId ?: classId
     }
 
-    private inner class AnnotationCallInfoImpl(val irElement: IrConstructorCall) : AnnotationCallInfo {
-        override val annotationSymbol: IrConstructorCall = irElement
+    private inner class AnnotationCallInfoImpl(val irElement: IrAnnotation) : AnnotationCallInfo {
+        override val annotationSymbol: IrAnnotation = irElement
 
-        override val classId: ClassId?
-            get() = getAnnotationClass()?.classId
+        override val classId: ClassId
+            get() = irElement.classId
 
         override val isRetentionSource: Boolean
             get() = getAnnotationClass()?.getAnnotationRetention() == KotlinRetention.SOURCE
@@ -602,7 +603,7 @@ internal abstract class IrExpectActualMatchingContext(
 
         private fun getAnnotationClass(): IrClass? {
             val annotationClass = irElement.type.getClass() ?: return null
-            return expectToActualClassMap[annotationClass.classId]?.owner ?: annotationClass
+            return expectToActualClassMap[irElement.classId]?.owner ?: annotationClass
         }
     }
 
