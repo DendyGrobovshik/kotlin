@@ -738,7 +738,7 @@ private class KotlinLikeDumper(val p: Printer, val options: KotlinLikeDumpOption
                     isInline = isInline,
                     isInfix = isInfix,
                     isOperator = isOperator,
-                    isCompanion = companionExtensionClass != null
+                    isCompanion = isStatic || companionExtensionClass != null
                 ),
             )
             p.printWithNoIndent(keyword)
