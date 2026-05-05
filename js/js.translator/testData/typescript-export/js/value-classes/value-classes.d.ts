@@ -11,6 +11,15 @@ declare namespace JS_TESTS {
         namespace KtList {
             function fromJsArray<E>(array: ReadonlyArray<E>): kotlin.collections.KtList<E>;
         }
+        interface KtMutableList<E> extends kotlin.collections.KtList<E>/*, kotlin.collections.MutableCollection<E> */ {
+            asJsArrayView(): Array<E>;
+            readonly __doNotUseOrImplementIt: {
+                readonly "kotlin.collections.KtMutableList": unique symbol;
+            } & kotlin.collections.KtList<any>["__doNotUseOrImplementIt"];
+        }
+        namespace KtMutableList {
+            function fromJsArray<E>(array: ReadonlyArray<E>): kotlin.collections.KtMutableList<E>;
+        }
         interface KtMap<K, out V> {
             asJsReadonlyMapView(): ReadonlyMap<K, V>;
             readonly __doNotUseOrImplementIt: {
@@ -28,15 +37,6 @@ declare namespace JS_TESTS {
         }
         namespace KtSet {
             function fromJsSet<E>(set: ReadonlySet<E>): kotlin.collections.KtSet<E>;
-        }
-        interface KtMutableList<E> extends kotlin.collections.KtList<E>/*, kotlin.collections.MutableCollection<E> */ {
-            asJsArrayView(): Array<E>;
-            readonly __doNotUseOrImplementIt: {
-                readonly "kotlin.collections.KtMutableList": unique symbol;
-            } & kotlin.collections.KtList<any>["__doNotUseOrImplementIt"];
-        }
-        namespace KtMutableList {
-            function fromJsArray<E>(array: ReadonlyArray<E>): kotlin.collections.KtMutableList<E>;
         }
     }
     namespace kotlin {
