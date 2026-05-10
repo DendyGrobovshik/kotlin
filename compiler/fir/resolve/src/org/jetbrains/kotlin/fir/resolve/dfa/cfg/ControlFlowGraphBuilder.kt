@@ -446,10 +446,11 @@ class ControlFlowGraphBuilder private constructor(
             return
         }
 
-        for ((lambdas, exits) in postponedLambdaExits.all()) {
-            if (symbol in lambdas) {
-                lambdas.addAll(currentLevel.lambdas)
-                exits.addAll(currentLevel.exits)
+        for (nextLevel in postponedLambdaExits.all()) {
+            if (symbol in nextLevel.lambdas) {
+                nextLevel.lambdas.addAll(currentLevel.lambdas)
+                nextLevel.exits.addAll(currentLevel.exits)
+                nextLevel.mergeNodes.addAll(currentLevel.mergeNodes)
                 break
             }
         }
