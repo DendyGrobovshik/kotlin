@@ -13,10 +13,12 @@ import org.jetbrains.kotlin.fir.analysis.cfa.util.*
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors
 import org.jetbrains.kotlin.fir.declarations.FirAnonymousFunction
+import org.jetbrains.kotlin.fir.expressions.FirFunctionCall
 import org.jetbrains.kotlin.fir.expressions.FirImplicitInvokeCall
 import org.jetbrains.kotlin.fir.expressions.FirQualifiedAccessExpression
 import org.jetbrains.kotlin.fir.references.toResolvedVariableSymbol
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.*
+import org.jetbrains.kotlin.fir.symbols.impl.FirAnonymousFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.ConeDynamicType
 
@@ -36,6 +38,20 @@ object FirCapturedVariableStabilityFunctionChecker : AbstractFirPropertyInitiali
             }
         if (trackedProperties.isEmpty()) return
 
+        val lambdaOwnerCalls = mutableMapOf<FirAnonymousFunctionSymbol, FirFunctionCall>()
+
+        data.graph.traverse(object : ControlFlowGraphVisitorVoid() {
+            override fun visitNode(node: CFGNode<*>) {}
+
+            override fun visitSplitPostponedLambdasNode(node: SplitPostponedLambdasNode) {
+                val call = node.fir as? FirFunctionCall ?: return
+
+                for (lambda in node.lambdas) {
+                    lambdaOwnerCalls[lambda.symbol] = call
+                }
+            }
+        })
+
         val capturedWrites = data.graph.traverseToFixedPoint(FindCapturedWrites(trackedProperties))
         val visibleWrites =
             data.graph.traverseToFixedPoint(FindVisibleWrites(capturedWrites, trackedProperties, excludeLocalInPlaceWrites = true))
@@ -52,12 +68,15 @@ object FirCapturedVariableStabilityFunctionChecker : AbstractFirPropertyInitiali
         })
 
         val escapingProperties = mutableSetOf<Pair<FirPropertySymbol, FirQualifiedAccessExpression>>()
+        val escapingPropertiesCalls = mutableMapOf<FirPropertySymbol, String>()
         data.graph.traverse(
             CapturedVariableVisitor(
                 trackedProperties,
                 visibleWrites,
                 propertyDeclarationGraphs,
                 escapingProperties,
+                lambdaOwnerCalls,
+                escapingPropertiesCalls
             )
         )
 
@@ -65,7 +84,7 @@ object FirCapturedVariableStabilityFunctionChecker : AbstractFirPropertyInitiali
             reporter.reportOn(
                 expression.source,
                 FirErrors.CV_DIAGNOSTIC,
-                symbol.name.toString(),
+                symbol.name.toString() + " ### " + escapingPropertiesCalls[symbol],
                 context
             )
         }
@@ -77,6 +96,8 @@ private class CapturedVariableVisitor(
     private val visibleWrites: Map<CFGNode<*>, PathAwareControlFlowInfo<PropertyAccessType, VariableWriteData>>,
     private val propertyDeclarationGraphs: Map<FirPropertySymbol, ControlFlowGraph>,
     private val escapingProperties: MutableSet<Pair<FirPropertySymbol, FirQualifiedAccessExpression>>,
+    private val lambdaOwnerCalls: Map<FirAnonymousFunctionSymbol, FirFunctionCall>,
+    private val escapingPropertiesCalls: MutableMap<FirPropertySymbol, String>,
 ) : ControlFlowGraphVisitorVoid() {
     override fun visitNode(node: CFGNode<*>) {}
 
@@ -99,8 +120,8 @@ private class CapturedVariableVisitor(
         expression: FirQualifiedAccessExpression,
     ) {
         val currentGraph = accessNode.owner.nearestNonInPlaceGraph()
+        val currentLambda = currentGraph.declaration as? FirAnonymousFunction ?: return
 
-        if (currentGraph.declaration !is FirAnonymousFunction) return
         val symbol = expression.calleeReference.toResolvedVariableSymbol() as? FirPropertySymbol ?: return
         if (symbol !in trackedProperties) return
 
@@ -119,6 +140,9 @@ private class CapturedVariableVisitor(
             } == true
 
         if (hasCapturedWrites) {
+            val ownerCall = lambdaOwnerCalls[currentLambda.symbol]
+            val lambdaOwnerName = ownerCall?.calleeReference?.name?.asString()
+            escapingPropertiesCalls[symbol] = lambdaOwnerName ?: "unknown"
             escapingProperties.add(symbol to expression)
         }
     }
