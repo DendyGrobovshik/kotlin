@@ -45,10 +45,16 @@ internal class IntegerStatisticsVisitor(
 
     private lateinit var currentModuleDirectory: File
 
-    private val targetFileName = targets.joinToString(" + ")
+    private val supposedTargetFileName = targets.joinToString(" + ")
+    private val targetFileName = supposedTargetFileName.takeIf { it.length <= 255 }
+        ?: supposedTargetFileName.substring(0, 20).plus(supposedTargetFileName.hashCode())
 
     private val currentFile: File
-        get() = currentModuleDirectory.resolve(targetFileName)
+        get() = currentModuleDirectory.resolve(targetFileName).also {
+            if (targetFileName != supposedTargetFileName) {
+                it.writeText("$supposedTargetFileName\n")
+            }
+        }
 
     private val longestTargetLength = targets.maxOf { it.toString().length }
         .let { maxOf(it, ("$UNSAFE_COMMONIZATION_TAG $INT_COMMONIZATION_TAG $OPTIMISTIC_TAG").length) }
