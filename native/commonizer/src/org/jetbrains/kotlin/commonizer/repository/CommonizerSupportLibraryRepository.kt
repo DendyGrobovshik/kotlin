@@ -25,11 +25,14 @@ val supportHierarchy = mapOf(
     "iosArm64" to "iosMain",
     "iosSimulatorArm64" to "iosMain",
 
+    "macosX64" to "macosMain",
     "macosArm64" to "macosMain",
 
+    "tvosX64" to "tvosMain",
     "tvosArm64" to "tvosMain",
     "tvosSimulatorArm64" to "tvosMain",
 
+    "watchosX64" to "watchosMain",
     "watchosArm32" to "watchosMain",
     "watchosArm64" to "watchosMain",
     "watchosDeviceArm64" to "watchosMain",
