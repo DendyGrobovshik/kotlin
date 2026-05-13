@@ -34,9 +34,13 @@ interface KtDoubleColonExpression : KtExpression, KtResolvable {
     val lhs: PsiElement?
         get() = doubleColonTokenReference.prevSibling
 
+    @Deprecated(
+        "Use KtPsiMutationService.getInstance().setDoubleColonReceiverExpression(this, newReceiverExpression) instead",
+        ReplaceWith("KtPsiMutationService.getInstance().setDoubleColonReceiverExpression(this, newReceiverExpression)"),
+    )
+    @OptIn(KtNonPublicApi::class)
     fun setReceiverExpression(newReceiverExpression: KtExpression) {
-        val oldReceiverExpression = this.receiverExpression
-        oldReceiverExpression?.replace(newReceiverExpression) ?: addBefore(newReceiverExpression, doubleColonTokenReference)
+        KtPsiMutationService.getInstance().setDoubleColonReceiverExpression(this, newReceiverExpression)
     }
 
     val isEmptyLHS: Boolean
