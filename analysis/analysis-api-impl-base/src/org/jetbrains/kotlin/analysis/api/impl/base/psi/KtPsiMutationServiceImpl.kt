@@ -5,9 +5,11 @@
 
 package org.jetbrains.kotlin.analysis.api.impl.base.psi
 
+import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
+import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.impl.CheckUtil
 import com.intellij.psi.impl.file.PsiFileImplUtil
@@ -27,7 +29,6 @@ import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.addRemoveModifier.removeModifier as removeModifierFromPsi
-import org.jetbrains.kotlin.psi.psiUtil.astReplace
 import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.psi.psiUtil.quoteIfNeeded
 import org.jetbrains.kotlin.psi.psiUtil.siblings
@@ -264,7 +265,7 @@ internal class KtPsiMutationServiceImpl : KtPsiMutationService {
 
         val newIdentifier = KtPsiFactory(declaration.project).createNameIdentifierIfPossible(name.quoteIfNeeded())
         if (newIdentifier != null) {
-            identifier.astReplace(newIdentifier)
+            astReplace(identifier, newIdentifier)
         } else {
             identifier.delete()
         }
@@ -606,6 +607,48 @@ internal class KtPsiMutationServiceImpl : KtPsiMutationService {
         )
     }
 
+    override fun astReplace(element: PsiElement, newElement: PsiElement) {
+        element.parent.node.replaceChild(element.node, newElement.node)
+    }
+
+    override fun replaceExpression(
+        expression: KtExpression,
+        newElement: PsiElement,
+        reformat: Boolean,
+        rawReplaceHandler: (PsiElement) -> PsiElement,
+    ): PsiElement {
+        val parent = expression.parent
+
+        if (newElement is KtExpression) {
+            when (parent) {
+                is KtExpression, is KtValueArgument -> {
+                    if (KtPsiUtil.areParenthesesNecessary(newElement, expression, parent)) {
+                        val factory = KtPsiFactory(expression.project)
+                        return rawReplaceHandler(factory.createExpressionByPattern("($0)", newElement, reformat = reformat))
+                    }
+                }
+                is KtSimpleNameStringTemplateEntry -> {
+                    if (newElement !is KtSimpleNameExpression && !newElement.isThisWithoutLabel()) {
+                        val factory = KtPsiFactory(expression.project)
+                        val newEntry = parent.replace(factory.createBlockStringTemplateEntry(newElement)) as KtBlockStringTemplateEntry
+                        return newEntry.expression!!
+                    }
+                }
+            }
+        }
+
+        return rawReplaceHandler(newElement)
+    }
+
+    override fun updateStringTemplateText(expression: KtStringTemplateExpression, text: String): PsiLanguageInjectionHost {
+        val newExpression = KtPsiFactory(expression.project).createExpressionIfPossible(text)
+        if (newExpression is KtStringTemplateExpression) {
+            return expression.replace(newExpression) as KtStringTemplateExpression
+        }
+
+        return ElementManipulators.handleContentChange(expression, text)
+    }
+
     private inline fun <T : KtElement> T.doSetReceiverTypeReference(
         typeRef: KtTypeReference?,
         getReceiverTypeReference: T.() -> KtTypeReference?,
@@ -636,6 +679,9 @@ internal class KtPsiMutationServiceImpl : KtPsiMutationService {
         }
         return null
     }
+
+    private fun PsiElement.isThisWithoutLabel(): Boolean = this is KtThisExpression && getLabelName() == null
+
     private companion object {
         val FUNCTIONLIKE_CONVENTIONS = setOf(
             OperatorNameConventions.INVOKE.asString(),
