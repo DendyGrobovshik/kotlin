@@ -144,6 +144,56 @@ interface KtPsiMutationService {
     fun replaceFileAnnotationList(file: KtFile, annotationList: KtFileAnnotationList): KtFileAnnotationList
 
     /**
+     * Replaces the existing modifier list on [owner] with [newModifierList], or adds it if missing.
+     */
+    fun setModifierList(owner: KtModifierListOwner, newModifierList: KtModifierList)
+
+    /**
+     * Replaces the existing modifier list on [owner] with [modifierList], adds it if missing, or removes it when [modifierList] is `null`.
+     */
+    fun replaceModifierList(owner: KtModifierListOwner, modifierList: KtModifierList?): KtModifierList?
+
+    /**
+     * Adds [modifier] to [owner].
+     */
+    fun addModifier(owner: KtModifierListOwner, modifier: KtModifierKeywordToken)
+
+    /**
+     * Adds [modifier] to [constructor] using primary-constructor-specific behavior.
+     */
+    fun addConstructorModifier(constructor: KtPrimaryConstructor, modifier: KtModifierKeywordToken)
+
+    /**
+     * Removes [modifier] from [owner].
+     */
+    fun removeModifier(owner: KtModifierListOwner, modifier: KtModifierKeywordToken)
+
+    /**
+     * Removes [modifier] from [constructor] using primary-constructor-specific behavior.
+     */
+    fun removeConstructorModifier(constructor: KtPrimaryConstructor, modifier: KtModifierKeywordToken)
+
+    /**
+     * Adds [annotationEntry] to [owner].
+     */
+    fun addAnnotationEntry(owner: KtModifierListOwner, annotationEntry: KtAnnotationEntry): KtAnnotationEntry
+
+    /**
+     * Adds [annotationEntry] to [constructor] using primary-constructor-specific behavior.
+     */
+    fun addConstructorAnnotationEntry(constructor: KtPrimaryConstructor, annotationEntry: KtAnnotationEntry): KtAnnotationEntry
+
+    /**
+     * Removes [entry] from [annotation], deleting the annotation when it becomes empty.
+     */
+    fun removeAnnotationEntry(annotation: KtAnnotation, entry: KtAnnotationEntry)
+
+    /**
+     * Removes the redundant `constructor` keyword and the following whitespace from [constructor].
+     */
+    fun removeRedundantConstructorKeywordAndSpace(constructor: KtPrimaryConstructor)
+
+    /**
      * Replaces the type reference on [function] with [typeRef], adds it if missing, or removes it when [typeRef] is `null`.
      */
     fun setFunctionTypeReference(function: KtNamedFunction, typeRef: KtTypeReference?): KtTypeReference?
