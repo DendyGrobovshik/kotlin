@@ -44,9 +44,13 @@ public class KtTypeArgumentList extends KtElementImplStub<KotlinPlaceHolderStub<
         return getStubOrPsiChildrenAsList(KtStubBasedElementTypes.TYPE_PROJECTION);
     }
 
+    /**
+     * @deprecated Use {@code KtPsiMutationService.getInstance().addTypeArgument(this, typeArgument)} instead.
+     */
     @NotNull
+    @Deprecated
     public KtTypeProjection addArgument(@NotNull KtTypeProjection typeArgument) {
-        return EditCommaSeparatedListHelper.INSTANCE.addItem(this, getArguments(), typeArgument, KtTokens.LT);
+        return KtPsiMutationService.getInstance().addTypeArgument(this, typeArgument);
     }
 
     @Nullable

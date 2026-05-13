@@ -675,20 +675,13 @@ fun KtParameter.isPropertyParameter() = ownerFunction is KtPrimaryConstructor &&
 fun isDoubleColonReceiver(expression: KtExpression) =
     expression.getParentOfTypeAndBranch<KtDoubleColonExpression> { this.receiverExpression } != null
 
-fun KtFunctionLiteral.getOrCreateParameterList(): KtParameterList {
-    valueParameterList?.let { return it }
-
-    val psiFactory = KtPsiFactory(project)
-
-    val anchor = lBrace
-    val newParameterList = addAfter(psiFactory.createLambdaParameterList("x"), anchor) as KtParameterList
-    newParameterList.removeParameter(0)
-    if (arrow == null) {
-        val whitespaceAndArrow = psiFactory.createWhitespaceAndArrow()
-        addRangeAfter(whitespaceAndArrow.first, whitespaceAndArrow.second, newParameterList)
-    }
-    return newParameterList
-}
+@Deprecated(
+    "Use KtPsiMutationService.getInstance().getOrCreateParameterList(this) instead",
+    ReplaceWith("KtPsiMutationService.getInstance().getOrCreateParameterList(this)"),
+)
+@OptIn(KtNonPublicApi::class)
+fun KtFunctionLiteral.getOrCreateParameterList(): KtParameterList =
+    KtPsiMutationService.getInstance().getOrCreateParameterList(this)
 
 fun KtFunctionLiteral.findLabelAndCall(): Pair<Name?, KtCallExpression?> {
     val literalParent = (this.parent as KtLambdaExpression).parent
@@ -716,20 +709,21 @@ fun KtFunctionLiteral.findLabelAndCall(): Pair<Name?, KtCallExpression?> {
     }
 }
 
-fun KtCallExpression.getOrCreateValueArgumentList(): KtValueArgumentList {
-    valueArgumentList?.let { return it }
-    return addAfter(
-        KtPsiFactory(project).createCallArguments("()"),
-        typeArgumentList ?: calleeExpression,
-    ) as KtValueArgumentList
-}
+@Deprecated(
+    "Use KtPsiMutationService.getInstance().getOrCreateValueArgumentList(this) instead",
+    ReplaceWith("KtPsiMutationService.getInstance().getOrCreateValueArgumentList(this)"),
+)
+@OptIn(KtNonPublicApi::class)
+fun KtCallExpression.getOrCreateValueArgumentList(): KtValueArgumentList =
+    KtPsiMutationService.getInstance().getOrCreateValueArgumentList(this)
 
+@Deprecated(
+    "Use KtPsiMutationService.getInstance().addTypeArgument(this, typeArgument) instead",
+    ReplaceWith("KtPsiMutationService.getInstance().addTypeArgument(this, typeArgument)"),
+)
+@OptIn(KtNonPublicApi::class)
 fun KtCallExpression.addTypeArgument(typeArgument: KtTypeProjection) {
-    if (typeArgumentList != null) {
-        typeArgumentList?.addArgument(typeArgument)
-    } else {
-        addAfter(KtPsiFactory(project).createTypeArguments("<${typeArgument.text}>"), calleeExpression)
-    }
+    KtPsiMutationService.getInstance().addTypeArgument(this, typeArgument)
 }
 
 fun KtDeclaration.hasBody() = when (this) {
