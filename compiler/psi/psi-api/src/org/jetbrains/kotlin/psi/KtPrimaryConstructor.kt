@@ -3,15 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
+@file:OptIn(KtNonPublicApi::class)
+
 package org.jetbrains.kotlin.psi
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.KtStubBasedElementTypes
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
-import org.jetbrains.kotlin.lexer.KtTokens
-import org.jetbrains.kotlin.psi.addRemoveModifier.addModifier
 import org.jetbrains.kotlin.psi.stubs.KotlinConstructorStub
 
 /**
@@ -32,47 +30,36 @@ class KtPrimaryConstructor : KtConstructor<KtPrimaryConstructor> {
 
     override fun getContainingClassOrObject() = parent as KtClassOrObject
 
-    private fun getOrCreateConstructorKeyword(): PsiElement {
-        return getConstructorKeyword() ?: addBefore(KtPsiFactory(project).createConstructorKeyword(), valueParameterList!!)
-    }
-
+    @Deprecated(
+        "Use KtPsiMutationService.getInstance().removeRedundantConstructorKeywordAndSpace(this) instead",
+        ReplaceWith("KtPsiMutationService.getInstance().removeRedundantConstructorKeywordAndSpace(this)"),
+    )
     fun removeRedundantConstructorKeywordAndSpace() {
-        getConstructorKeyword()?.delete()
-        if (prevSibling is PsiWhiteSpace) {
-            prevSibling.delete()
-        }
+        KtPsiMutationService.getInstance().removeRedundantConstructorKeywordAndSpace(this)
     }
 
+    @Deprecated(
+        "Use KtPsiMutationService.getInstance().addConstructorModifier(this, modifier) instead",
+        ReplaceWith("KtPsiMutationService.getInstance().addConstructorModifier(this, modifier)"),
+    )
     override fun addModifier(modifier: KtModifierKeywordToken) {
-        val modifierList = modifierList
-        if (modifierList != null) {
-            addModifier(modifierList, modifier)
-            if (this.modifierList == null) {
-                getConstructorKeyword()?.delete()
-            }
-        } else {
-            if (modifier == KtTokens.PUBLIC_KEYWORD) return
-            val newModifierList = KtPsiFactory(project).createModifierList(modifier)
-            addBefore(newModifierList, getOrCreateConstructorKeyword())
-        }
+        KtPsiMutationService.getInstance().addConstructorModifier(this, modifier)
     }
 
+    @Deprecated(
+        "Use KtPsiMutationService.getInstance().removeConstructorModifier(this, modifier) instead",
+        ReplaceWith("KtPsiMutationService.getInstance().removeConstructorModifier(this, modifier)"),
+    )
     override fun removeModifier(modifier: KtModifierKeywordToken) {
-        super.removeModifier(modifier)
-        if (modifierList == null) {
-            removeRedundantConstructorKeywordAndSpace()
-        }
+        KtPsiMutationService.getInstance().removeConstructorModifier(this, modifier)
     }
 
-    override fun addAnnotationEntry(annotationEntry: KtAnnotationEntry): KtAnnotationEntry {
-        val modifierList = modifierList
-        return if (modifierList != null) {
-            modifierList.addBefore(annotationEntry, modifierList.firstChild) as KtAnnotationEntry
-        } else {
-            val newModifierList = KtPsiFactory(project).createModifierList(annotationEntry.text)
-            (addBefore(newModifierList, getOrCreateConstructorKeyword()) as KtModifierList).annotationEntries.first()
-        }
-    }
+    @Deprecated(
+        "Use KtPsiMutationService.getInstance().addConstructorAnnotationEntry(this, annotationEntry) instead",
+        ReplaceWith("KtPsiMutationService.getInstance().addConstructorAnnotationEntry(this, annotationEntry)"),
+    )
+    override fun addAnnotationEntry(annotationEntry: KtAnnotationEntry): KtAnnotationEntry =
+        KtPsiMutationService.getInstance().addConstructorAnnotationEntry(this, annotationEntry)
 
     override fun mayHaveContract(): Boolean = false
 }
