@@ -13,7 +13,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.KtNodeTypes;
+import org.jetbrains.kotlin.KtStubBasedElementTypes;
 import org.jetbrains.kotlin.lexer.KtTokens;
+import org.jetbrains.kotlin.psi.stubs.KotlinDestructuringDeclarationStub;
 import org.jetbrains.kotlin.psi.psiUtil.KtPsiUtilKt;
 
 import java.util.ArrayList;
@@ -32,11 +34,15 @@ import static org.jetbrains.kotlin.lexer.KtTokens.*;
  *
  * @see KtDestructuringDeclarationEntry
  */
-public class KtDestructuringDeclaration extends KtDeclarationImpl
+public class KtDestructuringDeclaration extends KtDeclarationStub<KotlinDestructuringDeclarationStub>
         implements KtValVarKeywordOwner, KtDeclarationWithInitializer, KtDeclarationWithReturnType {
 
     public KtDestructuringDeclaration(@NotNull ASTNode node) {
         super(node);
+    }
+
+    public KtDestructuringDeclaration(@NotNull KotlinDestructuringDeclarationStub stub) {
+        super(stub, KtStubBasedElementTypes.DESTRUCTURING_DECLARATION);
     }
 
     @Override
@@ -76,10 +82,20 @@ public class KtDestructuringDeclaration extends KtDeclarationImpl
 
     @Override
     public boolean hasInitializer() {
+        KotlinDestructuringDeclarationStub stub = getGreenStub();
+        if (stub != null) {
+            return stub.getHasInitializer();
+        }
+
         return getInitializer() != null;
     }
 
     public boolean isVar() {
+        KotlinDestructuringDeclarationStub stub = getGreenStub();
+        if (stub != null) {
+            return stub.isVar();
+        }
+
         return getNode().findChildByType(KtTokens.VAR_KEYWORD) != null;
     }
 
