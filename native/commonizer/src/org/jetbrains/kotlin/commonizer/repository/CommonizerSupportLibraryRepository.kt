@@ -43,9 +43,15 @@ val supportHierarchy = mapOf(
     "tvosMain" to "appleMain",
     "watchosMain" to "appleMain",
 
+    "androidNativeX86" to "androidNativeMain",
+    "androidNativeX64" to "androidNativeMain",
+    "androidNativeArm32" to "androidNativeMain",
+    "androidNativeArm64" to "androidNativeMain",
+
     "linuxMain" to "nativeMain",
     "appleMain" to "nativeMain",
     "mingwX64" to "nativeMain",
+    "androidNativeMain" to "nativeMain",
 )
 
 class SupportHierarchyTarget(val name: String, var parent: SupportHierarchyTarget?, val targets: MutableList<SupportHierarchyTarget>) {
@@ -66,7 +72,15 @@ fun buildSupportHierarchyTargets(): Map<String, SupportHierarchyTarget> {
 
 fun Map<String, SupportHierarchyTarget>.toCommonizerTargets(): Map<SupportHierarchyTarget, CommonizerTarget> {
     val supportHierarchyTargetCache = mutableMapOf<SupportHierarchyTarget, CommonizerTarget>()
-    val leafTargets = KonanTarget.predefinedTargets.mapKeys { it.key.replace("_", "").lowercase() }
+    val leafTargets = KonanTarget.predefinedTargets.mapKeys {
+        val sanitized = it.key.replace("_", "").lowercase()
+
+        when {
+            sanitized.startsWith("android") -> sanitized.replace("android", "androidnative")
+            else -> sanitized
+        }
+    }
+
     fun SupportHierarchyTarget.toCommonizerTarget(): CommonizerTarget {
         return supportHierarchyTargetCache.getOrPut(this) {
             val leaf = leafTargets[name.lowercase()]
@@ -87,7 +101,7 @@ internal fun loadSupportLibraries(logger: Logger): Map<String, NativeLibrary> {
     }
 
     val supportLibLeafTargets = SUPPORT_LIB_FILE.list { _, name ->
-        name.endsWith("X64") || name.endsWith("Arm64") || name.endsWith("X32") || name.endsWith("Arm32")
+        name.endsWith("X64") || name.endsWith("Arm64") || name.endsWith("X32") || name.endsWith("Arm32") || name.endsWith("X86")
     } ?: return emptyMap()
     val supportNativeLeafLibraries = supportLibLeafTargets.associateWith {
         val file = SUPPORT_LIB_FILE.resolve(it).resolve("main").resolve("klib").resolve("module1")
