@@ -346,13 +346,14 @@ fun IrAnnotationContainer.hasAnnotation(classId: ClassId): Boolean = annotations
 
 fun IrAnnotationContainer.hasAnnotation(symbol: IrClassSymbol) =
     annotations.any {
-        it.symbol.owner.parentAsClass.symbol == symbol
+        it.classSymbol == symbol
     }
 
 fun IrAnnotation.getAnnotationStringValue() = (arguments[0] as? IrConst)?.value as String?
 
 fun IrAnnotation.getAnnotationStringValue(name: String): String {
-    val parameter = symbol.owner.parameters.single { it.name.asString() == name }
+    val constructor = classSymbol.owner.primaryConstructor!!
+    val parameter = constructor.parameters.single { it.name.asString() == name }
     return (arguments[parameter.indexInParameters] as IrConst).value as String
 }
 
@@ -361,7 +362,8 @@ inline fun <reified T> IrAnnotation.getAnnotationValueOrNull(name: String): T? =
 
 @PublishedApi
 internal fun IrAnnotation.getAnnotationValueOrNullImpl(name: String): Any? {
-    val parameter = symbol.owner.parameters.atMostOne { it.name.asString() == name }
+    val constructor = classSymbol.owner.primaryConstructor!!
+    val parameter = constructor.parameters.atMostOne { it.name.asString() == name }
     val argument = parameter?.let { arguments[it.indexInParameters] }
     return (argument as IrConst?)?.value
 }
@@ -372,7 +374,8 @@ inline fun <reified T> IrAnnotationContainer.getAnnotationArgumentValue(fqName: 
 @PublishedApi
 internal fun IrAnnotationContainer.getAnnotationArgumentValueImpl(fqName: FqName, argumentName: String): Any? {
     val annotation = this.annotations.findAnnotation(fqName) ?: return null
-    for (parameter in annotation.symbol.owner.parameters) {
+    val constructor = annotation.classSymbol.owner.primaryConstructor!!
+    for (parameter in constructor.parameters) {
         if (parameter.name.asString() == argumentName) {
             val actual = annotation.arguments[parameter.indexInParameters] as? IrConst
             return actual?.value
