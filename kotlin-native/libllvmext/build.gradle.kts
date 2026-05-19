@@ -186,7 +186,9 @@ open class TestArgumentProvider @Inject constructor(
 
 projectTests {
     testData(project.isolated, "testData")
-    testGenerator("org.jetbrains.kotlin.generators.tests.GenerateFileCheckTestsKt", generateTestsInBuildDirectory = true)
+    testGenerator("org.jetbrains.kotlin.generators.tests.GenerateFileCheckTestsKt", generateTestsInBuildDirectory = true, configureTestDataCollection = {
+        filePatterns.set(listOf("**/*.ll"))
+    })
     testTask(jUnitMode = JUnitMode.JUnit5) {
         if (HostManager.hostIsMingw) {
             enabled = false
