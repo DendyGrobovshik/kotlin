@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":compiler:ir.backend.common"))
     implementation(project(":compiler:ir.objcinterop"))
     implementation(project(":compiler:ir.serialization.native"))
-    api(project(":core:descriptors"))
+    implementation(project(":core:descriptors"))
     implementation(project(":native:frontend.native"))
     testFixturesImplementation(testFixtures(project(":native:objcexport-header-generator")))
     testFixturesApi(testFixtures(project(":compiler:tests-common")))
@@ -24,7 +24,7 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
 
-    api(project(":compiler:frontend"))
+    implementation(project(":compiler:frontend"))
     api(project(":compiler:frontend.common"))
     api(project(":compiler:psi:psi-api"))
     api(project(":core:compiler.common"))

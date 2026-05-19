@@ -26,6 +26,10 @@ val sandboxAnnotationsNativeRuntimeForTests by configurations.creating {
 val sandboxPluginForTests by configurations.creating
 
 dependencies {
+    implementation(project(":compiler:frontend.common.jvm"))
+    implementation(project(":compiler:frontend.common-psi"))
+    implementation(project(":compiler:psi:psi-api"))
+
     compileOnly(project(":compiler:fir:cones"))
     compileOnly(project(":compiler:fir:tree"))
     compileOnly(project(":compiler:fir:resolve"))

@@ -4,6 +4,8 @@ plugins {
 
 dependencies {
     implementation(project(":core:compiler.common"))
+    implementation(project(":core:descriptors"))
+    implementation(project(":core:deserialization"))
     implementation(project(":compiler:fir:fir-deserialization"))
     implementation(project(":core:metadata"))
     implementation(project(":compiler:serialization"))
