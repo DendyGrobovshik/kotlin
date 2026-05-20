@@ -73,6 +73,11 @@ public class KtDestructuringDeclaration extends KtDeclarationStub<KotlinDestruct
     @Nullable
     @Override
     public KtExpression getInitializer() {
+        KotlinDestructuringDeclarationStub stub = getGreenStub();
+        if (stub != null && !stub.getHasInitializer()) {
+            return null;
+        }
+
         ASTNode eqNode = getNode().findChildByType(EQ);
         if (eqNode == null) {
             return null;
