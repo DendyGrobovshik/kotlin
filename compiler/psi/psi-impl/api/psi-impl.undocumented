@@ -214,7 +214,6 @@ org.jetbrains.kotlin.psi.stubs.impl.KotlinContractEffectType.RETURNS
 org.jetbrains.kotlin.psi.stubs.impl.KotlinContractEffectType.RETURNS_RESULT_OF
 org.jetbrains.kotlin.psi.stubs.impl.KotlinContractEffectType.deserialize(StubInputStream)
 org.jetbrains.kotlin.psi.stubs.impl.KotlinContractSerializationVisitor
-org.jetbrains.kotlin.psi.stubs.impl.KotlinDestructuringDeclarationStubImpl
 org.jetbrains.kotlin.psi.stubs.impl.KotlinEnumEntryStubImpl
 org.jetbrains.kotlin.psi.stubs.impl.KotlinEnumEntrySuperclassReferenceExpressionStubImpl
 org.jetbrains.kotlin.psi.stubs.impl.KotlinFileStubImpl
