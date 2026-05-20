@@ -186,6 +186,10 @@ fun main(args: Array<String>) {
                 model("getOrBuildFir", pattern = TestGeneratorUtil.KT_OR_KTS)
             }
 
+            testClass<AbstractSourceLikeStubBasedGetOrBuildFirTest> {
+                model("getOrBuildFirForStubBased", pattern = TestGeneratorUtil.KT_OR_KTS)
+            }
+
             testClass<AbstractOutOfContentRootGetOrBuildFirTest> {
                 model("getOrBuildFir", pattern = TestGeneratorUtil.KT)
             }

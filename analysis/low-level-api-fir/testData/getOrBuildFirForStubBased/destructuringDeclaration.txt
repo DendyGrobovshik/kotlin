@@ -1,0 +1,17 @@
+Analysis attempt #0
+KT element: KtDestructuringDeclaration
+FIR element: FirErrorPropertyImpl
+FIR source kind: KtRealSourceElementKind
+
+FIR element rendered:
+public final [ResolvedTo(BODY_RESOLVE)] val <error property>: <ERROR TYPE REF: Destructuring declarations are only allowed for local variables/values> = ERROR_EXPR(Initializer required for destructuring declaration)
+
+=====
+
+Analysis attempt #1
+KT element: KtDestructuringDeclaration
+FIR element: FirErrorPropertyImpl
+FIR source kind: KtRealSourceElementKind
+
+FIR element rendered:
+public final [ResolvedTo(BODY_RESOLVE)] val <error property>: <ERROR TYPE REF: Destructuring declarations are only allowed for local variables/values> = ERROR_EXPR(Initializer required for destructuring declaration)
