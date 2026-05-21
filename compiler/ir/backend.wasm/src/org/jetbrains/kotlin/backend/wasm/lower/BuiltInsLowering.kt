@@ -183,7 +183,6 @@ class BuiltInsLowering(val context: WasmBackendContext) : FileLoweringPass {
                         arguments[0] = call.arguments.last()!!        // completion
                     }
 
-                    // Should we rely on fact this type is always statically known?
                     val fType = call.arguments[0]!!.type
                     val coroutineImplClass = symbols.coroutineImpl.owner  // CoroutineImplStateMachine
                     val wrappedCompletion =
