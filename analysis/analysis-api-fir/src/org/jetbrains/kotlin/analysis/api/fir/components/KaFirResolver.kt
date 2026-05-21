@@ -197,7 +197,10 @@ internal class KaFirResolver(
             getSymbolsByNameArgumentExpression(psi, analysisSession, firSymbolBuilder).ifNotEmpty(::KaBaseSymbolResolutionSuccess)
         }
 
-        else -> psi.getOrBuildFirWithAdjustments()?.unwrapSafeCall()?.toKaSymbolResolutionAttempt(psi)
+        else -> when (val fir = psi.getOrBuildFirWithAdjustments()) {
+            is FirSafeCallExpression -> fir.unwrapSelector(psi)
+            else -> fir
+        }?.toKaSymbolResolutionAttempt(psi)
     }
 
     private fun resolveKDocName(psi: KDocName): KaSymbolResolutionAttempt? {
@@ -661,20 +664,40 @@ internal class KaFirResolver(
     }
 
     /**
-     * Expressions like `s?.itself["1"]` where [KtSafeQualifiedExpression] is `s?.itself` are wrapped into something like `s?.{ $subj$.itself.get("1") }`,
-     * so we need to extract `itself` from `$subj$.itself` receiver.
-     * But! Expressions like `s?.itself("1")` where [KtSafeQualifiedExpression] is the whole expression might be wrapped the same way.
-     * For instance, it is the case for an implicit invoke. It could be wrapped into something like `s?.{ $subj$.itself.invoke("1") }` as well,
-     * but it has to be resolved into the call since the expression is call
+     * FIR safe calls may cover more syntax than the corresponding [KtSafeQualifiedExpression]. For example,
+     * `s?.itselfFun()["1"]` is represented as `s?.{ $subj$.itselfFun().get("1") }`, even though the PSI safe call
+     * is only `s?.itselfFun()`. Resolve the FIR node that corresponds to the requested PSI selector instead of the
+     * outer desugared call.
+     *
+     * If traversal reaches an implicit `invoke`, it is intentionally returned before searching the receiver: for
+     * `s?.action()`, resolving the call expression should still resolve to `invoke`, not to the callable expression
+     * used as its receiver.
      */
     private fun FirSafeCallExpression.unwrapSelector(psi: KtElement): FirElement {
         val selector = selector
-        if (psi !is KtSafeQualifiedExpression || psi.selectorExpression is KtCallExpression || selector !is FirQualifiedAccessExpression) {
+
+        val selectorPsi = when (psi) {
+            is KtSafeQualifiedExpression -> psi.selectorExpression
+            else -> psi
+        }
+
+        if (selectorPsi != null) {
+            selector.findNestedQualifiedAccessByPsi(selectorPsi)?.let { return it }
+        }
+
+        if (psi !is KtSafeQualifiedExpression || selector !is FirQualifiedAccessExpression) {
             return selector
         }
 
         val nonDefaultReceiver = selector.explicitReceiver?.takeUnless { it is FirCheckedSafeCallSubject }
         return nonDefaultReceiver ?: selector
+    }
+
+    private fun FirElement.findNestedQualifiedAccessByPsi(psi: KtElement): FirQualifiedAccessExpression? = when (this) {
+        is FirSmartCastExpression -> originalExpression.findNestedQualifiedAccessByPsi(psi)
+        is FirImplicitInvokeCall -> this
+        is FirQualifiedAccessExpression -> explicitReceiver?.findNestedQualifiedAccessByPsi(psi) ?: this
+        else -> null
     }
 
     /**
