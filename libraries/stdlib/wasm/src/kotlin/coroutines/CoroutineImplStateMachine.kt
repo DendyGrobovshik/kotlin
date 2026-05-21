@@ -16,7 +16,6 @@ import kotlin.wasm.internal.WasmCoroutineMode
 @UsedFromCompilerGeneratedCode
 internal abstract class CoroutineImplStateMachine(resultContinuation: Continuation<Any?>?) : CoroutineImpl<Any?, Any?>(resultContinuation) {
 
-
     override fun resumeWith(result: Result<Any?>) {
         var current = this
         var currentResult: Any? = result.getOrNull()

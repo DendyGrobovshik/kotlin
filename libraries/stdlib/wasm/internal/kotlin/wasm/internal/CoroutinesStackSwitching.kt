@@ -43,15 +43,15 @@ internal fun nullableContrefIntrinsic(): typedcontref<() -> Any?>? {
 @Suppress("UNCHECKED_CAST")
 internal suspend inline fun <T> suspendCoroutineUninterceptedOrReturnStackSwitching(block: (Continuation<T>) -> Any?): T {
     val completion = getContinuation<T>()
-    val wasmContBox = WasmContinuationBox(nullableContrefIntrinsic(), false)
+    val wasmContBox = WasmContinuationBox(nullableContrefIntrinsic())
     val freshCont = CoroutineImplStackSwitching<T, T>(completion, wasmContBox)
-    wasmContBox.pendingSuspend = true
+    freshCont.pendingSuspend = true
     val blockResult = block(freshCont)
 
     if (blockResult !== COROUTINE_SUSPENDED) return blockResult as T
 
-    if (freshCont.wasmContBox.pendingSuspend) {
-        freshCont.wasmContBox.pendingSuspend = false
+    if (freshCont.pendingSuspend) {
+        freshCont.pendingSuspend = false
         suspendIntrinsic(freshCont.wasmContBox)
     }
 

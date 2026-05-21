@@ -22,19 +22,20 @@ import kotlin.wasm.internal.resumeWithImpl
 internal class CoroutineImplStackSwitching<T, R>(
     resultContinuation: Continuation<R>,
     internal val wasmContBox: WasmContinuationBox =
-        WasmContinuationBox(nullableContrefIntrinsic(), false)
+        WasmContinuationBox(nullableContrefIntrinsic())
 ) : CoroutineImpl<T, R>(resultContinuation) {
 
     protected val _resultContinuation = resultContinuation
     override val _context: CoroutineContext = resultContinuation.context
+    internal var pendingSuspend = false
 
     @Suppress("UNCHECKED_CAST")
     override fun resumeWith(result: Result<T>) {
         this.result = result.getOrNull()
         exception = result.exceptionOrNull()
 
-        if (wasmContBox.pendingSuspend) {
-            wasmContBox.pendingSuspend = false
+        if (pendingSuspend) {
+            pendingSuspend = false
             return
         }
 
@@ -71,7 +72,4 @@ internal class CoroutineImplStackSwitching<T, R>(
     }
 }
 
-internal class WasmContinuationBox @WasmPrimitiveConstructor constructor(
-    var wasmContinuation: typedcontref<() -> Any?>?,
-    var pendingSuspend: Boolean
-)
+internal class WasmContinuationBox @WasmPrimitiveConstructor constructor(var wasmContinuation: typedcontref<() -> Any?>?)
