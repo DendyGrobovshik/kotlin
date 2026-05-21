@@ -2,6 +2,9 @@ class MyClass {
    operator fun get(argument: String) {}
    val itself: MyClass get() = this
    val nullableItself: MyClass? get() = this
+
+   fun itselfFun(): MyClass = this
+   fun nullableItselfFun(): MyClass? = this
 }
 
 fun main() {
@@ -12,4 +15,19 @@ fun main() {
 
    s.nullableItself?.get("4")
    s.nullableItself!!["5"]
+
+   s?.itselfFun()["6"]
+   s.nullableItselfFun()?.get("7")
+   s.nullableItselfFun()!!["8"]
+}
+
+class SmartNode {
+   operator fun get(argument: String) {}
+   val child: SmartNode? = null
+}
+
+fun smartCastSafeCallResult(node: SmartNode?) {
+   if (node?.child != null) {
+      node?.child["9"]
+   }
 }
