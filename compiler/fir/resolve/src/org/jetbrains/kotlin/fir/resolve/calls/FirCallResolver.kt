@@ -741,16 +741,18 @@ class FirCallResolver(
         }
     }
 
-    fun resolveAnnotationCall(annotation: FirAnnotationCall): FirAnnotationCall? {
-        val reference = annotation.calleeReference as? FirSimpleNamedReference ?: return null
+    fun resolveAnnotationCall(annotation: FirAnnotationCall): FirAnnotationCall {
+        val reference = annotation.calleeReference as FirSimpleNamedReference
         val annotationClassSymbol = annotation.getCorrespondingClassSymbolOrNull(session)
         val annotationTypeRef = annotation.annotationTypeRef
         val annotationConeType = annotationTypeRef.coneType
         val resolvedReference = if (annotationClassSymbol != null && annotationClassSymbol.fir.classKind == ClassKind.ANNOTATION_CLASS) {
             val constructorSymbol = getAnnotationConstructorSymbol(annotationConeType, annotationClassSymbol)
 
-            transformer.transformAnnotationCallArguments(annotation, constructorSymbol)
-
+            if (useArrayLiteralResolution()) {
+                @OptIn(ArrayLiteralResolution::class)
+                transformer.transformAnnotationCallArguments(annotation, constructorSymbol)
+            }
             val callInfo = toCallInfo(annotation, reference)
 
             if (constructorSymbol != null) {
@@ -771,8 +773,9 @@ class FirCallResolver(
                 )
             }
         } else {
-            annotation.replaceArgumentList(annotation.argumentList.transform(transformer, ResolutionMode.ContextDependent))
-
+            if (useArrayLiteralResolution()) {
+                transformer.transformCallArguments(annotation, ResolutionMode.ContextDependent)
+            }
             val callInfo = toCallInfo(annotation, reference)
 
             buildReferenceWithErrorCandidate(

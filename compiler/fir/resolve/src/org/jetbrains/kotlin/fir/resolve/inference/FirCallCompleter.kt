@@ -172,6 +172,21 @@ class FirCallCompleter(
         candidate: Candidate,
         completionMode: ConstraintSystemCompletionMode,
     ): T where T : FirResolvable, T : FirExpression {
+        if (this is FirAnnotationCall) {
+            assert(completionMode == ConstraintSystemCompletionMode.PCLA_POSTPONED_CALL && !useArrayLiteralResolution()) {
+                "Annotation call completion is non-FULL mode should only be possible with (new) collection literal resolution of annotations" +
+                        " and only in PCLA lambda"
+            }
+            val readOnlyConstraintStorage = candidate.system.asReadOnlyStorage()
+
+            // here, we substitute not fixed TVs with error types
+            val finalSubstitutor = readOnlyConstraintStorage
+                .buildAbstractResultingSubstitutor(session.typeContext).asCone()
+            transformSingle(
+                createCompletionResultsWriter(finalSubstitutor),
+                null
+            )
+        }
         return when {
             !candidate.isSyntheticCallForTopLevelLambda() && !candidate.isSyntheticCallForTopLevelCollectionLiteral() -> {
                 this
@@ -228,7 +243,11 @@ class FirCallCompleter(
         initialType: ConeKotlinType,
         resolutionMode: ResolutionMode,
     ) {
-        if (resolutionMode !is ResolutionMode.WithExpectedType || resolutionMode.arrayLiteralPosition == ArrayLiteralPosition.AnnotationArgument) return
+        if (resolutionMode !is ResolutionMode.WithExpectedType) return
+        @OptIn(ArrayLiteralResolution::class)
+        if (resolutionMode.arrayLiteralPosition == ArrayLiteralPosition.AnnotationArgument) {
+            return
+        }
         val expectedType = resolutionMode.expectedType.fullyExpandedType()
 
         val system = candidate.system
@@ -413,7 +432,6 @@ class FirCallCompleter(
             components.samResolver,
             components.context,
             mode,
-            insideAnnotationContext = components.context.isInsideAnnotationContext,
         )
     }
 
