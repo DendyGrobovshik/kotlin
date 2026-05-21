@@ -344,6 +344,8 @@ class WasmBaseTypeOperatorTransformer(val context: WasmBackendContext) : IrEleme
         //
         // just need to return a Unit instance +builder.irCall(unitGetInstance)
         // instead of trying to cast to Unit
+        //
+        // also fixes testData/codegen/box/basics/unchecked_cast10.kt
         if (toType.isUnit()) return false
 
         val argumentType = when (expression) {
