@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.backend.common.lower.AbstractSuspendFunctionsLowerin
 import org.jetbrains.kotlin.backend.common.lower.FinallyBlocksLowering
 import org.jetbrains.kotlin.ir.backend.js.JsStatementOrigins
 import org.jetbrains.kotlin.backend.common.lower.ReturnableBlockTransformer
-import org.jetbrains.kotlin.backend.common.lower.coroutines.SuspendFunctionsLoweringUtils
+import org.jetbrains.kotlin.backend.common.lower.coroutines.defaultLoweredSuspendFunctionReturnType
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.optimizations.LivenessAnalysis
 import org.jetbrains.kotlin.ir.IrElement
@@ -47,7 +47,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.assertedCast
  */
 open class JsSuspendFunctionsLowering<C : JsCommonBackendContext>(
     ctx: C
-) : AbstractSuspendFunctionsLowering<C>(ctx), SuspendFunctionsLoweringUtils, BodyLoweringPass {
+) : AbstractSuspendFunctionsLowering<C>(ctx), BodyLoweringPass {
     private val coroutineImplExceptionPropertyGetter = ctx.symbols.coroutineImplExceptionPropertyGetter.owner
     private val coroutineImplExceptionPropertySetter = ctx.symbols.coroutineImplExceptionPropertySetter.owner
     private val coroutineImplExceptionStatePropertyGetter = ctx.symbols.coroutineImplExceptionStatePropertyGetter.owner
@@ -343,7 +343,7 @@ open class JsSuspendFunctionsLowering<C : JsCommonBackendContext>(
 
     override fun IrBuilderWithScope.generateDelegatedCall(expectedType: IrType, delegatingCall: IrExpression): IrExpression {
         val functionReturnType = (delegatingCall as? IrCall)?.symbol?.owner?.let { function ->
-            lowerSuspendFunctionReturnType(function)
+            defaultLoweredSuspendFunctionReturnType(function, context.irBuiltIns)
         } ?: delegatingCall.type
 
         if (!needUnboxingOrUnit(functionReturnType, expectedType)) return delegatingCall

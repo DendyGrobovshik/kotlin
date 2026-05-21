@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.backend.common.lower.coroutines
 
 import org.jetbrains.kotlin.backend.common.BodyLoweringPass
+import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.linkage.partial.PartialLinkageCase.SuspendableFunctionCallWithoutCoroutineContext
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.runOnFilePostfix
@@ -13,6 +14,7 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.isSuspend
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
@@ -24,13 +26,16 @@ import org.jetbrains.kotlin.backend.common.linkage.partial.PartialLinkageSources
  *
  * Additionally materialize continuation for `getContinuation` intrinsic calls.
  */
-abstract class AbstractAddContinuationToFunctionCallsLowering :
-    SuspendFunctionsLoweringUtils, BodyLoweringPass {
+abstract class AbstractAddContinuationToFunctionCallsLowering : BodyLoweringPass {
+    protected abstract val context: CommonBackendContext
 
     protected abstract fun IrSimpleFunction.isContinuationItself(): Boolean
 
     protected open val IrSimpleFunction.continuationOwner: IrSimpleFunction
         get() = this
+
+    protected open fun suspendFunctionReturnTypeAtCallSite(expression: IrCall, newFun: IrSimpleFunction): IrType =
+        newFun.returnType
 
     override fun lower(irFile: IrFile) {
         runOnFilePostfix(irFile, withLocalDeclarations = true)
@@ -56,7 +61,7 @@ abstract class AbstractAddContinuationToFunctionCallsLowering :
                 val oldFun = expression.symbol.owner as? IrSimpleFunction
 
                 if (oldFun?.isSuspend == true) {
-                    expression.symbol = oldFun.getOrCreateFunctionWithContinuationStub().symbol
+                    expression.symbol = oldFun.getOrCreateFunctionWithContinuationStub(context).symbol
                 }
 
                 return super.visitRawFunctionReference(expression)
@@ -72,11 +77,11 @@ abstract class AbstractAddContinuationToFunctionCallsLowering :
                 }
 
                 val oldFun = expression.symbol.owner
-                val newFun: IrSimpleFunction = oldFun.getOrCreateFunctionWithContinuationStub()
+                val newFun: IrSimpleFunction = oldFun.getOrCreateFunctionWithContinuationStub(context)
 
                 return IrCallImpl(
                     expression.startOffset, expression.endOffset,
-                    suspendFunReturnTypeAtCallSite(expression, newFun),
+                    suspendFunctionReturnTypeAtCallSite(expression, newFun),
                     newFun.symbol,
                     origin = expression.origin,
                     superQualifierSymbol = expression.superQualifierSymbol,
