@@ -163,8 +163,10 @@ class FirCallCompleter(
 
     /**
      * Sometimes we need to run [FirCallCompletionResultsWriterTransformer] for [completionMode] != [ConstraintSystemCompletionMode.FULL].
-     * Currently, only applies for synthetic calls created for lambda or collection literals and only in
-     * [ConstraintSystemCompletionMode.PCLA_POSTPONED_CALL] mode.
+     * Currently, applies only for [ConstraintSystemCompletionMode.PCLA_POSTPONED_CALL] and only for:
+     *  - Top-level lambdas
+     *  - Top-level collection literals
+     *  - Annotation calls
      *
      * See also [FirCallCompletionResultsWriterTransformer.Mode.TopLevelSyntheticCallInPclaCompletion].
      */
@@ -172,22 +174,23 @@ class FirCallCompleter(
         candidate: Candidate,
         completionMode: ConstraintSystemCompletionMode,
     ): T where T : FirResolvable, T : FirExpression {
-        if (this is FirAnnotationCall) {
-            assert(completionMode == ConstraintSystemCompletionMode.PCLA_POSTPONED_CALL && !useArrayLiteralResolution()) {
-                "Annotation call completion is non-FULL mode should only be possible with (new) collection literal resolution of annotations" +
-                        " and only in PCLA lambda"
-            }
-            val readOnlyConstraintStorage = candidate.system.asReadOnlyStorage()
-
-            // here, we substitute not fixed TVs with error types
-            val finalSubstitutor = readOnlyConstraintStorage
-                .buildAbstractResultingSubstitutor(session.typeContext).asCone()
-            transformSingle(
-                createCompletionResultsWriter(finalSubstitutor),
-                null
-            )
-        }
         return when {
+            this is FirAnnotationCall -> {
+                assert(completionMode == ConstraintSystemCompletionMode.PCLA_POSTPONED_CALL && !useArrayLiteralResolution()) {
+                    "Annotation call completion is non-FULL mode should only be possible with (new) collection literal resolution of annotations" +
+                            " and only in PCLA lambda"
+                }
+                val readOnlyConstraintStorage = candidate.system.asReadOnlyStorage()
+
+                val finalSubstitutor = readOnlyConstraintStorage.buildAbstractResultingSubstitutor(
+                    session.typeContext,
+                    transformTypeVariablesToErrorTypes = true,
+                ).asCone()
+                transformSingle(
+                    createCompletionResultsWriter(finalSubstitutor),
+                    null
+                )
+            }
             !candidate.isSyntheticCallForTopLevelLambda() && !candidate.isSyntheticCallForTopLevelCollectionLiteral() -> {
                 this
             }

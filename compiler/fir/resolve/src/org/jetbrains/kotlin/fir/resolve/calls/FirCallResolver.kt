@@ -750,8 +750,9 @@ class FirCallResolver(
             val constructorSymbol = getAnnotationConstructorSymbol(annotationConeType, annotationClassSymbol)
 
             if (useArrayLiteralResolution()) {
+                // in CL resolution arguments are already transformed
                 @OptIn(ArrayLiteralResolution::class)
-                transformer.transformAnnotationCallArguments(annotation, constructorSymbol)
+                transformer.transformAnnotationCallArgumentsPreCollectionLiterals(annotation, constructorSymbol)
             }
             val callInfo = toCallInfo(annotation, reference)
 
@@ -774,6 +775,7 @@ class FirCallResolver(
             }
         } else {
             if (useArrayLiteralResolution()) {
+                // in CL resolution arguments are already transformed
                 transformer.transformCallArguments(annotation, ResolutionMode.ContextDependent)
             }
             val callInfo = toCallInfo(annotation, reference)

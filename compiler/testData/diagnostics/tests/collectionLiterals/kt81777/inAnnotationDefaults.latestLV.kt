@@ -26,10 +26,10 @@ fun <T> consume(it: T) {}
 annotation class RefInt(val e: Int = <!ANNOTATION_PARAMETER_DEFAULT_VALUE_MUST_BE_CONSTANT, UNRESOLVED_REFERENCE!>[::skip]<!>)
 annotation class RefIntArray(val e: IntArray = [::<!INAPPLICABLE_CANDIDATE!>skip<!>])
 annotation class RefArrayString(val e: Array<String> = [::<!INAPPLICABLE_CANDIDATE!>skip<!>])
-annotation class RefCorrect(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<() -> Unit><!> = [::skip])
-annotation class RefCorrectWithParam(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<(Int) -> Unit><!> = [::consume])
-annotation class RefCorrectWithReturn(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<() -> Int><!> = [::const42])
-annotation class RefCorrectWithReturnAndParam(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<(Int) -> Int><!> = [::id])
+annotation class RefCorrect(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<() -> Unit><!> = <!ANNOTATION_PARAMETER_DEFAULT_VALUE_MUST_BE_CONSTANT!>[::skip]<!>)
+annotation class RefCorrectWithParam(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<(Int) -> Unit><!> = <!ANNOTATION_PARAMETER_DEFAULT_VALUE_MUST_BE_CONSTANT!>[::consume]<!>)
+annotation class RefCorrectWithReturn(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<() -> Int><!> = <!ANNOTATION_PARAMETER_DEFAULT_VALUE_MUST_BE_CONSTANT!>[::const42]<!>)
+annotation class RefCorrectWithReturnAndParam(val e: <!INVALID_TYPE_OF_ANNOTATION_MEMBER!>Array<(Int) -> Int><!> = <!ANNOTATION_PARAMETER_DEFAULT_VALUE_MUST_BE_CONSTANT!>[::id]<!>)
 
 /* GENERATED_FIR_TAGS: annotationDeclaration, anonymousFunction, callableReference, collectionLiteral,
 functionDeclaration, integerLiteral, lambdaLiteral, nullableType, primaryConstructor, propertyDeclaration, typeParameter */

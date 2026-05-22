@@ -817,7 +817,7 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
             // Annotation calls inside annotation calls are treated similar to regular annotation calls,
             // mainly so that array literals are resolved with the correct expected type.
             val constructorSymbol = callResolver.getAnnotationConstructorSymbol(expectedType, null)
-            transformAnnotationCallArguments(call, constructorSymbol)
+            transformAnnotationCallArgumentsPreCollectionLiterals(call, constructorSymbol)
         } else {
             // `arrayOf` calls inside annotation calls don't get special treatment, but we track the array element type.
             // This is necessary because the expected type needs to reach nested array literals for them to be resolved properly.
@@ -832,7 +832,7 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
      * This is either the top-level [FirAnnotationCall] or a nested [FirFunctionCall] to an annotation like in `@Foo(Bar())`.
      */
     @ArrayLiteralResolution
-    fun transformAnnotationCallArguments(call: FirCall, constructorSymbol: FirConstructorSymbol?) {
+    fun transformAnnotationCallArgumentsPreCollectionLiterals(call: FirCall, constructorSymbol: FirConstructorSymbol?) {
         if (constructorSymbol != null && call.arguments.isNotEmpty()) {
             // Arguments of annotation calls may contain array literals.
             // To properly resolve array literals and report type mismatches, we need to know the expected type.
@@ -2351,13 +2351,10 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
                     dataFlowAnalyzer.exitCallArguments() // collectionLiteral
                     when (data) {
                         is ResolutionMode.WithExpectedType -> {
-                            val functionCall = components.syntheticCallGenerator.resolveCollectionLiteralExpressionWithSyntheticOuterCall(
+                            components.syntheticCallGenerator.resolveCollectionLiteralExpressionWithSyntheticOuterCall(
                                 collectionLiteral, data, resolutionContext,
-                            )
-                            if (data.arrayLiteralPosition == ArrayLiteralPosition.AnnotationParameter) {
-                                functionCall.transformSingle<FirExpression, _>(arrayOfCallTransformer, session)
-                            } else {
-                                functionCall
+                            ).applyIf(data.arrayLiteralPosition == ArrayLiteralPosition.AnnotationParameter) {
+                                transformSingle<FirExpression, _>(arrayOfCallTransformer, session)
                             }
                         }
                         is ResolutionMode.ContextDependent -> {
