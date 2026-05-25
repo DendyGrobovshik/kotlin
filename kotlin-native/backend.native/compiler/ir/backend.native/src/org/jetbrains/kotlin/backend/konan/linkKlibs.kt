@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.library.isHeader
 import org.jetbrains.kotlin.library.metadata.DeserializedKlibModuleOrigin
 import org.jetbrains.kotlin.library.metadata.KlibModuleOrigin
 import org.jetbrains.kotlin.library.metadata.impl.isForwardDeclarationModule
+import org.jetbrains.kotlin.library.metadata.isCInteropLibrary
 import org.jetbrains.kotlin.library.metadata.kotlinLibrary
 import org.jetbrains.kotlin.library.uniqueName
 import org.jetbrains.kotlin.psi2ir.Psi2IrConfiguration
@@ -254,7 +255,7 @@ private fun ensureCStructsAndEnumsAreLoadedForCaching(linker: KonanIrLinker, lib
     // Normally it's only for the classes actually used from the lib/app being compiled, but if instead we're building a cache for
     // a C-interop library, we want to load, process and cache everything. The consumer of the cached library will then have all the
     // resulting assembly code for the C structs and enums already available, without a need for any special processing.
-    if (libraryToCacheModule?.isFromCInteropLibrary() == true) {
+    if (libraryToCacheModule?.kotlinLibrary?.isCInteropLibrary() == true) {
         val interopModuleDeserializer = linker.getOrCreateDeserializerForModule(libraryToCacheModule, libraryToCacheModule.kotlinLibrary,
                 { DeserializationStrategy.ONLY_REFERENCED }, libraryToCacheModule.name.asString())
         (interopModuleDeserializer as? KonanInteropModuleDeserializer)?.deserializeAllCStructsAndEnums()
@@ -264,7 +265,7 @@ private fun ensureCStructsAndEnumsAreLoadedForCaching(linker: KonanIrLinker, lib
 private fun generateImplForCStructsAndEnums(linker: KonanIrLinker, symbols: BackendNativeSymbols) {
     val implGen = IrImplementationGeneratorForCStructsAndEnums(linker.builtIns, symbols)
     for (module in linker.modules.values) {
-        if (module.descriptor.isFromCInteropLibrary()) {
+        if (module.kotlinLibrary?.isCInteropLibrary() == true) {
             for (file in module.files) {
                 for (declaration in file.declarations) {
                     if (declaration is IrClass) {
