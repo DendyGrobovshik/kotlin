@@ -206,30 +206,35 @@ internal class KonanInteropModuleDeserializer(
     }
 
     private fun computeSignatureAndRegisterInSymbolTable(declaration: IrDeclarationWithName) {
-        if (declaration is IrClass) {
-            // Classes have signatures and are declared right upon creation, nothing to do here.
+        if (declaration is IrClass || declaration is IrEnumEntry) {
+            // Classes and enum entries have simple signatures, which may be computed right upon their creation.
+            // Having the signature, they are also declared in a symbol table right away. So nothing to do here.
             return
         }
 
         val signature = signatureComputer.computeSignature(declaration)
         when (declaration) {
-            is IrSimpleFunction -> {
-                val newSymbol = symbolTable.referenceSimpleFunction(signature)
-                (declaration as IrFunctionWithLateBinding).acquireSymbol(newSymbol)
-                symbolTable.declareSimpleFunction(signature, { newSymbol }, { declaration })
-            }
-            is IrConstructor -> {
-                val newSymbol = symbolTable.referenceConstructor(signature)
-                (declaration as IrConstructorWithLateBinding).acquireSymbol(newSymbol)
-                symbolTable.declareConstructor(signature, { newSymbol }, { declaration })
-            }
-            is IrProperty -> {
-                val newSymbol = symbolTable.referenceProperty(signature)
-                (declaration as IrPropertyWithLateBinding).acquireSymbol(newSymbol)
-                symbolTable.declareProperty(signature, { newSymbol }, { declaration })
+            is IrFunctionWithLateBinding -> symbolTable.declareSimpleFunction(
+                    signature = signature,
+                    symbolFactory = { IrSimpleFunctionSymbolImpl(signature = signature) },
+                    functionFactory = { declaration.acquireSymbol(it) }
+            )
+            is IrConstructorWithLateBinding -> symbolTable.declareConstructor(
+                    signature = signature,
+                    symbolFactory = { IrConstructorSymbolImpl(signature = signature) },
+                    constructorFactory = { declaration.acquireSymbol(it) }
+            )
+            is IrPropertyWithLateBinding -> {
+                symbolTable.declareProperty(
+                        signature = signature,
+                        symbolFactory = { IrPropertySymbolImpl(signature = signature) },
+                        propertyFactory = { declaration.acquireSymbol(it) }
+                )
+
                 declaration.getter?.let(::computeSignatureAndRegisterInSymbolTable)
                 declaration.setter?.let(::computeSignatureAndRegisterInSymbolTable)
             }
+            else -> error("Unexpected declaration kind: ${declaration::class.simpleName}")
         }
     }
 
