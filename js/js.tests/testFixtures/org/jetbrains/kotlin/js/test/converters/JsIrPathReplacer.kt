@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.util.getAnnotation
+import org.jetbrains.kotlin.ir.util.mapParametersWith
 import org.jetbrains.kotlin.js.test.utils.*
 import org.jetbrains.kotlin.test.services.TestServices
 import org.jetbrains.kotlin.test.services.isJsFile
@@ -43,7 +44,7 @@ class JsIrPathReplacer(testServices: TestServices) : DeclarationTransformer {
         val stringLiteral = jsModuleAnnotation.arguments[0] as IrConst
         val pathReplacement = stringLiteral.getReplacement() ?: return
 
-        jsModuleAnnotation.arguments[0] = pathReplacement
+        jsModuleAnnotation.argumentMapping = jsModuleAnnotation.mapParametersWith(pathReplacement)
     }
 
     private fun IrConst.getReplacement(): IrConst? {

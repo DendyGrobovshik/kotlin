@@ -515,7 +515,7 @@ internal class PrepareSuspendFunctionsForExportLowering(private val context: JsI
 
     private fun IrMutableAnnotationContainer.addJsName(name: String) {
         annotations = annotations memoryOptimizedPlus JsIrBuilder.buildAnnotation(jsNameAnnotation.symbol).apply {
-            arguments[0] = name.toIrConst(context.irBuiltIns.stringType)
+            argumentMapping = mapParametersWith(name.toIrConst(context.irBuiltIns.stringType))
         }
     }
 

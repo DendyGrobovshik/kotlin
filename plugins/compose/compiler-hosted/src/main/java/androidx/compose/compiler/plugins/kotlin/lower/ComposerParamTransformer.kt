@@ -547,7 +547,7 @@ class ComposerParamTransformer(
             typeArgumentsCount = 0,
             constructorTypeArgumentsCount = 0,
         ).also {
-            it.arguments[0] = irConst(name)
+            it.argumentMapping = it.mapParametersWith(irConst(name))
         }
     }
 

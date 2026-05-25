@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrVarargImpl
 import org.jetbrains.kotlin.ir.interpreter.isPrimitiveArray
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.dump
+import org.jetbrains.kotlin.ir.util.mapParametersWith
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.toIrConst
 
@@ -42,11 +43,10 @@ internal abstract class IrConstAnnotationTransformer(private val context: IrCons
 
     private fun transformAnnotation(annotation: IrAnnotation) {
         if (annotation.type is IrErrorType) return
-        for ([param, arg] in (annotation.classSymbol.owner.primaryConstructor!!.parameters zip annotation.arguments)) {
-            if (arg != null) {
-                annotation.arguments[param] = transformAnnotationArgument(arg, param)
-            }
-        }
+        val paramsToArgs = annotation.classSymbol.owner.primaryConstructor!!.parameters zip annotation.arguments
+        annotation.argumentMapping = annotation.mapParametersWith(
+            *paramsToArgs.map { [param, arg] -> arg?.let { transformAnnotationArgument(it, param) } }.toTypedArray()
+        )
     }
 
     private fun transformAnnotationArgument(argument: IrExpression, valueParameter: IrValueParameter): IrExpression? {

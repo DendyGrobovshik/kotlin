@@ -189,7 +189,7 @@ class ClassStabilityTransformer(
             constructorTypeArgumentsCount = 0,
             origin = null
         ).also {
-            it.arguments[0] = irConst(parameterMask)
+            it.argumentMapping = it.mapParametersWith(irConst(parameterMask))
         }
 
         if (useK2 && cls.hasFirDeclaration()) {

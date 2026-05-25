@@ -156,10 +156,12 @@ class SerializableCompanionIrGenerator(
             annotationType,
             annotationCtor
         ).apply {
-            arguments[0] = createClassReference(
-                serializer.defaultType,
-                startOffset,
-                endOffset
+            argumentMapping = mapParametersWith(
+                createClassReference(
+                    serializer.defaultType,
+                    startOffset,
+                    endOffset
+                )
             )
         }
 

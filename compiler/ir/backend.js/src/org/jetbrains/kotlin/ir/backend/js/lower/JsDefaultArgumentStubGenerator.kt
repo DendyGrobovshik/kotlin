@@ -218,7 +218,9 @@ class JsDefaultArgumentStubGenerator(context: JsIrBackendContext) :
         return with(context) {
             builder.irAnnotation(symbols.jsNameAnnotationSymbol.constructors.single())
                 .apply {
-                    arguments[0] = IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, irBuiltIns.stringType, name.identifier)
+                    argumentMapping = mapParametersWith(
+                        IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, irBuiltIns.stringType, name.identifier)
+                    )
                 }
         }
     }

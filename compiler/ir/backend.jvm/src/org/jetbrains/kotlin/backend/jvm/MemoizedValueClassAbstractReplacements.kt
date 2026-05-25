@@ -150,7 +150,7 @@ fun List<IrAnnotation>.withJvmExposeBoxedAnnotation(declaration: IrDeclaration, 
         if (jvmExposeBoxedAnnotation?.arguments[0] == null) {
             val jvmName = declaration.getAnnotation(JVM_NAME_ANNOTATION_FQ_NAME)?.arguments[0]
             if (jvmName != null) {
-                jvmExposeBoxedAnnotation?.arguments[0] = jvmName.deepCopyWithSymbols()
+                jvmExposeBoxedAnnotation?.argumentMapping = jvmExposeBoxedAnnotation.mapParametersWith(jvmName.deepCopyWithSymbols())
             }
         }
         return this
@@ -164,7 +164,9 @@ fun List<IrAnnotation>.withJvmExposeBoxedAnnotation(declaration: IrDeclaration, 
     ).apply {
         // Copy the name from @JvmName if it is present
         val jvmName = declaration.getAnnotation(JVM_NAME_ANNOTATION_FQ_NAME)?.arguments[0]
-        arguments[0] = jvmName?.deepCopyWithSymbols()
-            ?: IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.irBuiltIns.stringType, "")
+        argumentMapping = mapParametersWith(
+            jvmName?.deepCopyWithSymbols()
+                ?: IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.irBuiltIns.stringType, "")
+        )
     }
 }

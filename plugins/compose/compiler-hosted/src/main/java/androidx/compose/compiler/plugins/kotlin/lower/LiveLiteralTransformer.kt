@@ -158,8 +158,7 @@ open class LiveLiteralTransformer(
         typeArgumentsCount = 0,
         constructorTypeArgumentsCount = 0
     ).apply {
-        arguments[0] = irConst(key)
-        arguments[1] = irConst(offset)
+        argumentMapping = mapParametersWith(irConst(key), irConst(offset))
     }
 
     private fun irLiveLiteralFileInfoAnnotation(
@@ -172,7 +171,7 @@ open class LiveLiteralTransformer(
         typeArgumentsCount = 0,
         constructorTypeArgumentsCount = 0
     ).apply {
-        arguments[0] = irConst(file)
+        argumentMapping = mapParametersWith(irConst(file))
     }
 
     @OptIn(IrImplementationDetail::class)

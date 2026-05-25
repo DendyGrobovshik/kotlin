@@ -301,18 +301,20 @@ class LenientModeMissingActualDeclarationProvider(
                     constructorTypeArgumentsCount = 0
                 ).apply {
                     val parameterType = throwsConstructorSymbol.owner.parameters.first()
-                    arguments[0] = IrVarargImpl(
-                        startOffset = UNDEFINED_OFFSET,
-                        endOffset = UNDEFINED_OFFSET,
-                        type = parameterType.type,
-                        varargElementType = (parameterType.type as IrSimpleType).arguments.first().typeOrFail,
-                        elements = listOf(
-                            IrClassReferenceImpl(
-                                startOffset = UNDEFINED_OFFSET,
-                                endOffset = UNDEFINED_OFFSET,
-                                type = kClassSymbol.typeWith(notImplementedErrorConstructorSymbol.owner.returnType),
-                                symbol = (notImplementedErrorConstructorSymbol.owner.parent as IrClass).symbol,
-                                classType = notImplementedErrorConstructorSymbol.owner.returnType,
+                    argumentMapping = mapParametersWith(
+                        IrVarargImpl(
+                            startOffset = UNDEFINED_OFFSET,
+                            endOffset = UNDEFINED_OFFSET,
+                            type = parameterType.type,
+                            varargElementType = (parameterType.type as IrSimpleType).arguments.first().typeOrFail,
+                            elements = listOf(
+                                IrClassReferenceImpl(
+                                    startOffset = UNDEFINED_OFFSET,
+                                    endOffset = UNDEFINED_OFFSET,
+                                    type = kClassSymbol.typeWith(notImplementedErrorConstructorSymbol.owner.returnType),
+                                    symbol = (notImplementedErrorConstructorSymbol.owner.parent as IrClass).symbol,
+                                    classType = notImplementedErrorConstructorSymbol.owner.returnType,
+                                )
                             )
                         )
                     )

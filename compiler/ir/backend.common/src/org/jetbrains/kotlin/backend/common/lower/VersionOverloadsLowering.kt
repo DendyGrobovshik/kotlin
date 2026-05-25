@@ -183,21 +183,22 @@ open class VersionOverloadsLowering(val irFactory: IrFactory, val irBuiltIns: Ir
         irBuiltIns.deprecatedSymbol.defaultType,
         irBuiltIns.deprecatedSymbol.constructors.first()
     ).apply {
-        arguments[0] =
+        argumentMapping = mapParametersWith(
             IrConstImpl.string(
                 SYNTHETIC_OFFSET,
                 SYNTHETIC_OFFSET,
                 irBuiltIns.stringType,
                 "This method is kept for binary compatibility purposes, please use the main overload. " +
                         "This overload corresponds to ${version?.let { "version $it" } ?: "the initial version"}."
-            )
-        arguments[2] =
+            ),
+            null,
             IrGetEnumValueImpl(
                 SYNTHETIC_OFFSET,
                 SYNTHETIC_OFFSET,
                 irBuiltIns.deprecationLevelSymbol.defaultType,
                 deprecationLevelHiddenSymbol
             )
+        )
     }
 
     protected open fun IrFunction.generateWrapperCall(original: IrFunction, includedParams: BooleanArray): IrFunctionAccessExpression {

@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.mapParametersWith
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 
@@ -124,9 +125,11 @@ class DurableFunctionKeyTransformer(
         typeArgumentsCount = 0,
         constructorTypeArgumentsCount = 0,
     ).apply {
-        arguments[0] = irConst(key.key.hashCode())
-        arguments[1] = irConst(key.startOffset)
-        arguments[2] = irConst(key.endOffset)
+        argumentMapping = mapParametersWith(
+            irConst(key.key.hashCode()),
+            irConst(key.startOffset),
+            irConst(key.endOffset)
+        )
     }
 
     override fun visitSimpleFunction(declaration: IrSimpleFunction): IrStatement {

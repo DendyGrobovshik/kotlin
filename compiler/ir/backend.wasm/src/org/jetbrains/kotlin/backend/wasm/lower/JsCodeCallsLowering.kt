@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.util.copyTo
 import org.jetbrains.kotlin.ir.util.copyTypeParametersFrom
+import org.jetbrains.kotlin.ir.util.mapParametersWith
 import org.jetbrains.kotlin.ir.util.transformDeclarationsFlat
 
 /**
@@ -96,7 +97,9 @@ class JsCodeCallsLowering(val context: WasmBackendContext) : FileLoweringPass {
 
         val builder = context.createIrBuilder(function.symbol)
         function.annotations += builder.irAnnotation(jsRelatedSymbols.jsFunConstructor, typeArguments = emptyList()).also {
-            it.arguments[0] = builder.irString(jsFunCode)
+            it.argumentMapping = it.mapParametersWith(
+                builder.irString(jsFunCode)
+            )
         }
         function.body = null
         return null

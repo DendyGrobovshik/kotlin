@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.utils.memoryOptimizedMap
 import org.jetbrains.kotlin.utils.memoryOptimizedPlus
 
@@ -140,7 +141,7 @@ class ImplicitlyExportedDeclarationsMarkingLowering(private val context: JsIrBac
             }
         } else if (strictImplicitExport) {
             annotations = annotations memoryOptimizedPlus JsIrBuilder.buildAnnotation(jsImplicitExportCtor).apply {
-                arguments[0] = false.toIrConst(context.irBuiltIns.booleanType)
+                argumentMapping = mapParametersWith(false.toIrConst(context.irBuiltIns.booleanType))
             }
 
             parentClassOrNull?.takeIf { it.shouldBeMarkedWithImplicitExportOrUpgraded() }?.markWithJsImplicitExportOrUpgrade()

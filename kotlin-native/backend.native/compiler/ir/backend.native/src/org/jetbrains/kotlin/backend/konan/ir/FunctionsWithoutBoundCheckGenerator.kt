@@ -54,7 +54,9 @@ internal class FunctionsWithoutBoundCheckGenerator(val context: KonanBackendCont
                     annotation.deepCopyWithSymbols().also { copy ->
                         if (copy.isAnnotationWithEqualFqName(KonanFqNames.gcUnsafeCall)) {
                             val value = "${annotation.getAnnotationStringValue("callee")}_without_BoundCheck"
-                            copy.arguments[0] = IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.irBuiltIns.stringType, value)
+                            copy.argumentMapping = copy.mapParametersWith(
+                                    IrConstImpl.string(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.irBuiltIns.stringType, value)
+                            )
                         }
                     }
                 }

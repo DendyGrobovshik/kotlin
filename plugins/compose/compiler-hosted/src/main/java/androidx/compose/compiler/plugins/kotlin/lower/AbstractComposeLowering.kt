@@ -1711,17 +1711,20 @@ abstract class AbstractComposeLowering(
         type = deprecatedIrClass.defaultType,
         constructorSymbol = deprecatedIrClass.constructors.first { it.owner.isPrimary }
     ).also {
-        it.arguments[0] = IrConstImpl.string(
-            SYNTHETIC_OFFSET,
-            SYNTHETIC_OFFSET,
-            context.irBuiltIns.stringType,
-            message
-        )
-        it.arguments[2] = IrGetEnumValueImpl(
-            SYNTHETIC_OFFSET,
-            SYNTHETIC_OFFSET,
-            deprecationLevelIrClass.defaultType,
-            hiddenDeprecationLevel
+        it.argumentMapping = it.mapParametersWith(
+            IrConstImpl.string(
+                SYNTHETIC_OFFSET,
+                SYNTHETIC_OFFSET,
+                context.irBuiltIns.stringType,
+                message
+            ),
+            null,
+            IrGetEnumValueImpl(
+                SYNTHETIC_OFFSET,
+                SYNTHETIC_OFFSET,
+                deprecationLevelIrClass.defaultType,
+                hiddenDeprecationLevel
+            )
         )
     }
 

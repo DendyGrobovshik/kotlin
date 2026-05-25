@@ -77,7 +77,9 @@ private class DataFrameFileLowering(val context: IrPluginContext) : FileLowering
         getter.annotations = listOf(
             IrAnnotationImpl(-1, -1, jvmName.owner.returnType, jvmName, 0, 1)
                 .also {
-                    it.arguments[0] = IrConstImpl.string(-1, -1, context.irBuiltIns.stringType, jvmNameArg)
+                    it.argumentMapping = it.mapParametersWith(
+                        IrConstImpl.string(-1, -1, context.irBuiltIns.stringType, jvmNameArg)
+                    )
                 }
         )
         val returnType = getter.returnType

@@ -206,14 +206,14 @@ abstract class ConstantValueGenerator(
             irAnnotation.typeArguments[i] = typeArgument.type.toIrType()
         }
 
-        for (valueParameter in substitutedConstructor.valueParameters) {
-            val argumentIndex = valueParameter.index + if (primaryConstructorDescriptor.dispatchReceiverParameter != null) 1 else 0
-            val argumentValue = annotationDescriptor.allValueArguments[valueParameter.name] ?: continue
-            val adjustedValue = adjustAnnotationArgumentValue(argumentValue, valueParameter)
-            val [parameterStartOffset, parameterEndOffset] = extractAnnotationParameterOffsets(annotationDescriptor, valueParameter.name)
-            val irArgument = generateAnnotationValueAsExpression(parameterStartOffset, parameterEndOffset, adjustedValue, valueParameter)
-            irAnnotation.arguments[argumentIndex] = irArgument
-        }
+        irAnnotation.argumentMapping = irAnnotation.mapParametersWith(
+            *substitutedConstructor.valueParameters.map { valueParameter ->
+                val argumentValue = annotationDescriptor.allValueArguments[valueParameter.name] ?: return@map null
+                val adjustedValue = adjustAnnotationArgumentValue(argumentValue, valueParameter)
+                val [parameterStartOffset, parameterEndOffset] = extractAnnotationParameterOffsets(annotationDescriptor, valueParameter.name)
+                generateAnnotationValueAsExpression(parameterStartOffset, parameterEndOffset, adjustedValue, valueParameter)
+            }.toTypedArray()
+        )
 
         return irAnnotation
     }

@@ -204,7 +204,9 @@ class PrepareCollectionsToExportLowering(private val context: JsIrBackendContext
 
     private fun IrDeclarationWithName.addJsName() {
         annotations = annotations memoryOptimizedPlus JsIrBuilder.buildAnnotation(jsNameCtor).apply {
-            arguments[0] = "Kt${name.asString()}".toIrConst(context.irBuiltIns.stringType)
+            argumentMapping = mapParametersWith(
+                "Kt${name.asString()}".toIrConst(context.irBuiltIns.stringType)
+            )
         }
     }
 
@@ -214,7 +216,9 @@ class PrepareCollectionsToExportLowering(private val context: JsIrBackendContext
 
     private fun IrDeclaration.markWithJsImplicitExport() {
         annotations = annotations memoryOptimizedPlus JsIrBuilder.buildAnnotation(jsImplicitExportCtor).apply {
-            arguments[0] = true.toIrConst(context.irBuiltIns.booleanType)
+            argumentMapping = mapParametersWith(
+                true.toIrConst(context.irBuiltIns.booleanType)
+            )
         }
     }
 

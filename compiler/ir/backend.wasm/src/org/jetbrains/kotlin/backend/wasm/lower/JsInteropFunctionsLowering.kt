@@ -207,7 +207,9 @@ class JsInteropFunctionsLowering(val context: WasmBackendContext) : DeclarationT
         newFun.body = createAdapterFunctionBody(builder, newFun, function, valueParametersAdapters, resultAdapter)
 
         newFun.annotations += builder.irAnnotation(jsRelatedSymbols.jsNameConstructor, typeArguments = emptyList()).also {
-            it.arguments[0] = builder.irString(function.getJsNameOrKotlinName().identifier)
+            it.argumentMapping = it.mapParametersWith(
+                builder.irString(function.getJsNameOrKotlinName().identifier)
+            )
         }
         function.annotations = function.annotations.filter {
             it.classSymbol != jsRelatedSymbols.jsExport && it.classSymbol != jsRelatedSymbols.jsExportDefault
@@ -569,7 +571,7 @@ class JsInteropFunctionsLowering(val context: WasmBackendContext) : DeclarationT
         }
 
         result.annotations += builder.irAnnotation(jsRelatedSymbols.jsFunConstructor, typeArguments = emptyList()).also {
-            it.arguments[0] = builder.irString(jsCode)
+            it.argumentMapping = it.mapParametersWith(builder.irString(jsCode))
         }
 
         additionalDeclarations += result
@@ -689,7 +691,7 @@ class JsInteropFunctionsLowering(val context: WasmBackendContext) : DeclarationT
         }
 
         result.annotations += builder.irAnnotation(jsRelatedSymbols.jsFunConstructor, typeArguments = emptyList()).also {
-            it.arguments[0] = builder.irString(jsFun)
+            it.argumentMapping = it.mapParametersWith(builder.irString(jsFun))
         }
 
         additionalDeclarations += result

@@ -121,11 +121,13 @@ internal class RepeatedAnnotationLowering(private val context: JvmBackendContext
     ): IrAnnotation {
         val annotationType = annotationClass.typeWith()
         return IrAnnotationImpl.fromSymbolOwner(containerClass.defaultType, containerClass.primaryConstructor!!.symbol).apply {
-            arguments[0] = IrVarargImpl(
-                UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-                context.irBuiltIns.arrayClass.typeWith(annotationType),
-                annotationType,
-                entries
+            argumentMapping = mapParametersWith(
+                IrVarargImpl(
+                    UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+                    context.irBuiltIns.arrayClass.typeWith(annotationType),
+                    annotationType,
+                    entries
+                )
             )
         }
     }

@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.isFunction
 import org.jetbrains.kotlin.ir.util.isInterface
 import org.jetbrains.kotlin.ir.util.isSuspendFunction
+import org.jetbrains.kotlin.ir.util.mapParametersWith
 import org.jetbrains.kotlin.utils.atMostOne
 
 private fun IrClass.isClassTypeWithSignature(signature: IdSignature.CommonSignature): Boolean {
@@ -55,12 +56,14 @@ fun buildSimpleAnnotation(irBuiltIns: IrBuiltIns, startOffset: Int, endOffset: I
         it.singleOrNull() ?: it.single { ctor -> ctor.parameters.size == args.size }
     }
     return IrAnnotationImpl.fromSymbolOwner(startOffset, endOffset, constructor.returnType, constructor.symbol).apply {
-        args.forEachIndexed { index, arg ->
+        args.indices.forEach { index ->
             assert(constructor.parameters[index].type == irBuiltIns.stringType) {
                 "String type expected but was ${constructor.parameters[index].type}"
             }
-            arguments[index] = IrConstImpl.string(startOffset, endOffset, irBuiltIns.stringType, arg)
         }
+        argumentMapping = mapParametersWith(
+            *args.map { IrConstImpl.string(startOffset, endOffset, irBuiltIns.stringType, it) }.toTypedArray()
+        )
     }
 }
 

@@ -417,13 +417,13 @@ class ComposableTargetAnnotationsTransformer(
         if (ComposableTargetClass != null && ComposableOpenTargetClass != null) {
             when (this) {
                 is Token -> annotation(ComposableTargetClass).also {
-                    it.arguments[0] = irConst(value)
+                    it.argumentMapping = it.mapParametersWith(irConst(value))
                 }
                 is Open ->
                     if (index < 0) null else annotation(
                         ComposableOpenTargetClass
                     ).also {
-                        it.arguments[0] = irConst(index)
+                        it.argumentMapping = it.mapParametersWith(irConst(index))
                     }
             }
         } else null
@@ -435,7 +435,9 @@ class ComposableTargetAnnotationsTransformer(
         if (ComposableInferredTargetClass != null) {
             listOf(
                 annotation(ComposableInferredTargetClass).also {
-                    it.arguments[0] = irConst(serialize())
+                    it.argumentMapping = it.mapParametersWith(
+                        irConst(serialize())
+                    )
                 }
             )
         } else emptyList()

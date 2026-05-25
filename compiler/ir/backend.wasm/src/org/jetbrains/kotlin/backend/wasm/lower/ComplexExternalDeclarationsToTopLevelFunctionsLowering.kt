@@ -473,7 +473,9 @@ fun createExternalJsFunction(
     }
     val builder = context.createIrBuilder(res.symbol)
     res.annotations += builder.irAnnotation(context.wasmSymbols.jsRelatedSymbols.jsFunConstructor, typeArguments = emptyList()).also {
-        it.arguments[0] = builder.irString(jsCode)
+        it.argumentMapping = it.mapParametersWith(
+            builder.irString(jsCode)
+        )
     }
     return res
 }

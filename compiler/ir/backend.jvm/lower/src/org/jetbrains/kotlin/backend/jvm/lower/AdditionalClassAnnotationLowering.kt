@@ -64,8 +64,10 @@ internal class AdditionalClassAnnotationLowering(private val context: JvmBackend
             IrAnnotationImpl.fromSymbolOwner(
                 UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbols.retentionConstructor.returnType, symbols.retentionConstructor.symbol, 0
             ).apply {
-                arguments[0] = IrGetEnumValueImpl(
-                    UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbols.retentionPolicyEnum.defaultType, javaRetentionPolicy.symbol
+                argumentMapping = mapParametersWith(
+                    IrGetEnumValueImpl(
+                        UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbols.retentionPolicyEnum.defaultType, javaRetentionPolicy.symbol
+                    )
                 )
             }
     }
@@ -95,7 +97,7 @@ internal class AdditionalClassAnnotationLowering(private val context: JvmBackend
             IrAnnotationImpl.fromSymbolOwner(
                 UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbols.targetConstructor.returnType, symbols.targetConstructor.symbol, 0
             ).apply {
-                arguments[0] = vararg
+                argumentMapping = mapParametersWith(vararg)
             }
     }
 
@@ -123,7 +125,7 @@ internal class AdditionalClassAnnotationLowering(private val context: JvmBackend
             IrAnnotationImpl.fromSymbolOwner(
                 UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbols.repeatableConstructor.returnType, symbols.repeatableConstructor.symbol, 0
             ).apply {
-                arguments[0] = containerReference
+                argumentMapping = mapParametersWith(containerReference)
             }
     }
 

@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.ir.*
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
 import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.symbols.*
@@ -378,3 +379,17 @@ fun IrClass.selectSAMOverriddenFunctionOrNull(): IrSimpleFunction? {
 
 fun IrClass.selectSAMOverriddenFunction(): IrSimpleFunction = selectSAMOverriddenFunctionOrNull()
     ?: error("${render()} should have a single abstract method to be a type of function reference")
+
+@OptIn(DeprecatedCompilerApi::class)
+fun IrAnnotation.mapParametersWith(vararg args: IrExpression?): Map<Name, IrExpression?> {
+    val params = symbol.owner.parameters
+    if (params.size != args.size) {
+        error("The amount of arguments for annotation $classId is not correct. Expected ${params.size}, but got ${args.size}")
+    }
+    // TODO KT-55928 replace with something like `return params.map { it.name }.zip(args).toMap()`
+    for ([index, arg] in args.withIndex()) {
+        arguments[index] = arg
+    }
+    return IrAnnotationArgsView(arguments, symbol)
+}
+
