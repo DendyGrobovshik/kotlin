@@ -112,7 +112,8 @@ internal class KonanInteropModuleDeserializer(
 
         val commonSignature = ((idSig as? IdSignature.AccessorSignature)?.propertySignature ?: idSig)
                 as? IdSignature.CommonSignature ?: return false
-        val packageFqName = FqName(commonSignature.packageFqName)
+        val topLevelSignature = commonSignature.topLevelSignature() as IdSignature.CommonSignature
+        val packageFqName = topLevelSignature.packageFqName()
         if (packageFqName != definedPackageFqName) {
             return false
         }
@@ -120,7 +121,7 @@ internal class KonanInteropModuleDeserializer(
         // First, check for the presence of a top-level class. We assume that if it exists, all its members should also exist.
         // Note: Along classes, C-interop Klibs also define type aliases. However, all types in IR and metadata already provide their
         // expanded representation, and type aliases are not otherwise useful in IR, so there is no need to deserialize them.
-        val topLevelName = FqName(commonSignature.declarationFqName.substringBefore('.'))
+        val topLevelName = FqName(topLevelSignature.declarationFqName)
         val topLevelClassId = MetadataDeclarationId(TopLevelSymbolKind.CLASS_SYMBOL, packageFqName, topLevelName)
         if (topLevelClassId in metadataReader.getDeclaredDeclarationIds()) {
             return true
