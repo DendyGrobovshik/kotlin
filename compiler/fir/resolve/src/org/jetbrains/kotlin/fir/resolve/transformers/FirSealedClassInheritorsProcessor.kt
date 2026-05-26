@@ -39,14 +39,20 @@ class FirSealedClassInheritorsProcessor(
         val sealedClassInheritorsMap = mutableMapOf<FirRegularClass, MutableSet<ClassId>>()
         val inheritorsCollector = InheritorsCollector(session)
 
+        val directClassInheritorsResolver = runIf(session.languageVersionSettings.supportsFeature(LanguageFeature.DirectClassInheritors)) {
+            FirDirectClassInheritorsResolver(session)
+        }
+
         files.forEach {
             withFileAnalysisExceptionWrapping(it) {
                 it.accept(inheritorsCollector, sealedClassInheritorsMap)
+                directClassInheritorsResolver?.resolveInheritors(it)
             }
         }
         files.forEach {
             withFileAnalysisExceptionWrapping(it) {
                 it.transformSingle(InheritorsTransformer(sealedClassInheritorsMap), null)
+                directClassInheritorsResolver?.storeInheritors(it)
             }
         }
     }
