@@ -452,7 +452,8 @@ interface IrTypeSystemContext : TypeSystemContext, TypeSystemCommonSuperTypesCon
         (this as? IrType)?.annotations?.firstOrNull { annotation ->
             annotation.isAnnotationWithEqualFqName(fqName)
         }?.run {
-            (arguments.getOrNull(0) as? IrConst)?.value
+            // In the map we can't talk about the "first" value. So we are forcing single here to avoid subtle bugs.
+            (argumentMapping.values.singleOrNull() as? IrConst)?.value
         }
 
     override fun TypeConstructorMarker.getTypeParameterClassifier(): TypeParameterMarker? =

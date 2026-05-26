@@ -191,8 +191,7 @@ private fun IrClass.hasStableMarkedDescendant(): Boolean {
 }
 
 private fun IrAnnotationContainer.stabilityParamBitmask(): Int? =
-    (annotations.findAnnotation(ComposeFqNames.StabilityInferred)?.arguments[0] as? IrConst)
-        ?.value as? Int
+    annotations.findAnnotation(ComposeFqNames.StabilityInferred)?.getConstArgument("parameters")
 
 @VisibleForTesting
 data class SymbolForAnalysis(

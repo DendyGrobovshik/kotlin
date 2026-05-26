@@ -45,6 +45,7 @@ import org.jetbrains.kotlin.js.parser.sourcemaps.SourceMapParser
 import org.jetbrains.kotlin.js.parser.sourcemaps.SourceMapSuccess
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.JsStandardClassIds
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
@@ -145,9 +146,9 @@ fun IrFunction.getJsCode(): JsFunction? {
         return it
     }
 
-    parseJsFromAnnotation(this, JsStandardClassIds.Annotations.JsOutlinedFunction)
+    parseJsFromAnnotation(this, JsStandardClassIds.Annotations.JsOutlinedFunction, "jsFunctionExpression")
         ?.let { [annotation, parsedJsFunction] ->
-            val sourceMap = (annotation.arguments[1] as? IrConst)?.value as? String
+            val sourceMap = annotation.getConstArgument<String>("sourceMap")
             val parsedSourceMap = sourceMap?.let { parseSourceMap(it, fileOrNull, annotation) }
             if (parsedSourceMap != null) {
                 val remapper = SourceMapLocationRemapper(parsedSourceMap)
@@ -157,7 +158,7 @@ fun IrFunction.getJsCode(): JsFunction? {
             return parsedJsFunction
         }
 
-    parseJsFromAnnotation(this, JsStandardClassIds.Annotations.JsFun)
+    parseJsFromAnnotation(this, JsStandardClassIds.Annotations.JsFun, "code")
         ?.let { [_, parsedJsFunction] ->
             cachedOutlinedJsCode = parsedJsFunction
             return parsedJsFunction
@@ -165,10 +166,10 @@ fun IrFunction.getJsCode(): JsFunction? {
     return null
 }
 
-private fun parseJsFromAnnotation(declaration: IrDeclaration, annotationClassId: ClassId): Pair<IrAnnotation, JsFunction>? {
+private fun parseJsFromAnnotation(declaration: IrDeclaration, annotationClassId: ClassId, annotationParam: String): Pair<IrAnnotation, JsFunction>? {
     val annotation = declaration.getAnnotation(annotationClassId.asSingleFqName())
         ?: return null
-    val jsCode = annotation.arguments[0]
+    val jsCode = annotation.argumentMapping[Name.identifier(annotationParam)]
         ?: compilationException("@${annotationClassId.shortClassName} annotation must contain the JS code argument", annotation)
     val statements = translateJsCodeIntoStatementList(jsCode, declaration)
         ?: compilationException("Could not parse JS code", annotation)

@@ -38,9 +38,10 @@ internal fun IrExpectActualMatchingContext.areIrExpressionConstValuesEqual(
         }
 
         a is IrAnnotation && b is IrAnnotation -> {
-            equalBy(a, b) { it.arguments.size } &&
+            equalBy(a, b) { it.argumentMapping.size } &&
                     areCompatibleExpectActualTypes(a.type, b.type) &&
-                    a.arguments.zip(b.arguments).all { [argA, argB] ->
+                    a.argumentMapping.all { [nameA, argA] ->
+                        val argB = b.argumentMapping[nameA] ?: return@all false
                         areIrExpressionConstValuesEqual(
                             argA,
                             argB,

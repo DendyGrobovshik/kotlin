@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.ir.*
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
 import org.jetbrains.kotlin.ir.expressions.IrVararg
@@ -354,7 +355,7 @@ fun IrClass.getAnnotationTargets(): Set<KotlinTarget>? {
     if (!this.isAnnotationClass) return null
 
     val valueArgument = getAnnotation(StandardNames.FqNames.target)
-        ?.getValueArgument(StandardClassIds.Annotations.ParameterNames.targetAllowedTargets) as? IrVararg
+        ?.argumentMapping[StandardClassIds.Annotations.ParameterNames.targetAllowedTargets] as? IrVararg
         ?: return KotlinTarget.DEFAULT_TARGET_SET
     return valueArgument.elements.filterIsInstance<IrGetEnumValue>().mapNotNull {
         KotlinTarget.valueOrNull(it.symbol.owner.name.asString())
@@ -393,3 +394,7 @@ fun IrAnnotation.mapParametersWith(vararg args: IrExpression?): Map<Name, IrExpr
     return IrAnnotationArgsView(arguments, symbol)
 }
 
+inline fun <reified T> IrAnnotation.getConstArgument(name: String): T? {
+    val expression = argumentMapping[Name.identifier(name)] as? IrConst
+    return expression?.value as? T
+}

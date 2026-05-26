@@ -130,8 +130,7 @@ internal class AdditionalClassAnnotationLowering(private val context: JvmBackend
     }
 
     private fun IrAnnotation.getValueArgument(name: Name): IrExpression? {
-        val parameter = classSymbol.owner.primaryConstructor!!.parameters.find { it.name == name } ?: return null
-        return arguments[parameter]
+        return argumentMapping[name]
     }
 
     private fun IrClass.applicableTargetSet(): Set<KotlinTarget>? {
