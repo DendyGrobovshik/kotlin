@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.backend.common.serialization.IrModuleDeserializer
 import org.jetbrains.kotlin.backend.common.serialization.IrModuleDeserializerKind
 import org.jetbrains.kotlin.backend.common.serialization.encodings.BinarySymbolData
 import org.jetbrains.kotlin.backend.common.serialization.signature.PublicIdSignatureComputer
+import org.jetbrains.kotlin.backend.konan.InteropFqNames
 import org.jetbrains.kotlin.backend.konan.ir.BackendNativeSymbols
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.descriptors.*
@@ -815,14 +816,18 @@ internal class KonanInteropModuleDeserializer(
         // - Other Klibs are not expected to define any of those packages (see also KT-85765, KT-86193).
         // We can use all of that to infer whether a referenced class comes from Kolin code (the Stdlib), forward declarations,
         // or otherwise, from C-interop Klib. This information is necessary to construct a proper IdSignature.
-        val isFromStdlib = pkgFqName.isSubpackageOf(FqName("kotlin")) || pkgFqName.isSubpackageOf(FqName("kotlinx.cinterop"))
-        val isForwardDeclaration = pkgFqName in NativeForwardDeclarationKind.packageFqNameToKind
-        val cinteropFlag = IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.encode(!isFromStdlib && !isForwardDeclaration)
+        val isInteropClass = !pkgFqName.isDefinedInStdlib() && !pkgFqName.isPackageOfForwardDeclaration()
+        val cinteropFlag = IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.encode(isInteropClass)
         val classSignature = IdSignature.CommonSignature(pkgFqName.asString(), classFqName, null, cinteropFlag, null)
 
         return linker.deserializeOrReturnUnboundIrSymbolIfPartialLinkageEnabled(classSignature, BinarySymbolData.SymbolKind.CLASS_SYMBOL,
                 this@KonanInteropModuleDeserializer) as IrClassSymbol
     }
+
+    private fun FqName.isDefinedInStdlib(): Boolean =
+            isSubpackageOf(StandardNames.BUILT_INS_PACKAGE_FQ_NAME) || isSubpackageOf(InteropFqNames.packageName)
+
+    private fun FqName.isPackageOfForwardDeclaration(): Boolean = this in NativeForwardDeclarationKind.packageFqNameToKind
 
 
     private class KlibMetadataReader(
