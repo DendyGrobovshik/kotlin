@@ -659,7 +659,7 @@ internal class KonanInteropModuleDeserializer(
     }
 
     private fun deserializeTypeParameters(kmParameters: List<KmTypeParameter>): Map<Int, IrTypeParameter> {
-        val kmToIrParam = kmParameters.withIndex().associate { (index, kmParameter) ->
+        val kmToIrParam = kmParameters.withIndex().associate { [index, kmParameter] ->
             kmParameter to IrFactoryImpl.createTypeParameter(
                     startOffset = UNDEFINED_OFFSET,
                     endOffset = UNDEFINED_OFFSET,
@@ -673,7 +673,7 @@ internal class KonanInteropModuleDeserializer(
         }
 
         val typeParamsById = kmToIrParam.mapKeys { it.key.id }
-        for ((kmParameter, irParameter) in kmToIrParam) {
+        for ([kmParameter, irParameter] in kmToIrParam) {
             irParameter.superTypes = kmParameter.upperBounds.map { it.toIrType(typeParamsById) }
         }
 
@@ -886,7 +886,7 @@ internal class KonanInteropModuleDeserializer(
                 }
             }
 
-            for ((id, declarations) in deserializedDeclarations) {
+            for ([id, declarations] in deserializedDeclarations) {
                 if (allMetadataDeclarations[id]?.get() == null) {
                     allMetadataDeclarations[id] = SoftReference(declarations)
                 }

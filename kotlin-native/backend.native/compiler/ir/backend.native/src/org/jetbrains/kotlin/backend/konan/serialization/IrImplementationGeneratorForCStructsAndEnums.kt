@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.name.Name.identifier
 
 private val varTypeAnnotationFqName = FqName("kotlinx.cinterop.internal.CStruct.VarType")
 private val cEnumEntryAliasAnnotation = FqName("kotlinx.cinterop.internal.CEnumEntryAlias")
@@ -166,7 +165,7 @@ internal class IrImplementationGeneratorForCStructsAndEnums(
             // [kotlinx.cinterop.internal.ConstantValue.*] annotations that holds internal constant value of the
             // corresponding entry.
             val value = cEnumEntryValueTypes.firstNotNullOfOrNull {
-                enumEntry.getAnnotation(cEnumEntryValueAnnotationName.child(identifier(it)))?.getValueArgument(Name.identifier("value"))
+                enumEntry.getAnnotation(cEnumEntryValueAnnotationName.child(Name.identifier(it)))?.getValueArgument(Name.identifier("value"))
             } ?: error("Enum entry ${enumEntry.fqNameWhenAvailable} has no appropriate @$cEnumEntryValueAnnotationName annotation!")
 
             enumEntry.initializerExpression = IrFactoryImpl.createExpressionBody(
