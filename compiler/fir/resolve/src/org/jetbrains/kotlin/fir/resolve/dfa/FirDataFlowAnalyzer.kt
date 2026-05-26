@@ -1577,6 +1577,9 @@ abstract class FirDataFlowAnalyzer(
     }
 
     fun exitAnnotation(alsoExitCall: Boolean = false) {
+        if (alsoExitCall) {
+            context.variableAssignmentAnalyzer.exitFunctionCall(callCompleted = true)
+        }
         graphBuilder.exitFakeExpression(alsoExitCall)
         resetSmartCastPosition() // rollback to position before annotation
     }
