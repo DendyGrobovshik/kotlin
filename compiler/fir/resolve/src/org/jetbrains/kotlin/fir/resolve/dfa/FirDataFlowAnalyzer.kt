@@ -1576,8 +1576,8 @@ abstract class FirDataFlowAnalyzer(
         graphBuilder.enterFakeExpression().mergeIncomingFlow()
     }
 
-    fun exitAnnotation() {
-        graphBuilder.exitFakeExpression()
+    fun exitAnnotation(alsoExitCall: Boolean = false) {
+        graphBuilder.exitFakeExpression(alsoExitCall)
         resetSmartCastPosition() // rollback to position before annotation
     }
 
