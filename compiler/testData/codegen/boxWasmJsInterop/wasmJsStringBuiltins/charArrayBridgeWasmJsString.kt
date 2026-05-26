@@ -1,8 +1,6 @@
 // TARGET_BACKEND: WASM
 // WITH_STDLIB
 
-private const val EXPECTED = "a\uD83D\uDE80\u0000e\u0301z"
-
 @JsFun("""(s) => s.length""")
 external fun jsLength(s: String): Int
 
@@ -16,7 +14,7 @@ fun box(): String {
     val chars = charArrayOf('a', '\uD83D', '\uDE80', '\u0000', 'e', '\u0301', 'z')
     val s = chars.concatToString()
 
-    check(s, EXPECTED, "concatToString")?.let { return it }
+    check(s, "a\uD83D\uDE80\u0000e\u0301z", "concatToString")?.let { return it }
     if (s.length != chars.size) return "Fail Kotlin length: ${s.length}"
     if (jsLength(s) != chars.size) return "Fail JS length: ${jsLength(s)}"
 
