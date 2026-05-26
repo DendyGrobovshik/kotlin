@@ -6,7 +6,6 @@
 package kotlin.reflect.jvm.internal
 
 import org.jetbrains.kotlin.descriptors.runtime.structure.safeClassLoader
-import org.jetbrains.kotlin.metadata.deserialization.Flags
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 import kotlin.jvm.internal.CallableReference
 import kotlin.metadata.*
@@ -25,11 +24,8 @@ internal class KotlinKNamedFunction(
     override val contextParameters: List<KmValueParameter> get() = kmFunction.contextParameters
 
     override val extensionReceiverType: KmType? by lazy(PUBLICATION) {
-        kmFunction.receiverParameterType.takeUnless {
-            // Replace with an access to `KmFunction.isStatic` when that API appears.
-            val flags = KmFunction::class.java.getDeclaredField("flags").apply { isAccessible = true }.get(kmFunction) as Int
-            Flags.IS_STATIC_FUNCTION.get(flags)
-        }
+        @OptIn(ExperimentalCompanionBlocksAndExtensions::class)
+        kmFunction.receiverParameterType.takeUnless { kmFunction.isStatic }
     }
 
     override val valueParameters: List<KmValueParameter> get() = kmFunction.valueParameters

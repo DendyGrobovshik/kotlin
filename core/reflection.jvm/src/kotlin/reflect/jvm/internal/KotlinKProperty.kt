@@ -6,7 +6,6 @@
 package kotlin.reflect.jvm.internal
 
 import org.jetbrains.kotlin.descriptors.runtime.structure.safeClassLoader
-import org.jetbrains.kotlin.metadata.deserialization.Flags
 import java.lang.reflect.*
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 import kotlin.metadata.*
@@ -24,11 +23,8 @@ internal abstract class KotlinKProperty<out V>(
     override val name: String get() = kmProperty.name
 
     private val extensionReceiverType: KmType? by lazy(PUBLICATION) {
-        kmProperty.receiverParameterType.takeUnless {
-            // Replace with an access to `KmProperty.isStatic` when that API appears.
-            val flags = KmProperty::class.java.getDeclaredField("flags").apply { isAccessible = true }.get(kmProperty) as Int
-            Flags.IS_STATIC_PROPERTY.get(flags)
-        }
+        @OptIn(ExperimentalCompanionBlocksAndExtensions::class)
+        kmProperty.receiverParameterType.takeUnless { kmProperty.isStatic }
     }
 
     override val allParameters: List<KParameter> by lazy(PUBLICATION) {
