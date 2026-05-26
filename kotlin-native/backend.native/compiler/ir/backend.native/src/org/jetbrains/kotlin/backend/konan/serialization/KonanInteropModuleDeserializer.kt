@@ -133,6 +133,10 @@ internal class KonanInteropModuleDeserializer(
             // Unfortunately, for them, there is no quick way to tell if an interop Klib contains one with a given signature, because
             // metadata does not store IdSignatures. It's necessary to invoke the actual deserialization, which will compute the signatures
             // on the fly, then match against the requested one.
+            // Note: The following check will return a false positive if the symbol for a given function or property is already bound.
+            // If this would indeed happen, it's most likely because the symbol was deserialized by another instance of
+            // KonanInteropModuleDeserializer, most likely by its contains() method. At this time we don't consider it a problem,
+            // because we usually stop on the first module deserializer to return true, and don't call contains() afterwards.
             return tryDeserializeIrSymbol(idSig, BinarySymbolData.SymbolKind.FUNCTION_SYMBOL)?.isBound == true ||
                     tryDeserializeIrSymbol(idSig, BinarySymbolData.SymbolKind.PROPERTY_SYMBOL)?.isBound == true
         }
