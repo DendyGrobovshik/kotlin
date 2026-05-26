@@ -290,11 +290,10 @@ internal class KonanInteropModuleDeserializer(
         require(kmClass.typeParameters.isEmpty()) { "Classes inside C-interop Klibs are not expected to have type parameters." }
         require(!kmClass.name.isLocalClassName()) { "Local/anonymous classes are not supported: ${kmClass.name}." }
 
-        val packageFqName = kmClass.name.substringBeforeLast('/').replace("/", ".")
-        val classFqName = kmClass.name.substringAfterLast('/')
-        val classSimpleName = classFqName.substringAfterLast('.')
+        val packageFqName = kmClass.name.packageFqName
+        val classFqName = kmClass.name.declarationFqName
         val signatureMask = IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.encode(true)
-        val signature = IdSignature.CommonSignature(packageFqName, classFqName, null, signatureMask, null)
+        val signature = IdSignature.CommonSignature(packageFqName.asString(), classFqName.asString(), null, signatureMask, null)
 
         val clazz = symbolTable.declareClass(signature, { IrClassSymbolImpl(signature = signature) }) { symbol ->
             IrFactoryImpl.createClass(
@@ -302,7 +301,7 @@ internal class KonanInteropModuleDeserializer(
                     endOffset = UNDEFINED_OFFSET,
                     symbol = symbol,
                     origin = IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,
-                    name = Name.identifier(classSimpleName),
+                    name = classFqName.shortName(),
                     visibility = kmClass.visibility.toDescriptorVisibility(),
                     modality = kmClass.modality.toDescriptorModality(),
                     kind = kmClass.kind.toDescriptorClassKind(),
@@ -339,8 +338,8 @@ internal class KonanInteropModuleDeserializer(
             clazz.declarations += deserializeEnumEntry(enumEntry, clazz, signature)
         }
         for (nestedClassName in kmClass.nestedClasses) {
-            val nestedClassFqName = FqName(classFqName).child(Name.identifier(nestedClassName))
-            val nestedClassId = MetadataDeclarationId(TopLevelSymbolKind.CLASS_SYMBOL, FqName(packageFqName), nestedClassFqName)
+            val nestedClassFqName = classFqName.child(Name.identifier(nestedClassName))
+            val nestedClassId = MetadataDeclarationId(TopLevelSymbolKind.CLASS_SYMBOL, packageFqName, nestedClassFqName)
             val nestedKmClass = metadataReader.retrieveDeclarationsById(nestedClassId)?.first() as KmClass? ?: continue
             clazz.declarations += deserializeClass(nestedKmClass, clazz)
         }
@@ -749,9 +748,9 @@ internal class KonanInteropModuleDeserializer(
             }
             is KmAnnotationArgument.ArrayKClassValue -> TODO("Unsupported annotation argument kind used inside C-interop Klib: Array class reference")
             is KmAnnotationArgument.EnumValue -> {
-                val pkgFqName = kmArgument.enumClassName.substringBeforeLast('/').replace("/", ".")
-                val enumEntryFqName = kmArgument.enumClassName.substringAfterLast('/') + "." + kmArgument.enumEntryName
-                val enumEntrySig = IdSignature.CommonSignature(pkgFqName, enumEntryFqName, null, 0, null)
+                val pkgFqName = kmArgument.enumClassName.packageFqName
+                val enumEntryFqName = kmArgument.enumClassName.declarationFqName.child(Name.identifier(kmArgument.enumEntryName))
+                val enumEntrySig = IdSignature.CommonSignature(pkgFqName.asString(), enumEntryFqName.asString(), null, 0, null)
                 val enumEntrySymbol = linker.deserializeOrReturnUnboundIrSymbolIfPartialLinkageEnabled(
                         enumEntrySig, BinarySymbolData.SymbolKind.ENUM_ENTRY_SYMBOL, this) as IrEnumEntrySymbol
                 val enumClassSymbol = findReferencedClass(kmArgument.enumClassName)
@@ -805,8 +804,8 @@ internal class KonanInteropModuleDeserializer(
 
     private fun findReferencedClass(className: ClassName): IrClassSymbol {
         require(!className.isLocalClassName()) { "Local/anonymous classes are not supported: $className" }
-        val pkgFqName = FqName(className.substringBeforeLast('/').replace("/", "."))
-        val classFqName = className.substringAfterLast('/')
+        val pkgFqName = className.packageFqName
+        val classFqName = className.declarationFqName
 
         // A C-interop Klib may only reference classes from the Kotlin stdlib, itself, or other C-interop Klibs.
         // Additionally, interop Klibs may reference special "forward declared" classes, which are not physically present in
@@ -818,7 +817,7 @@ internal class KonanInteropModuleDeserializer(
         // or otherwise, from C-interop Klib. This information is necessary to construct a proper IdSignature.
         val isInteropClass = !pkgFqName.isDefinedInStdlib() && !pkgFqName.isPackageOfForwardDeclaration()
         val cinteropFlag = IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.encode(isInteropClass)
-        val classSignature = IdSignature.CommonSignature(pkgFqName.asString(), classFqName, null, cinteropFlag, null)
+        val classSignature = IdSignature.CommonSignature(pkgFqName.asString(), classFqName.asString(), null, cinteropFlag, null)
 
         return linker.deserializeOrReturnUnboundIrSymbolIfPartialLinkageEnabled(classSignature, BinarySymbolData.SymbolKind.CLASS_SYMBOL,
                 this@KonanInteropModuleDeserializer) as IrClassSymbol
@@ -871,7 +870,7 @@ internal class KonanInteropModuleDeserializer(
             for (packageFragment in metadataModule.fragments) {
                 val packageFqName = FqName(packageFragment.fqName ?: continue)
                 for (clazz in packageFragment.classes) {
-                    val classFqName = FqName(clazz.name.substringAfterLast('/'))
+                    val classFqName = clazz.name.declarationFqName
                     val id = MetadataDeclarationId(TopLevelSymbolKind.CLASS_SYMBOL, packageFqName, classFqName)
                     deserializedDeclarations.putToMultiMap(id, clazz)
                 }
@@ -921,6 +920,9 @@ internal class KonanInteropModuleDeserializer(
             val relativeDeclarationName: FqName,
     )
 }
+
+private val ClassName.packageFqName get() = FqName(substringBeforeLast('/').replace("/", "."))
+private val ClassName.declarationFqName get() = FqName(substringAfterLast('/'))
 
 class DeserializedSecondStageInteropPackageDescriptor(
         module: ModuleDescriptor,
