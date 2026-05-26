@@ -887,7 +887,7 @@ internal class KonanInteropModuleDeserializer(
             }
 
             for ((id, declarations) in deserializedDeclarations) {
-                if (id !in allMetadataDeclarations || allMetadataDeclarations[id]?.get() == null) {
+                if (allMetadataDeclarations[id]?.get() == null) {
                     allMetadataDeclarations[id] = SoftReference(declarations)
                 }
             }
