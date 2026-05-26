@@ -2876,7 +2876,7 @@ internal class LocationInfo(val scope: DIScopeOpaqueRef,
                             val column: Int,
                             val inlinedAt: LocationInfo? = null)
 
-internal fun NativeGenerationState.generateRuntimeConstantsModule() : LLVMModuleRef {
+internal fun NativeGenerationState.generateRuntimeConstantsModule(): LLVMModuleRef {
     val llvmModule = LLVMModuleCreateWithNameInContext("constants", llvmContext)!!
     LLVMSetDataLayout(llvmModule, runtime.dataLayout)
     val static = StaticData(llvmModule, llvm)
@@ -2887,18 +2887,19 @@ internal fun NativeGenerationState.generateRuntimeConstantsModule() : LLVMModule
         global.setLinkage(LLVMLinkage.LLVMExternalLinkage)
     }
 
-    setRuntimeConstGlobal("Kotlin_needDebugInfo", llvm.constInt32(if (shouldContainDebugInfo()) 1 else 0))
-    setRuntimeConstGlobal("Kotlin_runtimeAssertsMode", llvm.constInt32(config.runtimeAssertsMode.value))
-    setRuntimeConstGlobal("Kotlin_disableMmap", llvm.constInt32(if (config.disableMmap) 1 else 0))
+    setRuntimeConstGlobal(NativeRuntimeConstants.NEED_DEBUG_INFO, llvm.constInt32(if (shouldContainDebugInfo()) 1 else 0))
+    setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_ASSERTS_MODE, llvm.constInt32(config.runtimeAssertsMode.value))
+    setRuntimeConstGlobal(NativeRuntimeConstants.DISABLE_MMAP, llvm.constInt32(if (config.disableMmap) 1 else 0))
 
     val runtimeLogs = ConstArray(llvm.int32Type, LoggingTag.entries.sortedBy { it.ord }.map {
         config.runtimeLogs[it]!!.ord.let { llvm.constInt32(it) }
     })
-    setRuntimeConstGlobal("Kotlin_runtimeLogs", runtimeLogs)
-    setRuntimeConstGlobal("Kotlin_concurrentWeakSweep", llvm.constInt32(if (context.config.concurrentWeakSweep) 1 else 0))
-    setRuntimeConstGlobal("Kotlin_gcMarkSingleThreaded", llvm.constInt32(if (config.gcMarkSingleThreaded) 1 else 0))
-    setRuntimeConstGlobal("Kotlin_fixedBlockPageSize", llvm.constInt32(config.fixedBlockPageSize.toInt()))
-    setRuntimeConstGlobal("Kotlin_pagedAllocator", llvm.constInt32(if (config.pagedAllocator) 1 else 0))
+    setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, runtimeLogs)
+
+    setRuntimeConstGlobal(NativeRuntimeConstants.CONCURRENT_WEAK_SWEEP, llvm.constInt32(if (context.config.concurrentWeakSweep) 1 else 0))
+    setRuntimeConstGlobal(NativeRuntimeConstants.GC_MARK_SINGLE_THREADED, llvm.constInt32(if (config.gcMarkSingleThreaded) 1 else 0))
+    setRuntimeConstGlobal(NativeRuntimeConstants.FIXED_BLOCK_PAGE_SIZE, llvm.constInt32(config.fixedBlockPageSize.toInt()))
+    setRuntimeConstGlobal(NativeRuntimeConstants.PAGED_ALLOCATOR, llvm.constInt32(if (config.pagedAllocator) 1 else 0))
 
     return llvmModule
 }
