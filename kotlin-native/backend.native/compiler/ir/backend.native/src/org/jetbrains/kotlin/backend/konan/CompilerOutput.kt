@@ -205,8 +205,7 @@ private fun collectLlvmModules(generationState: NativeGenerationState, generated
     return LlvmModules(
             runtimeModules.ifNotEmpty { this + generationState.generateRuntimeConstantsModule() } ?: emptyList(),
             additionalModules
-                    + listOfNotNull(patchObjCRuntimeModule(generationState))
-                    + listOfNotNull(overriddenModules)
+                    + listOfNotNull(patchObjCRuntimeModule(generationState), overriddenModules)
     )
 }
 
