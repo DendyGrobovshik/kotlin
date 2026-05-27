@@ -123,13 +123,8 @@ public class LoadDescriptorUtil {
         if (withForeignAnnotations) {
             String foreignAnnotationsPath =
                     System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH);
-<<<<<<< HEAD
-            javaBinaryRoots.add(MockLibraryUtil.INSTANCE.getOrCompileCachedLibrary("foreign-annotations", () -> 
-                MockLibraryUtilExt.compileJavaFilesLibraryToJar(foreignAnnotationsPath, "foreign-annotations")
-=======
             javaBinaryRoots.add(libraryCache.getOrCompile("foreign-annotations", () ->
                     MockLibraryUtilExt.compileJavaFilesLibraryToJar(foreignAnnotationsPath, "foreign-annotations")
->>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
             ));
         }
         javaBinaryRoots.add(KtTestUtil.getAnnotationsJar());
@@ -180,19 +175,11 @@ public class LoadDescriptorUtil {
 
         classpath.add(ForTestCompileRuntime.runtimeJarForTests());
         if (useJetbrainsAnnotationsWithTypeUse) {
-<<<<<<< HEAD
-            classpath.add(MockLibraryUtil.INSTANCE.getOrCompileCachedLibrary("foreign-annotations", () -> 
-                MockLibraryUtilExt.compileJavaFilesLibraryToJar(
-                        System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH),
-                        "foreign-annotations"
-                )
-=======
             classpath.add(libraryCache.getOrCompile("foreign-annotations", () ->
                     MockLibraryUtilExt.compileJavaFilesLibraryToJar(
                             System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH),
                             "foreign-annotations"
                     )
->>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
             ));
         }
         classpath.add(KtTestUtil.getAnnotationsJar());

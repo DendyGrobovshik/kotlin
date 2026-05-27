@@ -24,9 +24,13 @@ import org.jetbrains.kotlin.test.services.javaFiles
 import org.jetbrains.kotlin.test.services.sourceFileProvider
 import org.jetbrains.kotlin.test.services.configuration.JvmEnvironmentConfigurator
 import org.jetbrains.kotlin.test.util.KtTestUtil
-import java.io.File
+import org.jetbrains.kotlin.test.util.CompiledLibraryCache
 
 class JKlibJavaSourceConfigurator(testServices: TestServices) : EnvironmentConfigurator(testServices) {
+    companion object {
+        private val libraryCache = CompiledLibraryCache()
+    }
+
     override val directiveContainers: List<DirectivesContainer>
         get() = listOf(JvmEnvironmentConfigurationDirectives, ForeignAnnotationsDirectives)
 
@@ -53,9 +57,9 @@ class JKlibJavaSourceConfigurator(testServices: TestServices) : EnvironmentConfi
         javaFiles.forEach { testServices.sourceFileProvider.getOrCreateRealFileForSourceFile(it) }
 
         val javaDir = testServices.sourceFileProvider.getJavaSourceDirectoryForModule(module)
-        
+
         val annotationsJar = if (ForeignAnnotationsDirectives.ENABLE_FOREIGN_ANNOTATIONS in module.directives) {
-            MockLibraryUtil.getOrCompileCachedLibrary("java8-annotations") {
+            libraryCache.getOrCompile("java8-annotations") {
                 MockLibraryUtil.compileJavaFilesLibraryToJar(
                     JavaForeignAnnotationType.Java8Annotations.path,
                     "java8-annotations",
@@ -67,7 +71,7 @@ class JKlibJavaSourceConfigurator(testServices: TestServices) : EnvironmentConfi
             KtTestUtil.getAnnotationsJar()
         }
         configuration.addJvmClasspathRoot(annotationsJar)
-        
+
         val jvmClasspathRoots = configuration.jvmClasspathRoots.map { it.absolutePath }
 
         try {

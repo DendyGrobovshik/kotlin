@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class CompiledLibraryCache : Disposable {
     private val cache = ConcurrentHashMap<String, File>()
+    private val locks = ConcurrentHashMap<String, Any>()
 
     init {
         try {
@@ -28,7 +29,9 @@ class CompiledLibraryCache : Disposable {
         val cached = cache[key]
         if (cached != null) return cached
 
-        synchronized(this) {
+        val lock = locks.computeIfAbsent(key) { Any() }
+
+        synchronized(lock) {
             val doubleCheck = cache[key]
             if (doubleCheck != null) return doubleCheck
 
@@ -40,5 +43,6 @@ class CompiledLibraryCache : Disposable {
 
     override fun dispose() {
         cache.clear()
+        locks.clear()
     }
 }

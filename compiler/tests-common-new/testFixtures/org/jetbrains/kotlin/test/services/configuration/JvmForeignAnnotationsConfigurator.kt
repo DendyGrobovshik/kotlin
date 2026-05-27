@@ -88,21 +88,6 @@ open class JvmForeignAnnotationsConfigurator(testServices: TestServices) : Envir
         val jsr305JarFile = createJsr305Jar(configuration)
         val useJava11ToCompileIncludedJavaFiles =
             registeredDirectives[JvmEnvironmentConfigurationDirectives.JDK_KIND].singleOrNull() == TestJdkKind.FULL_JDK_11
-<<<<<<< HEAD
-            
-        val foreignAnnotationsJar = MockLibraryUtil.getOrCompileCachedLibrary("foreign-annotations-${annotationPath.name}") {
-            val javaFilesDir = createTempDirectory().toFile().also {
-                File(annotationPath.path).copyRecursively(it)
-            }
-            MockLibraryUtil.compileJavaFilesLibraryToJar(
-                javaFilesDir.path,
-                "foreign-annotations",
-                assertions = JUnit5Assertions,
-                extraClasspath = configuration.jvmClasspathRoots.map { it.absolutePath } + jsr305JarFile.absolutePath,
-                useJava11 = useJava11ToCompileIncludedJavaFiles
-            )
-        }
-=======
         val foreignAnnotationsJar =
             libraryCache.getOrCompile("foreign-annotations-${annotationPath.name}-${useJava11ToCompileIncludedJavaFiles}") {
                 val javaFilesDir = createTempDirectory().toFile().also {
@@ -116,7 +101,6 @@ open class JvmForeignAnnotationsConfigurator(testServices: TestServices) : Envir
                     useJava11 = useJava11ToCompileIncludedJavaFiles
                 )
             }
->>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
         configuration.addModularRootIfNotNull(useJava11ToCompileIncludedJavaFiles, "java9_annotations", foreignAnnotationsJar)
         testServices.register(
             AdditionalClassPathForJavaCompilationOrAnalysis::class,
@@ -125,11 +109,7 @@ open class JvmForeignAnnotationsConfigurator(testServices: TestServices) : Envir
         configuration.addJvmClasspathRoot(testServices.standardLibrariesPathProvider.jvmAnnotationsForTests())
 
         if (JvmEnvironmentConfigurationDirectives.WITH_JSR305_TEST_ANNOTATIONS in registeredDirectives) {
-<<<<<<< HEAD
-            val jar = MockLibraryUtil.getOrCompileCachedLibrary("jsr-305-test-annotations") {
-=======
             val jar = libraryCache.getOrCompile("jsr-305-test-annotations") {
->>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
                 val resourceUri = this::class.java.classLoader.getResource(JSR_305_TEST_ANNOTATIONS_PATH)!!.toURI()
                 val target = createTempDirectory().toFile()
                 when (resourceUri.scheme) {
@@ -181,11 +161,7 @@ open class JvmForeignAnnotationsConfigurator(testServices: TestServices) : Envir
     }
 
     private fun createJsr305Jar(configuration: CompilerConfiguration): File {
-<<<<<<< HEAD
-        return MockLibraryUtil.getOrCompileCachedLibrary("jsr305") {
-=======
         return libraryCache.getOrCompile("jsr305") {
->>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
             val jsr305FilesDir = createTempDirectory().toFile().also {
                 File(JavaForeignAnnotationType.Jsr305.path).copyRecursively(it)
             }
