@@ -2890,14 +2890,6 @@ private fun setRuntimeConstGlobal(name: String, value: ConstValue) {
     }
 }
 
-context(static: StaticData)
-private fun overrideRuntimeConstGlobal(name: String, value: ConstValue) {
-    static.placeGlobal(name, value).also {
-        it.setConstant(true)
-        it.setLinkage(LLVMLinkage.LLVMWeakAnyLinkage)
-    }
-}
-
 context(llvm: CodegenLlvmHelpers)
 private fun Map<LoggingTag, LoggingLevel>.toLLVMConstArray() = ConstArray(
         llvm.int32Type,
