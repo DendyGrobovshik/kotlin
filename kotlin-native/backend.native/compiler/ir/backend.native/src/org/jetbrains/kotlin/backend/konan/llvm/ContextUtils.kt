@@ -664,3 +664,11 @@ internal fun Boolean.toLlvmConstInt32(): ConstInt32 =
 context(llvm: CodegenLlvmHelpers)
 internal fun Int.toLlvmConstInt32(): ConstInt32 =
         llvm.constInt32(this)
+
+context(llvm: CodegenLlvmHelpers)
+internal fun UByte.toLlvmConstUInt8(): ConstUInt8 =
+        llvm.constUInt8(this)
+
+context(llvm: CodegenLlvmHelpers)
+internal fun String?.toCStringLiteral(): ConstPointer =
+        if (this != null) llvm.staticData.cStringLiteral(this) else llvm.nullPointer
