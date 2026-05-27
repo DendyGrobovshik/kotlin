@@ -197,15 +197,10 @@ private fun collectLlvmModules(generationState: NativeGenerationState, generated
             runtimeBitcodeFiles.takeIf { generationState.shouldLinkRuntimeNativeLibraries }.orEmpty()
     )
     val additionalModules = parseBitcodeFiles(additionalBitcodeFiles)
-    val overriddenModules = if (!generationState.shouldLinkRuntimeNativeLibraries && !generationState.config.produce.isCache)
-        generationState.overrideRuntimeConstantsModule()
-    else
-        null
 
     return LlvmModules(
             runtimeModules.ifNotEmpty { this + generationState.generateRuntimeConstantsModule() } ?: emptyList(),
-            additionalModules
-                    + listOfNotNull(patchObjCRuntimeModule(generationState), overriddenModules)
+            additionalModules + listOfNotNull(patchObjCRuntimeModule(generationState))
     )
 }
 

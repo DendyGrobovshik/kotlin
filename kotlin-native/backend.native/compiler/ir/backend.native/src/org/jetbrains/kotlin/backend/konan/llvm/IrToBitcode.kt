@@ -2688,6 +2688,8 @@ internal class CodeGeneratorVisitor(
 
             overrideRuntimeGlobal(NativeCompilerConstants.MINIDUMP_LOCATION, context.config.minidumpLocation.toCStringLiteral())
             overrideRuntimeGlobal(NativeCompilerConstants.MINIDUMP_ON_SIGTERM, context.config.minidumpOnSIGTERM.toLlvmConstInt32())
+
+            overrideRuntimeGlobal(NativeCompilerConstants.RUNTIME_LOGS, context.config.runtimeLogs.toLLVMConstArray())
         }
     }
 
@@ -2918,19 +2920,6 @@ internal fun NativeGenerationState.generateRuntimeConstantsModule(): LLVMModuleR
         setRuntimeConstGlobal(NativeRuntimeConstants.GC_MARK_SINGLE_THREADED, config.gcMarkSingleThreaded.toLlvmConstInt32())
         setRuntimeConstGlobal(NativeRuntimeConstants.FIXED_BLOCK_PAGE_SIZE, config.fixedBlockPageSize.toInt().toLlvmConstInt32())
         setRuntimeConstGlobal(NativeRuntimeConstants.PAGED_ALLOCATOR, config.pagedAllocator.toLlvmConstInt32())
-        overrideRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, config.runtimeLogs.toLLVMConstArray())
-    }
-
-    return llvmModule
-}
-
-internal fun NativeGenerationState.overrideRuntimeConstantsModule(): LLVMModuleRef {
-    val llvmModule = LLVMModuleCreateWithNameInContext("constants_override", llvmContext)!!
-    LLVMSetDataLayout(llvmModule, runtime.dataLayout)
-
-    val static = StaticData(llvmModule, llvm)
-    context(llvm, static) {
-        setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, config.runtimeLogs.toLLVMConstArray())
     }
 
     return llvmModule
