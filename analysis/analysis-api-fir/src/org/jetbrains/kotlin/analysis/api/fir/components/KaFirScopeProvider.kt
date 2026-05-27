@@ -41,8 +41,8 @@ import org.jetbrains.kotlin.fir.resolve.scope
 import org.jetbrains.kotlin.fir.resolve.scopeSessionKey
 import org.jetbrains.kotlin.fir.scopes.*
 import org.jetbrains.kotlin.fir.scopes.impl.*
-import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirVariableSymbol
+import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhaseWithCallableMembers
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.kdoc.psi.api.KDoc
@@ -54,7 +54,7 @@ import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
 import org.jetbrains.kotlin.utils.exceptions.withPsiEntry
 
 internal class KaFirScopeProvider(
-    override val analysisSessionProvider: () -> KaFirSession
+    override val analysisSessionProvider: () -> KaFirSession,
 ) : KaBaseSessionComponent<KaFirSession>(), KaScopeProvider, KaFirSessionComponent {
     private fun getScopeSession(): ScopeSession {
         return analysisSession.getScopeSessionFor(analysisSession.firSession)
@@ -308,10 +308,12 @@ internal class KaFirScopeProvider(
             buildList {
                 val receiver = towerDataElement.implicitReceiver
                 if (receiver != null) {
+                    val label = receiver.referencedMemberSymbol.label()
                     val receiverValue = KaBaseScopeImplicitReceiverValue(
                         backingType = firSymbolBuilder.typeBuilder.buildKtType(receiver.type),
                         ownerSymbol = firSymbolBuilder.buildSymbol(receiver.referencedMemberSymbol),
                         scopeIndexInTower = index,
+                        label = label,
                     )
 
                     add(receiverValue)
@@ -416,6 +418,17 @@ internal class KaFirScopeProvider(
     private fun FirTypeScope.withSyntheticPropertiesScopeOrSelf(coneType: ConeKotlinType): FirTypeScope {
         val syntheticPropertiesScope = getFirSyntheticPropertiesScope(coneType, this) ?: return this
         return FirTypeScopeWithSyntheticProperties(typeScope = this, syntheticPropertiesScope)
+    }
+
+    private tailrec fun FirBasedSymbol<*>.label(): String? {
+        return when (this) {
+            is FirAnonymousFunctionSymbol -> label?.name
+            is FirAnonymousObjectSymbol -> null
+            is FirNamedFunctionSymbol -> name.asString()
+            is FirClassSymbol -> name.asString()
+            is FirReceiverParameterSymbol -> containingDeclarationSymbol.label()
+            else -> null
+        }
     }
 }
 

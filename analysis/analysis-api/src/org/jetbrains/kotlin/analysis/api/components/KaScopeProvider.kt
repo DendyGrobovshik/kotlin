@@ -350,6 +350,8 @@ public interface KaImplicitReceiver : KaScopeImplicitReceiverValue {
     override val type: KaType
     override val ownerSymbol: KaSymbol
     override val scopeIndexInTower: Int
+
+    public val label: String?
 }
 
 public sealed interface KaScopeKind {

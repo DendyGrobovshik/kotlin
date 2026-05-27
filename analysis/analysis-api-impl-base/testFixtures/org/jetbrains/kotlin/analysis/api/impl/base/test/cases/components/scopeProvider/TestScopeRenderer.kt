@@ -51,6 +51,9 @@ internal object TestScopeRenderer {
 
                                 is KaScopeImplicitReceiverValue -> {
                                     appendSymbol(KaScopeImplicitReceiverValue::ownerSymbol.name, printer, implicitValue.ownerSymbol)
+
+                                    if (implicitValue is KaImplicitReceiver)
+                                        appendLine("${KaImplicitReceiver::label.name} = ${implicitValue.label}")
                                 }
                             }
                         }
@@ -78,7 +81,7 @@ internal object TestScopeRenderer {
         scope: KaScope,
         printer: PrettyPrinter,
         printPretty: Boolean,
-        additionalSymbolInfo: KaSession.(KaSymbol) -> String? = { null }
+        additionalSymbolInfo: KaSession.(KaSymbol) -> String? = { null },
     ) {
         renderScopeMembers(scope, printer, printPretty, additionalSymbolInfo)
     }
@@ -86,7 +89,7 @@ internal object TestScopeRenderer {
     context(_: KaSession)
     private fun renderType(
         type: KaType,
-        printPretty: Boolean
+        printPretty: Boolean,
     ): String = prettyPrint {
         if (printPretty) {
             prettyPrintTypeRenderer.renderType(useSiteSession, type, this)
