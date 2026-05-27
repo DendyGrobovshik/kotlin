@@ -41,17 +41,16 @@ abstract class CheckUndeclaredInputsTask : DefaultTask() {
             println("Skipping undeclared inputs checking because `kotlin.build.disable.verification.tasks` is true")
             return
         }
-        val undeclaredInputs = mutableSetOf<Path>()
-
-        RecordingFile(jfrFile.singleFile.toPath()).use { recording ->
-            while (recording.hasMoreEvents()) {
-                val event = recording.readEvent()
-                if (event.eventType.name !in listOf("jetbrains.UndeclaredInput")) continue
-                val path = event.getString("path")?.let(Paths::get) ?: continue
-                undeclaredInputs.add(path)
+        val undeclaredInputs = buildSet {
+            RecordingFile(jfrFile.singleFile.toPath()).use { recording ->
+                while (recording.hasMoreEvents()) {
+                    val event = recording.readEvent()
+                    if (event.eventType.name !in listOf("jetbrains.UndeclaredInput")) continue
+                    val path = event.getString("path")?.let(Paths::get) ?: continue
+                    add(path)
+                }
             }
         }
-
         undeclaredInputsFile.get().asFile.writeText(undeclaredInputs.joinToString("\n"))
 
         if (undeclaredInputs.isNotEmpty()) {
