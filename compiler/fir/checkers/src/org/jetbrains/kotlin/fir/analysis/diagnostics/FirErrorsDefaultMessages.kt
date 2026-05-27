@@ -4017,7 +4017,7 @@ object FirErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
         )
         map.put(
             MISSING_INHERITOR_FOR,
-            "This class is not registered a direct inheritor for the supertype ''{0}''",
+            "This class is not registered a direct inheritor for the supertype ''{0}''.",
             SYMBOL,
         )
     }
