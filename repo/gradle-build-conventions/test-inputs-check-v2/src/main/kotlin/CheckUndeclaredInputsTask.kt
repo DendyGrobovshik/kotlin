@@ -30,7 +30,7 @@ abstract class CheckUndeclaredInputsTask : DefaultTask() {
     @get:OutputFile
     abstract val undeclaredInputsFile: RegularFileProperty
 
-    @Input
+    @get:Input
     val verificationTasksDisabled: Property<Boolean> = project.objects.property<Boolean>()
         .value(project.kotlinBuildProperties.verificationTasksDisabled)
         .apply { finalizeValue() }
