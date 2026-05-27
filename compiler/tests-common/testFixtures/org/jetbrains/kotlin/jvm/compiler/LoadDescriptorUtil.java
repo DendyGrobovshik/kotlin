@@ -53,10 +53,14 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.jetbrains.kotlin.test.util.CompiledLibraryCache;
+
 import static org.jetbrains.kotlin.checkers.ThirdPartyAnnotationPathsKt.FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH;
 import static org.jetbrains.kotlin.codegen.forTestCompile.TestCompilePaths.KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH;
 
 public class LoadDescriptorUtil {
+    private static final CompiledLibraryCache libraryCache = new CompiledLibraryCache();
+
     @NotNull
     public static final FqName TEST_PACKAGE_FQNAME = FqName.topLevel(Name.identifier("test"));
 
@@ -95,7 +99,8 @@ public class LoadDescriptorUtil {
                 withForeignAnnotations,
                 explicitLanguageVersionSettings,
                 Collections.emptyList(),
-                (configuration) -> {}
+                (configuration) -> {
+                }
         );
     }
 
@@ -118,8 +123,13 @@ public class LoadDescriptorUtil {
         if (withForeignAnnotations) {
             String foreignAnnotationsPath =
                     System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH);
+<<<<<<< HEAD
             javaBinaryRoots.add(MockLibraryUtil.INSTANCE.getOrCompileCachedLibrary("foreign-annotations", () -> 
                 MockLibraryUtilExt.compileJavaFilesLibraryToJar(foreignAnnotationsPath, "foreign-annotations")
+=======
+            javaBinaryRoots.add(libraryCache.getOrCompile("foreign-annotations", () ->
+                    MockLibraryUtilExt.compileJavaFilesLibraryToJar(foreignAnnotationsPath, "foreign-annotations")
+>>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
             ));
         }
         javaBinaryRoots.add(KtTestUtil.getAnnotationsJar());
@@ -170,11 +180,19 @@ public class LoadDescriptorUtil {
 
         classpath.add(ForTestCompileRuntime.runtimeJarForTests());
         if (useJetbrainsAnnotationsWithTypeUse) {
+<<<<<<< HEAD
             classpath.add(MockLibraryUtil.INSTANCE.getOrCompileCachedLibrary("foreign-annotations", () -> 
                 MockLibraryUtilExt.compileJavaFilesLibraryToJar(
                         System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH),
                         "foreign-annotations"
                 )
+=======
+            classpath.add(libraryCache.getOrCompile("foreign-annotations", () ->
+                    MockLibraryUtilExt.compileJavaFilesLibraryToJar(
+                            System.getProperty(KOTLIN_THIRDPARTY_JAVA8_ANNOTATIONS_PATH, FOREIGN_JDK8_ANNOTATIONS_SOURCES_PATH),
+                            "foreign-annotations"
+                    )
+>>>>>>> 588e0159b92f (fixup! fixup! [JKLIB][TEST] Support foreign annotations in JKlib tests and unmute passing tests)
             ));
         }
         classpath.add(KtTestUtil.getAnnotationsJar());
