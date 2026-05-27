@@ -2876,30 +2876,58 @@ internal class LocationInfo(val scope: DIScopeOpaqueRef,
                             val column: Int,
                             val inlinedAt: LocationInfo? = null)
 
+context(static: StaticData)
+private fun setRuntimeConstGlobal(name: String, value: ConstValue) {
+    static.placeGlobal(name, value).also {
+        it.setConstant(true)
+        it.setLinkage(LLVMLinkage.LLVMExternalLinkage)
+    }
+}
+
+context(static: StaticData)
+private fun overrideRuntimeConstGlobal(name: String, value: ConstValue) {
+    static.placeGlobal(name, value).also {
+        it.setConstant(true)
+        it.setLinkage(LLVMLinkage.LLVMWeakAnyLinkage)
+    }
+}
+
+context(llvm: CodegenLlvmHelpers)
+private fun Map<LoggingTag, LoggingLevel>.toLLVMConstArray() = ConstArray(
+        llvm.int32Type,
+        LoggingTag.entries.sortedBy { it.ord }.map {
+            this[it]!!.ord.toLlvmConstInt32()
+        }
+)
+
 internal fun NativeGenerationState.generateRuntimeConstantsModule(): LLVMModuleRef {
     val llvmModule = LLVMModuleCreateWithNameInContext("constants", llvmContext)!!
     LLVMSetDataLayout(llvmModule, runtime.dataLayout)
-    val static = StaticData(llvmModule, llvm)
 
-    fun setRuntimeConstGlobal(name: String, value: ConstValue) {
-        val global = static.placeGlobal(name, value)
-        global.setConstant(true)
-        global.setLinkage(LLVMLinkage.LLVMExternalLinkage)
+    val static = StaticData(llvmModule, llvm)
+    context(llvm, static) {
+        setRuntimeConstGlobal(NativeRuntimeConstants.NEED_DEBUG_INFO, shouldContainDebugInfo().toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_ASSERTS_MODE, config.runtimeAssertsMode.value.toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.DISABLE_MMAP, config.disableMmap.toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS_ENABLED, config.runtimeLogsEnabled.toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.CONCURRENT_WEAK_SWEEP, context.config.concurrentWeakSweep.toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.GC_MARK_SINGLE_THREADED, config.gcMarkSingleThreaded.toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.FIXED_BLOCK_PAGE_SIZE, config.fixedBlockPageSize.toInt().toLlvmConstInt32())
+        setRuntimeConstGlobal(NativeRuntimeConstants.PAGED_ALLOCATOR, config.pagedAllocator.toLlvmConstInt32())
+        overrideRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, config.runtimeLogs.toLLVMConstArray())
     }
 
-    setRuntimeConstGlobal(NativeRuntimeConstants.NEED_DEBUG_INFO, llvm.constInt32(if (shouldContainDebugInfo()) 1 else 0))
-    setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_ASSERTS_MODE, llvm.constInt32(config.runtimeAssertsMode.value))
-    setRuntimeConstGlobal(NativeRuntimeConstants.DISABLE_MMAP, llvm.constInt32(if (config.disableMmap) 1 else 0))
+    return llvmModule
+}
 
-    val runtimeLogs = ConstArray(llvm.int32Type, LoggingTag.entries.sortedBy { it.ord }.map {
-        config.runtimeLogs[it]!!.ord.let { llvm.constInt32(it) }
-    })
-    setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, runtimeLogs)
+internal fun NativeGenerationState.overrideRuntimeConstantsModule(): LLVMModuleRef {
+    val llvmModule = LLVMModuleCreateWithNameInContext("constants_override", llvmContext)!!
+    LLVMSetDataLayout(llvmModule, runtime.dataLayout)
 
-    setRuntimeConstGlobal(NativeRuntimeConstants.CONCURRENT_WEAK_SWEEP, llvm.constInt32(if (context.config.concurrentWeakSweep) 1 else 0))
-    setRuntimeConstGlobal(NativeRuntimeConstants.GC_MARK_SINGLE_THREADED, llvm.constInt32(if (config.gcMarkSingleThreaded) 1 else 0))
-    setRuntimeConstGlobal(NativeRuntimeConstants.FIXED_BLOCK_PAGE_SIZE, llvm.constInt32(config.fixedBlockPageSize.toInt()))
-    setRuntimeConstGlobal(NativeRuntimeConstants.PAGED_ALLOCATOR, llvm.constInt32(if (config.pagedAllocator) 1 else 0))
+    val static = StaticData(llvmModule, llvm)
+    context(llvm, static) {
+        setRuntimeConstGlobal(NativeRuntimeConstants.RUNTIME_LOGS, config.runtimeLogs.toLLVMConstArray())
+    }
 
     return llvmModule
 }

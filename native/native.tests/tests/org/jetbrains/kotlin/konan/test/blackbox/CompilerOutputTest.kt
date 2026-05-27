@@ -106,7 +106,7 @@ abstract class CompilerOutputTestBase : AbstractNativeSimpleTest() {
     }
 
     @Test
-    fun testLoggingWarningWithDistCache() {
+    fun testLoggingCompilesCleanlyWithDistCache() {
         val rootDir = ForTestCompileRuntime.transformTestDataPath("native/native.tests/testData/compilerOutput/runtimeLogging")
         val testCase = generateTestCaseWithSingleFile(
             rootDir.resolve("main.kt"),
@@ -114,7 +114,7 @@ abstract class CompilerOutputTestBase : AbstractNativeSimpleTest() {
             extras = TestCase.NoTestRunnerExtras("main"),
             testKind = TestKind.STANDALONE_NO_TR,
         )
-        val expectedArtifact = TestCompilationArtifact.Executable(buildDir.resolve("logging_warning_with_cache"))
+        val expectedArtifact = TestCompilationArtifact.Executable(buildDir.resolve("logging_with_cache"))
         val compilation = ExecutableCompilation(
             testRunSettings,
             freeCompilerArgs = testCase.freeCompilerArgs,
@@ -124,9 +124,7 @@ abstract class CompilerOutputTestBase : AbstractNativeSimpleTest() {
             expectedArtifact = expectedArtifact,
         )
         val compilationResult = compilation.result
-        val goldenData = rootDir.resolve(
-            if (testRunSettings.get<CacheMode>().useStaticCacheForDistributionLibraries) "logging_cache_warning.txt" else "empty.txt"
-        )
+        val goldenData = rootDir.resolve("empty.txt")
 
         TestDataAssertions.assertEqualsToFile(goldenData, compilationResult.toOutput().sanitizeCompilationOutput())
     }

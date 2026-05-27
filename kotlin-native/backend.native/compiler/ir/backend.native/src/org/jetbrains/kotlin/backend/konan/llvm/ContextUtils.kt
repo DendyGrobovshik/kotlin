@@ -656,3 +656,11 @@ class IrStaticInitializer(val konanLibrary: KotlinLibrary?, val runtimeInitializ
  */
 @JvmInline
 value class RuntimeInitializer(val llvmCallable: LlvmCallable)
+
+context(llvm: CodegenLlvmHelpers)
+internal fun Boolean.toLlvmConstInt32(): ConstInt32 =
+        llvm.constInt32(if (this) 1 else 0)
+
+context(llvm: CodegenLlvmHelpers)
+internal fun Int.toLlvmConstInt32(): ConstInt32 =
+        llvm.constInt32(this)

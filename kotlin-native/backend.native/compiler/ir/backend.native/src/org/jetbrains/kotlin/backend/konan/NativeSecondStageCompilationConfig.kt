@@ -568,6 +568,8 @@ class NativeSecondStageCompilationConfig(
             append("-paged_allocator${if (pagedAllocator) "TRUE" else "FALSE"}")
         if (minidumpLocation != null)
             append("-with_crash_dumps")
+        if (runtimeLogsEnabled)
+            append("-runtime_logs_enabled")
     }
 
     private val userCacheFlavorString = buildString {
@@ -592,7 +594,6 @@ class NativeSecondStageCompilationConfig(
 
     internal val ignoreCacheReason = when {
         optimizationsEnabled -> "for optimized compilation"
-        runtimeLogsEnabled -> "with runtime logs"
         forceNativeThreadStateForFunctions != defaultForceNativeThreadStateForFunctions -> "with non-default forceNativeThreadStateForFunctions"
         else -> null
     }
