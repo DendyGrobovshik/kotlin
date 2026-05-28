@@ -66,9 +66,9 @@ Why? Because these files are not produced by our build. They are either useless 
 Some examples:
 1. `GRADLE_USER_HOME` / `GRADLE_RO_DEP_CACHE` — a jar at `~/.gradle/caches/.../foo-1.0.0.jar` cannot silently change; if a dependency version changes, Gradle's own input tracking already invalidates the task.
 2. JDK toolchain directory — already captured by `javaLauncher.metadata.languageVersion`. The JDK's individual files don't need to be declared one by one; the Java version is the input.
-3. System temp dir, `java.io.tmpdir` — by definition transient, test-local space to be thrown away.
+3. System temp dir — by definition transient, test-local space to be thrown away.
 4. System binaries (`/bin/sh`, `/usr/bin/tar`, Xcode toolchain) — these are environment, not inputs. Tracking them as inputs would either be useless (they almost never change) or catastrophic (every OS update busts every cache). The correct model is "this test requires tool X to be present", not "this test's output depends on the bytes of `/bin/tar`".
-5. `~/.konan`, native dist — same story. The Konan version is the input; the on-disk dist is a derived cache.
+5. Konan — mostly we read `kotlin-native/dist`. We only read `~/.konan` in case the bootstrap version of K/N is required (for that we use `NativeCompilerDownloader` and pass the path via system property). In both cases, the Konan dist is declared as a Gradle input.
 6. `/dev/random`, `/dev/urandom` — these cannot be inputs in any meaningful sense.
 
 ### Ignoring files inside the current project's build directory
