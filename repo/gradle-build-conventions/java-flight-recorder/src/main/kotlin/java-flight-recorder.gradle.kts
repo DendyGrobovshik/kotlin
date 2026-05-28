@@ -10,7 +10,7 @@ tasks.withType<Test>().configureEach {
 
     val jfrExtension = extensions.create<JfrExtension>("javaFlightRecorder").apply {
         jfcFile.convention(defaultJfcFile())
-        jfrFile.convention(defaultJfrFileFor(testTask))
+        jfrFile.convention(defaultJfrFileFor(testTask.name))
             .builtBy(testTask) // inform testTask that it builds jfrFile
             .also { testTask.outputs.file(it) } // inform other tasks that jfrFile is built by testTask
     }
@@ -31,5 +31,5 @@ fun defaultJfcFile(): RegularFile {
     return layout.settingsDirectory.file(if (isTeamcityBuild) "tests/jfr/teamcity.jfc" else "tests/jfr/local.jfc")
 }
 
-fun defaultJfrFileFor(testTask: Test): Provider<RegularFile> =
-    layout.buildDirectory.file("$pluginBuildDir/${testTask.name}.jfr")
+fun defaultJfrFileFor(testTaskName: String): Provider<RegularFile> =
+    layout.buildDirectory.file("$pluginBuildDir/$testTaskName.jfr")
