@@ -6,18 +6,26 @@
 package org.jetbrains.kotlin.fir.resolve.transformers
 
 import org.jetbrains.kotlin.config.LanguageFeature
+import org.jetbrains.kotlin.fir.FirElement
+import org.jetbrains.kotlin.fir.FirLabel
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.SessionHolder
 import org.jetbrains.kotlin.fir.declarations.FirAnonymousObject
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationStatus
+import org.jetbrains.kotlin.fir.declarations.FirFile
+import org.jetbrains.kotlin.fir.declarations.FirImport
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
 import org.jetbrains.kotlin.fir.declarations.FirTypeAlias
+import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
 import org.jetbrains.kotlin.fir.declarations.addDirectInheritors
 import org.jetbrains.kotlin.fir.declarations.directInheritors
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.isActual
 import org.jetbrains.kotlin.fir.declarations.utils.isExpect
+import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.isDisabled
+import org.jetbrains.kotlin.fir.references.FirReference
 import org.jetbrains.kotlin.fir.resolve.providers.getRegularClassSymbolByClassIdFromDependencies
 import org.jetbrains.kotlin.fir.resolve.toRegularClassSymbol
 import org.jetbrains.kotlin.fir.resolve.toSymbol
@@ -25,13 +33,16 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassifierSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeAliasSymbol
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
+import org.jetbrains.kotlin.fir.types.FirTypeProjection
 import org.jetbrains.kotlin.fir.types.FirTypeRef
 import org.jetbrains.kotlin.fir.types.coneType
 import org.jetbrains.kotlin.fir.types.lookupTagIfAny
+import org.jetbrains.kotlin.fir.visitors.FirDefaultVisitorVoid
 import org.jetbrains.kotlin.name.ClassId
 
-class DirectClassInheritorsResolver(override val session: FirSession) : SessionHolder {
-
+class DirectClassInheritorsCollector(
+    override val session: FirSession
+) : FirDefaultVisitorVoid(), SessionHolder {
     private fun collectInheritorsOfCorrespondingExpectClass(expectClassId: ClassId, expansionClass: FirRegularClass) {
         if (LanguageFeature.MultiPlatformProjects.isDisabled()) return
         val correspondingExpectClass = session.getRegularClassSymbolByClassIdFromDependencies(expectClassId)?.fir ?: return
@@ -53,27 +64,49 @@ class DirectClassInheritorsResolver(override val session: FirSession) : SessionH
         }
     }
 
-    fun resolveRegularClass(regularClass: FirRegularClass) {
-        val symbol = regularClass.symbol
+    override fun visitElement(element: FirElement): Unit = element.acceptChildren(this)
+
+    override fun visitFile(file: FirFile): Unit = file.declarations.forEach { it.accept(this) }
+
+    override fun visitRegularClass(regularClass: FirRegularClass) {
+        regularClass.declarations.forEach { it.accept(this) }
+
+        val classId = regularClass.symbol.classId
         for (typeRef in regularClass.superTypeRefs) {
             val parent = extractClassFromTypeRef(typeRef) ?: continue
-            parent.addDirectInheritors(symbol)
+            parent.addDirectInheritors(classId)
         }
 
-        collectInheritorsOfCorrespondingExpectClass(symbol.classId, regularClass)
+        collectInheritorsOfCorrespondingExpectClass(classId, regularClass)
     }
 
-    fun resolveTypeAlias(typeAlias: FirTypeAlias) {
+    override fun visitTypeAlias(typeAlias: FirTypeAlias) {
         if (!typeAlias.isActual) return
         val expansionClass = typeAlias.expandedTypeRef.coneType.toRegularClassSymbol(session)?.fir ?: return
         collectInheritorsOfCorrespondingExpectClass(typeAlias.classId, expansionClass)
     }
 
-    fun resolveAnonymousObject(anonymousObject: FirAnonymousObject) {
-        val symbol = anonymousObject.symbol
+    override fun visitAnonymousObject(anonymousObject: FirAnonymousObject) {
+        val classId = anonymousObject.symbol.classId
         for (typeRef in anonymousObject.superTypeRefs) {
             val parent = extractClassFromTypeRef(typeRef) ?: continue
-            parent.addDirectInheritors(symbol)
+            parent.addDirectInheritors(classId)
         }
     }
+
+    override fun visitImport(import: FirImport): Unit = Unit
+
+    override fun visitTypeRef(typeRef: FirTypeRef): Unit = Unit
+
+    override fun visitReference(reference: FirReference): Unit = Unit
+
+    override fun visitTypeProjection(typeProjection: FirTypeProjection): Unit = Unit
+
+    override fun visitTypeParameter(typeParameter: FirTypeParameter): Unit = Unit
+
+    override fun visitDeclarationStatus(declarationStatus: FirDeclarationStatus): Unit = Unit
+
+    override fun visitAnnotation(annotation: FirAnnotation): Unit = Unit
+
+    override fun visitLabel(label: FirLabel): Unit = Unit
 }
