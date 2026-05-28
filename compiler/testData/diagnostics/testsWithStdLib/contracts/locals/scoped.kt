@@ -24,7 +24,7 @@ fun bar(n: Int) {
         <!LEAKED_LOCAL("it: Int")!>x = it<!>
     }
     foo { n ->
-        println(n)
+        println(<!LEAKED_LOCAL_THROUGH_CALL("n: Int")!>n<!>)
         <!LEAKED_LOCAL("n: Int")!>n<!>
     }
     foo {

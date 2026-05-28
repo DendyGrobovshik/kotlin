@@ -1167,6 +1167,16 @@ abstract class FirDataFlowAnalyzer(
         node.mergeIncomingFlow { _, flow ->
             val callArgsExit = node.previousNodes.singleOrNull { it is FunctionCallEnterNode }
             processConditionalContract(flow, functionCall, callArgsExit?.flow)
+
+            val hasLocallyScoped = ((functionCall as? FirQualifiedAccessExpression)?.calleeReference?.symbol?.fir as? FirValueParameter)?.hasLocallyScopedContract
+            if (hasLocallyScoped != true) {
+                for ((argument, parameter) in functionCall.resolvedArgumentMapping.orEmpty()) {
+                    if (parameter.hasLocalContract == true) continue
+                    getOrCreateVariable(argument)?.let {
+                        logicSystem.addReferenceToDomain(flow, it, DomainReference.Potential(functionCall, argument))
+                    }
+                }
+            }
         }
     }
 

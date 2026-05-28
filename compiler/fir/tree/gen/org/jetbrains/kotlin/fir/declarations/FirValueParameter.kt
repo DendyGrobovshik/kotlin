@@ -57,6 +57,8 @@ abstract class FirValueParameter : FirVariable(), FirControlFlowGraphOwner {
     abstract val isNoinline: Boolean
     abstract val isVararg: Boolean
     abstract val valueParameterKind: FirValueParameterKind
+    abstract val hasLocalContract: Boolean?
+    abstract val hasLocallyScopedContract: Boolean?
 
     override fun <R, D> accept(visitor: FirVisitor<R, D>, data: D): R =
         visitor.visitValueParameter(this, data)
@@ -88,6 +90,10 @@ abstract class FirValueParameter : FirVariable(), FirControlFlowGraphOwner {
     abstract override fun replaceControlFlowGraphReference(newControlFlowGraphReference: FirControlFlowGraphReference?)
 
     abstract fun replaceDefaultValue(newDefaultValue: FirExpression?)
+
+    abstract fun replaceHasLocalContract(newHasLocalContract: Boolean?)
+
+    abstract fun replaceHasLocallyScopedContract(newHasLocallyScopedContract: Boolean?)
 
     abstract override fun <D> transformTypeParameters(transformer: FirTransformer<D>, data: D): FirValueParameter
 

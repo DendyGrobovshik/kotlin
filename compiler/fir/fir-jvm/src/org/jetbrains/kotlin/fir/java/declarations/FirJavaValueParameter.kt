@@ -116,6 +116,12 @@ class FirJavaValueParameter @FirImplementationDetail constructor(
     override val isLocal: Boolean
         get() = true
 
+    override val hasLocalContract: Boolean
+        get() = false
+
+    override val hasLocallyScopedContract: Boolean
+        get() = false
+
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         returnTypeRef.accept(visitor, data)
         annotations.forEach { it.accept(visitor, data) }
@@ -216,6 +222,14 @@ class FirJavaValueParameter @FirImplementationDetail constructor(
 
     override fun replaceStatus(newStatus: FirDeclarationStatus) {
         error("Status cannot be replaced for FirJavaValueParameter")
+    }
+
+    override fun replaceHasLocalContract(newHasLocalContract: Boolean?) {
+        error("HasLocalContract cannot be replaced for FirJavaValueParameter")
+    }
+
+    override fun replaceHasLocallyScopedContract(newHasLocallyScopedContract: Boolean?) {
+        error("HasLocallyScopedContract cannot be replaced for FirJavaValueParameter")
     }
 }
 

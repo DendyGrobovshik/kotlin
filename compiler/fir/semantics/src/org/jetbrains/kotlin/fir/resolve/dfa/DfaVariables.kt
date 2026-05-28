@@ -210,5 +210,5 @@ sealed interface DomainReference {
     data class Original(override val variable: RealVariable) : DomainReference.WithVariable
     data class Expression(override val variable: DataFlowVariable, override val statement: FirStatement) : DomainReference.WithVariable, DomainReference.WithStatement
     data class Result(override val statement: FirExpression, val original: FirExpression?) : DomainReference.WithStatement
-    data class Potential(override val statement: FirExpression) : DomainReference.WithStatement
+    data class Potential(override val statement: FirStatement, val argument: FirExpression?) : DomainReference.WithStatement
 }

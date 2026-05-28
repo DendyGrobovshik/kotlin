@@ -47,22 +47,9 @@ object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
         allowTopMostReturn: Boolean,
     ) {
         val function = graph.declaration as? FirFunction
-        val contract = (graph.declaration as? FirContractDescriptionOwner)?.contractDescription
 
-        val parametersWithLocalContract = when {
-            function == null || contract == null -> emptySet()
-            else -> buildSet {
-                contract.effects?.forEach { firEffect ->
-                    val effect = firEffect.effect as? ConeLocalEffectDeclaration ?: return@forEach
-                    val symbol = when (val index = effect.valueParameterReference.parameterIndex) {
-                        -1 -> function.symbol
-                        in function.valueParameters.indices -> function.valueParameters[index].symbol
-                        else -> function.contextParametersForFunctionOrContainingProperty()[index - function.valueParameters.size].symbol
-                    }
-                    add(symbol)
-                }
-            }
-        }
+        val parametersWithLocalContract =
+            function?.valueParameters.orEmpty().filter { it.hasLocalContract == true }.map { it.symbol}
         val parametersFromLocallyScoped = when {
             function?.isLocallyScoped == true -> function.valueParameters.map { it.symbol }.toSet()
             else -> emptySet()
@@ -96,7 +83,16 @@ object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
                             statementToReport = referenceToReport.original ?: break
                             referenceToReport = parameterReferences.find { it.statement == referenceToReport.original } ?: break
                         }
-                        reporter.reportOn(statementToReport.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
+
+                        if (referenceToReport is DomainReference.Potential) {
+                            reporter.reportOn(
+                                (referenceToReport.argument ?: statementToReport).source,
+                                FirErrors.LEAKED_LOCAL_THROUGH_CALL,
+                                parameterVariable.symbol
+                            )
+                        } else {
+                            reporter.reportOn(statementToReport.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
+                        }
                     }
                 }
                 isTopMost = false

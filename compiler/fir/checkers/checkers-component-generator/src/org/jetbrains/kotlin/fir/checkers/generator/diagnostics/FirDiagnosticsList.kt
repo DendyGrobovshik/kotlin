@@ -1884,6 +1884,9 @@ object DIAGNOSTICS_LIST : DiagnosticList("FirErrors") {
         val LEAKED_LOCAL by warning<KtElement> {
             parameter<Symbol>("parameter")
         }
+        val LEAKED_LOCAL_THROUGH_CALL by warning<KtElement> {
+            parameter<Symbol>("parameter")
+        }
     }
 
     val NULLABILITY by object : DiagnosticGroup("Nullability") {

@@ -41,6 +41,8 @@ internal class FirDefaultSetterValueParameter(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val symbol: FirValueParameterSymbol,
     override val containingDeclarationSymbol: FirBasedSymbol<*>,
+    override var hasLocalContract: Boolean?,
+    override var hasLocallyScopedContract: Boolean?,
 ) : FirValueParameter() {
     override val typeParameters: List<FirTypeParameterRef>
         get() = emptyList()
@@ -189,4 +191,12 @@ internal class FirDefaultSetterValueParameter(
     }
 
     override fun replaceDefaultValue(newDefaultValue: FirExpression?) {}
+
+    override fun replaceHasLocalContract(newHasLocalContract: Boolean?) {
+        hasLocalContract = newHasLocalContract
+    }
+
+    override fun replaceHasLocallyScopedContract(newHasLocallyScopedContract: Boolean?) {
+        hasLocallyScopedContract = newHasLocallyScopedContract
+    }
 }

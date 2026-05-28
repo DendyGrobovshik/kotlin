@@ -864,6 +864,12 @@ object FirTree : AbstractFirTreeBuilder() {
         }
         generateBooleanFields("crossinline", "noinline", "vararg")
         +field("valueParameterKind", valueParameterKindType)
+        +field("hasLocalContract", boolean, nullable = true, withReplace = true) {
+            isMutable = true
+        }
+        +field("hasLocallyScopedContract", boolean, nullable = true, withReplace = true) {
+            isMutable = true
+        }
     }
 
     val receiverParameter: Element by element(Declaration) {

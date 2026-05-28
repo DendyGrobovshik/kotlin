@@ -42,6 +42,8 @@ open class FirValueParameterBuilder : FirAnnotationContainerBuilder {
     open var isNoinline: Boolean = false
     open var isVararg: Boolean = false
     open var valueParameterKind: FirValueParameterKind = FirValueParameterKind.Regular
+    open var hasLocalContract: Boolean? = null
+    open var hasLocallyScopedContract: Boolean? = null
 
     override fun build(): FirValueParameter {
         return FirValueParameterImpl(
@@ -60,6 +62,8 @@ open class FirValueParameterBuilder : FirAnnotationContainerBuilder {
             isNoinline,
             isVararg,
             valueParameterKind,
+            hasLocalContract,
+            hasLocallyScopedContract,
         )
     }
 
@@ -93,5 +97,7 @@ inline fun buildValueParameterCopy(original: FirValueParameter, init: FirValuePa
     copyBuilder.isNoinline = original.isNoinline
     copyBuilder.isVararg = original.isVararg
     copyBuilder.valueParameterKind = original.valueParameterKind
+    copyBuilder.hasLocalContract = original.hasLocalContract
+    copyBuilder.hasLocallyScopedContract = original.hasLocallyScopedContract
     return copyBuilder.apply(init).build()
 }

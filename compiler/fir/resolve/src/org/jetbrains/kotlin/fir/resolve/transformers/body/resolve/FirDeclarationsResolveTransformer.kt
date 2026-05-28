@@ -16,6 +16,9 @@ import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.fakeElement
 import org.jetbrains.kotlin.fir.*
+import org.jetbrains.kotlin.fir.contracts.description.ConeLocalEffectDeclaration
+import org.jetbrains.kotlin.fir.contracts.description.ConeScopedCallsEffectDeclaration
+import org.jetbrains.kotlin.fir.contracts.effects
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.builder.buildValueParameter
 import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertyAccessor
@@ -1223,6 +1226,23 @@ open class FirDeclarationsResolveTransformer(
 
         dataFlowAnalyzer.exitValueParameter(result)?.let { graph ->
             result.replaceControlFlowGraphReference(FirControlFlowGraphReferenceImpl(graph))
+        }
+
+        val containingFir = valueParameter.containingDeclarationSymbol.fir
+        val function = containingFir as? FirFunction
+        val contract = (containingFir as? FirContractDescriptionOwner)?.contractDescription
+        if (function != null && contract != null) {
+            val index = function.valueParameters.indexOf(valueParameter)
+            contract.effects?.forEach { firEffect ->
+                when (val effect = firEffect.effect) {
+                    is ConeLocalEffectDeclaration if effect.valueParameterReference.parameterIndex == index -> {
+                        valueParameter.replaceHasLocalContract(true)
+                    }
+                    is ConeScopedCallsEffectDeclaration if effect.valueParameterReference.parameterIndex == index -> {
+                        valueParameter.replaceHasLocallyScopedContract(true)
+                    }
+                }
+            }
         }
 
         if (result.containingDeclarationSymbol.isAnnotationConstructor(session)) {

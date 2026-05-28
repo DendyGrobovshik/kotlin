@@ -522,6 +522,7 @@ import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LATEINIT_NULLABLE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LATEINIT_PROPERTY_WITHOUT_TYPE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LEAKED_IN_PLACE_LAMBDA
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LEAKED_LOCAL
+import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LEAKED_LOCAL_THROUGH_CALL
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LESS_VISIBLE_TYPE_ACCESS_IN_INLINE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LESS_VISIBLE_TYPE_IN_INLINE_ACCESSED_SIGNATURE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors.LOCAL_ANNOTATION_CLASS_ERROR
@@ -3315,7 +3316,8 @@ object FirErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
         map.put(UNREACHABLE_CODE, "Unreachable code.", NOT_RENDERED, NOT_RENDERED)
         map.put(SENSELESS_COMPARISON, "Condition is always ''{0}''.", TO_STRING)
         map.put(SENSELESS_NULL_IN_WHEN, "Expression under 'when' is never equal to null.")
-        map.put(LEAKED_LOCAL, "Potentially leaked local ''{0}''.", SYMBOL)
+        map.put(LEAKED_LOCAL, "Local ''{0}'' leaks.", SYMBOL)
+        map.put(LEAKED_LOCAL_THROUGH_CALL, "Local ''{0}'' may leak through this call.", SYMBOL)
 
         // Nullability
         map.put(

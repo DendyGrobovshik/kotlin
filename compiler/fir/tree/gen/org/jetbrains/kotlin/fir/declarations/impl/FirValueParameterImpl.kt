@@ -46,6 +46,8 @@ internal class FirValueParameterImpl(
     override val isNoinline: Boolean,
     override val isVararg: Boolean,
     override val valueParameterKind: FirValueParameterKind,
+    override var hasLocalContract: Boolean?,
+    override var hasLocallyScopedContract: Boolean?,
 ) : FirValueParameter() {
     override val typeParameters: List<FirTypeParameterRef>
         get() = emptyList()
@@ -186,5 +188,13 @@ internal class FirValueParameterImpl(
 
     override fun replaceDefaultValue(newDefaultValue: FirExpression?) {
         defaultValue = newDefaultValue
+    }
+
+    override fun replaceHasLocalContract(newHasLocalContract: Boolean?) {
+        hasLocalContract = newHasLocalContract
+    }
+
+    override fun replaceHasLocallyScopedContract(newHasLocallyScopedContract: Boolean?) {
+        hasLocallyScopedContract = newHasLocallyScopedContract
     }
 }

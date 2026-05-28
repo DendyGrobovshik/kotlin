@@ -4216,6 +4216,13 @@ private fun KaDiagnosticConverterBuilder.addConversions94() {
             token,
         )
     }
+    add(FirErrors.LEAKED_LOCAL_THROUGH_CALL) { firDiagnostic ->
+        LeakedLocalThroughCallImpl(
+            firSymbolBuilder.buildSymbol(firDiagnostic.a),
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
     add(FirErrors.INFERRED_INVISIBLE_WHEN_TYPE.errorFactory) { firDiagnostic ->
         InferredInvisibleWhenTypeErrorImpl(
             firSymbolBuilder.typeBuilder.buildKtType(firDiagnostic.a),
