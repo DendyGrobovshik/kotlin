@@ -69,7 +69,7 @@ projectTests {
         // Use the bootstrap K/N stdlib for compiling test code samples.
         val nativeDistributionDownloader = NativeCompilerDownloader(project).also { it.downloadIfNeeded() }
         val compilerDirectory = project.layout.dir(providers.provider { nativeDistributionDownloader.compilerDirectory })
-        addClasspathProperty(compilerDirectory, "kotlin.internal.native.test.nativeHome")
+        addClasspathProperty("kotlin.internal.native.test.nativeHome") { from(compilerDirectory) }
     }
     testData(project.isolated, "testData")
 }
