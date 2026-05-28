@@ -6,18 +6,19 @@ val pluginBuildDir = "test-inputs-check-v2"
 val disableInputsCheck = project.providers.gradleProperty("kotlin.test.instrumentation.disable.inputs.check").orNull?.toBoolean() == true
 
 if (!disableInputsCheck) {
-    tasks.withType<Test>().configureEach {
-        configureTestInstrumenter()
-    }
-    afterEvaluate {
-        tasks.withType<Test>().forEach { testTask ->
-            registerCheckUndeclaredInputsFor(testTask)
+    tasks {
+        val checkUndeclaredInputs by registering(CheckUndeclaredInputsTask::class) {
+            outputDirectory = layout.buildDirectory.dir("$pluginBuildDir/undeclared-inputs")
+        }
+        withType<Test>().configureEach {
+            configureTestInstrumenter()
+            registerForCheckingInputs(checkUndeclaredInputs)
         }
     }
 }
 
 fun Test.configureTestInstrumenter() {
-    val declaredInputsFile = layout.buildDirectory.file("$pluginBuildDir/declared-inputs.txt")
+    val declaredInputsFile = layout.buildDirectory.file("$pluginBuildDir/declared-inputs/$name.txt")
 
     doFirst {
         declaredInputsFile.get().asFile.apply {
@@ -32,13 +33,14 @@ fun Test.configureTestInstrumenter() {
     addAbsoluteDirectoryProperty(layout.buildDirectory, "test.instrumenter.build.dir")
 }
 
-fun registerCheckUndeclaredInputsFor(testTask: Test) {
-    val undeclaredInputsFile = layout.buildDirectory.file("$pluginBuildDir/undeclared-inputs-for-${testTask.name}.txt")
-    val taskName = "checkUndeclaredInputsFor${testTask.name.capitalize()}"
+fun Test.registerForCheckingInputs(checkUndeclaredInputs: TaskProvider<CheckUndeclaredInputsTask>) {
+    val testTask = this
 
-    val checkUndeclaredInputs = tasks.register<CheckUndeclaredInputsTask>(taskName) {
-        this.jfrFile.from(testTask.javaFlightRecorder.jfrFile)
-        this.undeclaredInputsFile.set(undeclaredInputsFile)
+    // We eagerly call Provider.get() because we're in a lazy context, so we can't use TaskProvider.configure().
+    // It's not a big deal since there is always a single CheckUndeclaredInputs task that must be configured anyway,
+    // so configuration avoidance would save us nothing
+    checkUndeclaredInputs.get().apply {
+        jfrFilesToCheck.from(testTask.javaFlightRecorder.jfrFile)
+        testTask.finalizedBy(this)
     }
-    testTask.finalizedBy(checkUndeclaredInputs)
 }
