@@ -862,7 +862,7 @@ private fun IrSimpleFunction.renderSimpleFunctionFlags(renderer: FlagsRenderer):
         "fake_override".takeIf { isFakeOverride },
         "operator".takeIf { isOperator },
         "infix".takeIf { isInfix },
-        "static".takeIf { isStatic },
+        "companion".takeIf { isStatic },
     )
 
 private fun IrConstructor.renderConstructorFlags(renderer: FlagsRenderer) =
