@@ -4580,6 +4580,12 @@ internal class ReturnValueNotUsedCoercionImpl(
     token: KaLifetimeToken,
 ) : KaAbstractFirDiagnostic<KtElement>(firDiagnostic, token), KaFirDiagnostic.ReturnValueNotUsedCoercion
 
+internal class LeakedLocalImpl(
+    override val parameter: KaSymbol,
+    firDiagnostic: KtPsiDiagnostic,
+    token: KaLifetimeToken,
+) : KaAbstractFirDiagnostic<KtElement>(firDiagnostic, token), KaFirDiagnostic.LeakedLocal
+
 internal class NullForNonnullTypeImpl(
     override val expectedType: KaType,
     firDiagnostic: KtPsiDiagnostic,

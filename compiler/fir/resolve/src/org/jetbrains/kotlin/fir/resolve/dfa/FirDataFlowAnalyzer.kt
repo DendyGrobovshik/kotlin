@@ -569,7 +569,14 @@ abstract class FirDataFlowAnalyzer(
     }
 
     fun exitBlock(block: FirBlock) {
-        graphBuilder.exitBlock(block).mergeIncomingFlow()
+        graphBuilder.exitBlock(block).mergeIncomingFlow { _, flow ->
+            val lastExpression = block.lastExpression
+            if (lastExpression != null) {
+                getOrCreateVariable(lastExpression)?.let {
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(block, lastExpression))
+                }
+            }
+        }
     }
 
     // ----------------------------------- Operator call -----------------------------------
@@ -837,7 +844,14 @@ abstract class FirDataFlowAnalyzer(
     }
 
     fun exitJump(jump: FirJump<*>) {
-        graphBuilder.exitJump(jump).mergeIncomingFlow()
+        graphBuilder.exitJump(jump).mergeIncomingFlow { _, flow ->
+            if (jump is FirReturnExpression) {
+                getOrCreateVariable(jump.result)?.let {
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(jump, null))
+                }
+            }
+
+        }
     }
 
     // ----------------------------------- Check not null call -----------------------------------
@@ -892,7 +906,13 @@ abstract class FirDataFlowAnalyzer(
     fun exitWhenExpression(whenExpression: FirWhenExpression, callCompleted: Boolean) {
         val [whenExitNode, syntheticElseNode] = graphBuilder.exitWhenExpression(whenExpression, callCompleted)
         syntheticElseNode?.mergeWhenBranchEntryFlow()
-        whenExitNode.mergeIncomingFlow()
+        whenExitNode.mergeIncomingFlow { _, flow ->
+            for (branch in whenExpression.branches) {
+                getOrCreateVariable(branch.result)?.let {
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(whenExpression, branch.result))
+                }
+            }
+        }
     }
 
     fun exitWhenSubjectExpression(expression: FirWhenSubjectExpression) {
@@ -1030,8 +1050,14 @@ abstract class FirDataFlowAnalyzer(
         graphBuilder.exitFinallyBlock().mergeIncomingFlow()
     }
 
-    fun exitTryExpression(callCompleted: Boolean) {
-        graphBuilder.exitTryExpression(callCompleted).mergeIncomingFlow()
+    fun exitTryExpression(tryExpression: FirTryExpression, callCompleted: Boolean) {
+        graphBuilder.exitTryExpression(callCompleted).mergeIncomingFlow { _, flow ->
+            for (branch in listOfNotNull(tryExpression.tryBlock, tryExpression.finallyBlock) + tryExpression.catches.map { it.block }) {
+                getOrCreateVariable(branch)?.let {
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(tryExpression, branch))
+                }
+            }
+        }
     }
 
     // ----------------------------------- Resolvable call -----------------------------------
@@ -1482,7 +1508,7 @@ abstract class FirDataFlowAnalyzer(
 
         logicSystem.removePreviousDomainReferences(flow, propertyVariable)
         flow.getOrCreateVariable(initializer)?.let {
-            logicSystem.addReferenceToDomain(flow, it, DomainReference.Expression(propertyVariable, initializer))
+            logicSystem.addReferenceToDomain(flow, it, DomainReference.Expression(propertyVariable, property))
         }
     }
 
@@ -1687,6 +1713,12 @@ abstract class FirDataFlowAnalyzer(
             val rhs = (elvisExpression.rhs as? FirLiteralExpression)?.value as? Boolean
             if (rhs != null) {
                 flow.addAllConditionally(elvisVariable eq !rhs, node.firstPreviousNode.getFlow(path))
+            }
+
+            for (branch in listOfNotNull(elvisExpression.lhs, elvisExpression.rhs)) {
+                getOrCreateVariable(branch)?.let {
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(elvisExpression, branch))
+                }
             }
         }
     }

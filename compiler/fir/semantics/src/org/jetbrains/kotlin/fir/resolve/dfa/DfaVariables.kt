@@ -195,20 +195,20 @@ sealed interface Domain {
     }
 }
 
-sealed class DomainReference {
-    sealed class WithVariable: DomainReference() {
-        abstract val variable: DataFlowVariable
+sealed interface DomainReference {
+    sealed interface WithVariable : DomainReference {
+        val variable: DataFlowVariable
     }
 
-    @OptIn(ExperimentalContracts::class)
-    operator fun contains(variable: DataFlowVariable): Boolean {
-        contract {
-            returns(true) implies (this@DomainReference is DomainReference.WithVariable)
-        }
-        return this is WithVariable && this.variable == variable
+    sealed interface WithStatement : DomainReference {
+        val statement: FirStatement
     }
 
-    data class Original(override val variable: RealVariable) : DomainReference.WithVariable()
-    data class Expression(override val variable: DataFlowVariable, val expression: FirStatement) : DomainReference.WithVariable()
-    data class Potential(val call: FirExpression) : DomainReference()
+    operator fun contains(variable: DataFlowVariable): Boolean =
+        this is WithVariable && this.variable == variable
+
+    data class Original(override val variable: RealVariable) : DomainReference.WithVariable
+    data class Expression(override val variable: DataFlowVariable, override val statement: FirStatement) : DomainReference.WithVariable, DomainReference.WithStatement
+    data class Result(override val statement: FirExpression, val original: FirExpression?) : DomainReference.WithStatement
+    data class Potential(override val statement: FirExpression) : DomainReference.WithStatement
 }
