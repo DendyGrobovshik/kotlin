@@ -7,7 +7,7 @@ val disableInputsCheck = project.providers.gradleProperty("kotlin.test.instrumen
 
 if (!disableInputsCheck) {
     tasks {
-        val checkUndeclaredInputs by registering(CheckUndeclaredInputsTask::class) {
+        val checkUndeclaredInputs by registering(CheckUndeclaredInputs::class) {
             outputDirectory = layout.buildDirectory.dir("$pluginBuildDir/undeclared-inputs")
         }
         withType<Test>().configureEach {
@@ -33,7 +33,7 @@ fun Test.configureTestInstrumenter() {
     addAbsoluteDirectoryProperty(layout.buildDirectory, "test.instrumenter.build.dir")
 }
 
-fun Test.registerForCheckingInputs(checkUndeclaredInputs: TaskProvider<CheckUndeclaredInputsTask>) {
+fun Test.registerForCheckingInputs(checkUndeclaredInputs: TaskProvider<CheckUndeclaredInputs>) {
     val testTask = this
 
     // We eagerly call Provider.get() because we're in a lazy context, so we can't use TaskProvider.configure().
