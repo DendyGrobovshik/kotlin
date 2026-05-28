@@ -43,7 +43,6 @@ import org.jetbrains.kotlin.name.ClassId
 class DirectClassInheritorsCollector(
     override val session: FirSession
 ) : FirDefaultVisitorVoid(), SessionHolder {
-
     private fun collectInheritorsOfCorrespondingExpectClass(expectClassId: ClassId, expansionClass: FirRegularClass) {
         if (LanguageFeature.MultiPlatformProjects.isDisabled()) return
         val correspondingExpectClass = session.getRegularClassSymbolByClassIdFromDependencies(expectClassId)?.fir ?: return
@@ -72,13 +71,13 @@ class DirectClassInheritorsCollector(
     override fun visitRegularClass(regularClass: FirRegularClass) {
         regularClass.declarations.forEach { it.accept(this) }
 
-        val symbol = regularClass.symbol
+        val classId = regularClass.symbol.classId
         for (typeRef in regularClass.superTypeRefs) {
             val parent = extractClassFromTypeRef(typeRef) ?: continue
-            parent.addDirectInheritors(symbol)
+            parent.addDirectInheritors(classId)
         }
 
-        collectInheritorsOfCorrespondingExpectClass(symbol.classId, regularClass)
+        collectInheritorsOfCorrespondingExpectClass(classId, regularClass)
     }
 
     override fun visitTypeAlias(typeAlias: FirTypeAlias) {
@@ -88,12 +87,10 @@ class DirectClassInheritorsCollector(
     }
 
     override fun visitAnonymousObject(anonymousObject: FirAnonymousObject) {
-        anonymousObject.declarations.forEach { it.accept(this) }
-
-        val symbol = anonymousObject.symbol
+        val classId = anonymousObject.symbol.classId
         for (typeRef in anonymousObject.superTypeRefs) {
             val parent = extractClassFromTypeRef(typeRef) ?: continue
-            parent.addDirectInheritors(symbol)
+            parent.addDirectInheritors(classId)
         }
     }
 
