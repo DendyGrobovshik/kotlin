@@ -642,10 +642,6 @@ private class KotlinLikeDumper(val p: Printer, val options: KotlinLikeDumpOption
     override fun visitSimpleFunction(declaration: IrSimpleFunction, data: IrDeclaration?) {
         if (declaration.isExpect && !options.printExpectDeclarations) return
         val keyword = buildString {
-            if (declaration.isStatic) {
-                append(customModifier("static"))
-                append(' ')
-            }
             append("fun ")
         }
         declaration.printSimpleFunction(
