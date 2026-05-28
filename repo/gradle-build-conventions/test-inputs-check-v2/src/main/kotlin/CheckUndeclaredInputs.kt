@@ -6,12 +6,12 @@
 import jdk.jfr.consumer.RecordingFile
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -25,10 +25,10 @@ abstract class CheckUndeclaredInputs : DefaultTask() {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
-    abstract val jfrFilesToCheck: ConfigurableFileCollection
+    abstract val jfrFile: ConfigurableFileCollection
 
-    @get:OutputDirectory
-    abstract val outputDirectory: DirectoryProperty
+    @get:OutputFile
+    abstract val undeclaredInputsFile: RegularFileProperty
 
     @get:Input
     val verificationTasksDisabled: Property<Boolean> = project.objects.property<Boolean>()
@@ -41,38 +41,30 @@ abstract class CheckUndeclaredInputs : DefaultTask() {
             println("Skipping undeclared inputs checking because `kotlin.build.disable.verification.tasks` is true")
             return
         }
+        val jfrFile = jfrFile.singleFile
 
-        val undeclaredInputs = mutableMapOf<String, Set<Path>>()
-
-        for (jfrFile in jfrFilesToCheck.files) {
-            val taskName = jfrFile.nameWithoutExtension
-
-            undeclaredInputs[taskName] = buildSet {
-                RecordingFile(jfrFile.toPath()).use { recording ->
-                    while (recording.hasMoreEvents()) {
-                        val event = recording.readEvent()
-                        if (event.eventType.name !in listOf("jetbrains.UndeclaredInput")) continue
-                        val path = event.getString("path")?.let(Paths::get) ?: continue
-                        add(path)
-                    }
+        val undeclaredInputs = buildSet {
+            RecordingFile(jfrFile.toPath()).use { recording ->
+                while (recording.hasMoreEvents()) {
+                    val event = recording.readEvent()
+                    if (event.eventType.name !in listOf("jetbrains.UndeclaredInput")) continue
+                    val path = event.getString("path")?.let(Paths::get) ?: continue
+                    add(path)
                 }
             }
-            outputDirectory.file("$taskName.txt").get().asFile
-                .writeText(undeclaredInputs[taskName]?.joinToString("\n").orEmpty())
         }
+        undeclaredInputsFile.get().asFile.writeText(undeclaredInputs.joinToString("\n"))
 
-        val allUndeclaredInputs = undeclaredInputs.values.flatten().distinct()
-
-        if (allUndeclaredInputs.isNotEmpty()) {
+        if (undeclaredInputs.isNotEmpty()) {
             error(buildString {
-                appendLine("Undeclared inputs found! (${allUndeclaredInputs.size})")
+                appendLine("Undeclared inputs found! (${undeclaredInputs.size})")
                 appendLine("Open the JFR snapshot in IDEA, then go to: Events | Uncategorized | jetbrains.UndeclaredInput")
-                appendLine("You can find it here -> ${jfrFilesToCheck.first().parentFile.absolutePath}")
-                appendLine("Displaying ${min(allUndeclaredInputs.size, 100)}/${allUndeclaredInputs.size} undeclared inputs:")
-                if (allUndeclaredInputs.size > 100) {
-                    appendLine("See the full list here -> ${outputDirectory.get().asFile.absolutePath}")
+                appendLine("You can find your ${jfrFile.name} here -> ${jfrFile.parentFile.absolutePath}")
+                appendLine("Displaying ${min(undeclaredInputs.size, 100)}/${undeclaredInputs.size} elements:")
+                if (undeclaredInputs.size > 100) {
+                    appendLine("See the full list here -> ${undeclaredInputsFile.get().asFile.absolutePath}")
                 }
-                allUndeclaredInputs.take(100).forEach { appendLine(it) }
+                undeclaredInputs.take(100).forEach { appendLine(it) }
             })
         }
     }
