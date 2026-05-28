@@ -10,8 +10,8 @@ if (!disableInputsCheck) {
         configureTestInstrumenter()
     }
     afterEvaluate {
-        tasks.withType<Test>().names.forEach { testTask ->
-            registerCheckUndeclaredInputsFor(tasks.named<Test>(testTask))
+        tasks.withType<Test>().names.forEach { testTaskName ->
+            registerCheckUndeclaredInputsFor(tasks.named<Test>(testTaskName))
         }
     }
 }
