@@ -2,7 +2,6 @@
 // FIR_IDENTICAL
 // WITH_STDLIB
 // WITH_COROUTINES
-// LANGUAGE: +DirectClassInheritors
 import kotlin.coroutines.*
 
 interface CoroutineTracerShim {

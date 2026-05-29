@@ -59,7 +59,6 @@ class DirectClassInheritorsResolver(override val session: FirSession) : SessionH
             val parent = extractClassFromTypeRef(typeRef) ?: continue
             parent.addDirectInheritors(symbol)
         }
-
         collectInheritorsOfCorrespondingExpectClass(symbol.classId, regularClass)
     }
 
