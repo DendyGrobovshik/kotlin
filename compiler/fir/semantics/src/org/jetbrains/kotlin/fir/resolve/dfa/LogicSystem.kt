@@ -552,7 +552,7 @@ private fun DomainReference.replaceVariable(from: RealVariable, to: RealVariable
         if (to == null) return null
         when (this) {
             is DomainReference.Original -> DomainReference.Original(to)
-            is DomainReference.Expression -> DomainReference.Expression(to, statement)
+            is DomainReference.Assignment -> DomainReference.Assignment(to, statement)
         }
     }
     else -> this

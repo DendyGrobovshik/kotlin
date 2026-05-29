@@ -11,13 +11,9 @@ import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.cfa.FirControlFlowChecker
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors
-import org.jetbrains.kotlin.fir.contracts.description.ConeLocalEffectDeclaration
-import org.jetbrains.kotlin.fir.contracts.effects
 import org.jetbrains.kotlin.fir.declarations.FirAnonymousFunction
-import org.jetbrains.kotlin.fir.declarations.FirContractDescriptionOwner
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirFunction
-import org.jetbrains.kotlin.fir.declarations.utils.contextParametersForFunctionOrContainingProperty
 import org.jetbrains.kotlin.fir.resolve.dfa.Domain
 import org.jetbrains.kotlin.fir.resolve.dfa.DomainReference
 import org.jetbrains.kotlin.fir.resolve.dfa.RealVariable
@@ -72,26 +68,32 @@ object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
                 for ((parameterDomain, parameterVariable) in scopeDomains) {
                     val parameterReferences = node.flow.getReferences(parameterDomain).filterIsInstance<DomainReference.WithStatement>()
                     for (reference in parameterReferences) {
-                        // if (reference !is DomainReference.WithStatement) continue
                         if (node.fir != reference.statement) continue
-                        if (reference is DomainReference.WithVariable && reference.variable in scopeVariables) continue
-                        if (reference is DomainReference.Result && isTopMost && allowTopMostReturn) continue
 
-                        var statementToReport = reference.statement
-                        var referenceToReport: DomainReference.WithStatement = reference
-                        while (referenceToReport is DomainReference.Result) {
-                            statementToReport = referenceToReport.original ?: break
-                            referenceToReport = parameterReferences.find { it.statement == referenceToReport.original } ?: break
+                        val ignore = when (reference) {
+                            is DomainReference.WithVariable -> reference.variable in scopeVariables
+                            is DomainReference.Join -> isTopMost && allowTopMostReturn
+                            is DomainReference.Access -> isTopMost
+                            else -> false
                         }
+                        if (ignore) continue
 
-                        if (referenceToReport is DomainReference.Potential) {
-                            reporter.reportOn(
-                                (referenceToReport.argument ?: statementToReport).source,
-                                FirErrors.LEAKED_LOCAL_THROUGH_CALL,
-                                parameterVariable.symbol
-                            )
-                        } else {
-                            reporter.reportOn(statementToReport.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
+                        when (reference) {
+                            is DomainReference.Call ->
+                                reporter.reportOn(reference.argument.source, FirErrors.LEAKED_LOCAL_THROUGH_CALL, parameterVariable.symbol)
+                            is DomainReference.Access ->
+                                reporter.reportOn(reference.statement.source, FirErrors.LEAKED_LOCAL_THROUGH_CAPTURE, parameterVariable.symbol)
+                            is DomainReference.Join -> {
+                                var statementToReport = reference.statement
+                                var currentStatement: DomainReference.WithStatement = reference
+                                while (currentStatement is DomainReference.Join) {
+                                    statementToReport = currentStatement.original ?: break
+                                    currentStatement = parameterReferences.find { it.statement == currentStatement.original } ?: break
+                                }
+                                reporter.reportOn(statementToReport.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
+                            }
+                            else ->
+                                reporter.reportOn(reference.statement.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
                         }
                     }
                 }

@@ -3833,6 +3833,11 @@ sealed interface KaFirDiagnostic<PSI : PsiElement> : KaDiagnosticWithPsi<PSI> {
         val parameter: KaSymbol
     }
 
+    interface LeakedLocalThroughCapture : KaFirDiagnostic<KtElement> {
+        override val diagnosticClass get() = LeakedLocalThroughCapture::class
+        val parameter: KaSymbol
+    }
+
     interface NullForNonnullType : KaFirDiagnostic<PsiElement> {
         override val diagnosticClass get() = NullForNonnullType::class
         val expectedType: KaType

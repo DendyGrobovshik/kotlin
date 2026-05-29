@@ -2622,6 +2622,13 @@ private fun KaDiagnosticConverterBuilder.addConversions58() {
             token,
         )
     }
+    add(FirErrors.LEAKED_LOCAL_THROUGH_CAPTURE) { firDiagnostic ->
+        LeakedLocalThroughCaptureImpl(
+            firSymbolBuilder.buildSymbol(firDiagnostic.a),
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
     add(FirErrors.FORBIDDEN_IDENTITY_EQUALS) { firDiagnostic ->
         ForbiddenIdentityEqualsImpl(
             firSymbolBuilder.typeBuilder.buildKtType(firDiagnostic.a),

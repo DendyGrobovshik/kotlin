@@ -573,7 +573,7 @@ abstract class FirDataFlowAnalyzer(
             val lastExpression = block.lastExpression
             if (lastExpression != null) {
                 getOrCreateVariable(lastExpression)?.let {
-                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(block, lastExpression))
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Join(block, lastExpression))
                 }
             }
         }
@@ -847,7 +847,7 @@ abstract class FirDataFlowAnalyzer(
         graphBuilder.exitJump(jump).mergeIncomingFlow { _, flow ->
             if (jump is FirReturnExpression) {
                 getOrCreateVariable(jump.result)?.let {
-                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(jump, null))
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Join(jump, null))
                 }
             }
 
@@ -909,7 +909,7 @@ abstract class FirDataFlowAnalyzer(
         whenExitNode.mergeIncomingFlow { _, flow ->
             for (branch in whenExpression.branches) {
                 getOrCreateVariable(branch.result)?.let {
-                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(whenExpression, branch.result))
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Join(whenExpression, branch.result))
                 }
             }
         }
@@ -1054,7 +1054,7 @@ abstract class FirDataFlowAnalyzer(
         graphBuilder.exitTryExpression(callCompleted).mergeIncomingFlow { _, flow ->
             for (branch in listOfNotNull(tryExpression.tryBlock, tryExpression.finallyBlock) + tryExpression.catches.map { it.block }) {
                 getOrCreateVariable(branch)?.let {
-                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(tryExpression, branch))
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Join(tryExpression, branch))
                 }
             }
         }
@@ -1066,6 +1066,9 @@ abstract class FirDataFlowAnalyzer(
         graphBuilder.exitQualifiedAccessExpression(qualifiedAccessExpression).mergeIncomingFlow { _, flow ->
             processConditionalContract(flow, qualifiedAccessExpression, callArgsExit = null)
             processBackingFieldAccess(flow, qualifiedAccessExpression)
+            getOrCreateVariable(qualifiedAccessExpression)?.let {
+                logicSystem.addReferenceToDomain(flow, it, DomainReference.Access(qualifiedAccessExpression))
+            }
         }
     }
 
@@ -1173,7 +1176,7 @@ abstract class FirDataFlowAnalyzer(
                 for ((argument, parameter) in functionCall.resolvedArgumentMapping.orEmpty()) {
                     if (parameter.hasLocalContract == true) continue
                     getOrCreateVariable(argument)?.let {
-                        logicSystem.addReferenceToDomain(flow, it, DomainReference.Potential(functionCall, argument))
+                        logicSystem.addReferenceToDomain(flow, it, DomainReference.Call(functionCall, argument))
                     }
                 }
             }
@@ -1445,7 +1448,7 @@ abstract class FirDataFlowAnalyzer(
                 flow.getOrCreateVariable(assignment.lValue)?.let { variable ->
                     logicSystem.removePreviousDomainReferences(flow, variable)
                     flow.getOrCreateVariable(assignment.rValue)?.let { value ->
-                        logicSystem.addReferenceToDomain(flow, value, DomainReference.Expression(variable, assignment))
+                        logicSystem.addReferenceToDomain(flow, value, DomainReference.Assignment(variable, assignment))
                     }
                 }
             }
@@ -1518,7 +1521,7 @@ abstract class FirDataFlowAnalyzer(
 
         logicSystem.removePreviousDomainReferences(flow, propertyVariable)
         flow.getOrCreateVariable(initializer)?.let {
-            logicSystem.addReferenceToDomain(flow, it, DomainReference.Expression(propertyVariable, property))
+            logicSystem.addReferenceToDomain(flow, it, DomainReference.Assignment(propertyVariable, property))
         }
     }
 
@@ -1727,7 +1730,7 @@ abstract class FirDataFlowAnalyzer(
 
             for (branch in listOfNotNull(elvisExpression.lhs, elvisExpression.rhs)) {
                 getOrCreateVariable(branch)?.let {
-                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Result(elvisExpression, branch))
+                    logicSystem.addReferenceToDomain(flow, it, DomainReference.Join(elvisExpression, branch))
                 }
             }
         }

@@ -16,13 +16,13 @@ fun fooInPlace(block: (Int) -> Unit) {
 fun bar(n: Int) {
     contract { local(n) }
     foo {
-        <!LEAKED_LOCAL("n: Int")!>val x = n<!>
+        <!LEAKED_LOCAL("n: Int")!>val x = <!LEAKED_LOCAL_THROUGH_CAPTURE("n: Int")!>n<!><!>
     }
     fooInPlace {
         val x = n
     }
     foo {
-        <!LEAKED_LOCAL("n: Int")!>n<!>
+        <!LEAKED_LOCAL("n: Int"), LEAKED_LOCAL_THROUGH_CAPTURE("n: Int")!>n<!>
     }
     fooInPlace { n }
 }

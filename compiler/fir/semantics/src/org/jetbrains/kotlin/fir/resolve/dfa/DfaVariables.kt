@@ -27,8 +27,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.types.SmartcastStability
 import java.util.*
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 sealed class DataFlowVariable {
     abstract val originalType: ConeKotlinType
@@ -207,8 +205,28 @@ sealed interface DomainReference {
     operator fun contains(variable: DataFlowVariable): Boolean =
         this is WithVariable && this.variable == variable
 
+    /**
+     * The original domain of a variable, like its original argument
+     */
     data class Original(override val variable: RealVariable) : DomainReference.WithVariable
-    data class Expression(override val variable: DataFlowVariable, override val statement: FirStatement) : DomainReference.WithVariable, DomainReference.WithStatement
-    data class Result(override val statement: FirExpression, val original: FirExpression?) : DomainReference.WithStatement
-    data class Potential(override val statement: FirStatement, val argument: FirExpression?) : DomainReference.WithStatement
+
+    /**
+     * Reference made through a particular statement or expression
+     */
+    data class Assignment(override val variable: DataFlowVariable, override val statement: FirStatement) : DomainReference.WithVariable, DomainReference.WithStatement
+
+    /**
+     * The result of an expression with multiple branches
+     */
+    data class Join(override val statement: FirExpression, val original: FirExpression?) : DomainReference.WithStatement
+
+    /**
+     * Function call that may potentially leak locals
+     */
+    data class Call(override val statement: FirStatement, val argument: FirExpression) : DomainReference.WithStatement
+
+    /**
+     * Record accesses, they leak local if they are captured
+     */
+    data class Access(override val statement: FirStatement) : DomainReference.WithStatement
 }

@@ -910,6 +910,7 @@ object FirErrors : KtDiagnosticsContainer() {
     val RETURN_VALUE_NOT_USED_COERCION: KtDiagnosticFactory1<Name?> = KtDiagnosticFactory1("RETURN_VALUE_NOT_USED_COERCION", WARNING, SourceElementPositioningStrategies.REFERENCE_BY_QUALIFIED, KtElement::class, getRendererFactory())
     val LEAKED_LOCAL: KtDiagnosticFactory1<FirBasedSymbol<*>> = KtDiagnosticFactory1("LEAKED_LOCAL", WARNING, SourceElementPositioningStrategies.DEFAULT, KtElement::class, getRendererFactory())
     val LEAKED_LOCAL_THROUGH_CALL: KtDiagnosticFactory1<FirBasedSymbol<*>> = KtDiagnosticFactory1("LEAKED_LOCAL_THROUGH_CALL", WARNING, SourceElementPositioningStrategies.DEFAULT, KtElement::class, getRendererFactory())
+    val LEAKED_LOCAL_THROUGH_CAPTURE: KtDiagnosticFactory1<FirBasedSymbol<*>> = KtDiagnosticFactory1("LEAKED_LOCAL_THROUGH_CAPTURE", WARNING, SourceElementPositioningStrategies.DEFAULT, KtElement::class, getRendererFactory())
 
     // Nullability
     val NULL_FOR_NONNULL_TYPE: KtDiagnosticFactory1<ConeKotlinType> = KtDiagnosticFactory1("NULL_FOR_NONNULL_TYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class, getRendererFactory())
