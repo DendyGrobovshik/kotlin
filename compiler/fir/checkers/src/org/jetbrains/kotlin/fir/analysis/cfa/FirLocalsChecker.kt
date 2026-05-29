@@ -19,6 +19,7 @@ import org.jetbrains.kotlin.fir.resolve.dfa.DomainReference
 import org.jetbrains.kotlin.fir.resolve.dfa.RealVariable
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.ControlFlowGraph
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.VariableDeclarationExitNode
+import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
 
 object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
@@ -58,6 +59,7 @@ object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
         val localVariables = (topScope.localVariables + localParameters.values).toMutableSet()
         val updatedScopes = listOf(Scope(localDomains, localVariables)) + scopes.drop(1)
 
+        val leakedVariables = mutableSetOf<FirBasedSymbol<*>>()
         for (node in graph.nodes) {
             if (node is VariableDeclarationExitNode) {
                 localVariables.add(node.fir.symbol.realVariable())
@@ -66,39 +68,47 @@ object FirLocalsChecker : FirControlFlowChecker(MppCheckerKind.Common) {
             var isTopMost = true
             for ((scopeDomains, scopeVariables) in updatedScopes) {
                 for ((parameterDomain, parameterVariable) in scopeDomains) {
-                    val parameterReferences = node.flow.getReferences(parameterDomain).filterIsInstance<DomainReference.WithStatement>()
-                    for (reference in parameterReferences) {
+                    val parameterReferences = node.flow.getReferences(parameterDomain)
+
+                    if (!isTopMost && parameterReferences.any { it is DomainReference.Access }) {
+                        leakedVariables += parameterVariable.symbol
+                    }
+
+                    val referencesWithStatement = parameterReferences.filterIsInstance<DomainReference.WithStatement>()
+                    for (reference in referencesWithStatement) {
                         if (node.fir != reference.statement) continue
 
                         val ignore = when (reference) {
                             is DomainReference.WithVariable -> reference.variable in scopeVariables
                             is DomainReference.Join -> isTopMost && allowTopMostReturn
-                            is DomainReference.Access -> isTopMost
                             else -> false
                         }
                         if (ignore) continue
 
-                        when (reference) {
-                            is DomainReference.Call ->
-                                reporter.reportOn(reference.argument.source, FirErrors.LEAKED_LOCAL_THROUGH_CALL, parameterVariable.symbol)
-                            is DomainReference.Access ->
-                                reporter.reportOn(reference.statement.source, FirErrors.LEAKED_LOCAL_THROUGH_CAPTURE, parameterVariable.symbol)
-                            is DomainReference.Join -> {
-                                var statementToReport = reference.statement
-                                var currentStatement: DomainReference.WithStatement = reference
-                                while (currentStatement is DomainReference.Join) {
-                                    statementToReport = currentStatement.original ?: break
-                                    currentStatement = parameterReferences.find { it.statement == currentStatement.original } ?: break
-                                }
-                                reporter.reportOn(statementToReport.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
-                            }
-                            else ->
-                                reporter.reportOn(reference.statement.source, FirErrors.LEAKED_LOCAL, parameterVariable.symbol)
+                        // dig to find the smallest statement to report
+                        var statementToReport = reference.statement
+                        var referenceToReport: DomainReference.WithStatement = reference
+                        while (referenceToReport is DomainReference.Join) {
+                            statementToReport = referenceToReport.original ?: break
+                            referenceToReport = referencesWithStatement.find { it.statement == referenceToReport.original } ?: break
                         }
+                        if (referenceToReport is DomainReference.Call) {
+                            statementToReport = referenceToReport.argument
+                        }
+
+                        reporter.reportOn(
+                            statementToReport.source,
+                            if (referenceToReport is DomainReference.Call) FirErrors.LEAKED_LOCAL_THROUGH_CALL else FirErrors.LEAKED_LOCAL,
+                            parameterVariable.symbol
+                        )
                     }
                 }
                 isTopMost = false
             }
+        }
+
+        if (leakedVariables.isNotEmpty() && function != null) {
+            reporter.reportOn(function.source, FirErrors.LEAKED_LOCAL_THROUGH_CAPTURE, leakedVariables.toList())
         }
 
         for (subGraph in graph.subGraphs) {

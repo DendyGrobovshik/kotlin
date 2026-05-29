@@ -4593,7 +4593,7 @@ internal class LeakedLocalThroughCallImpl(
 ) : KaAbstractFirDiagnostic<KtElement>(firDiagnostic, token), KaFirDiagnostic.LeakedLocalThroughCall
 
 internal class LeakedLocalThroughCaptureImpl(
-    override val parameter: KaSymbol,
+    override val parameters: List<KaSymbol>,
     firDiagnostic: KtPsiDiagnostic,
     token: KaLifetimeToken,
 ) : KaAbstractFirDiagnostic<KtElement>(firDiagnostic, token), KaFirDiagnostic.LeakedLocalThroughCapture

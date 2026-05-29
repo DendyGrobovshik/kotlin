@@ -3319,7 +3319,7 @@ object FirErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
         map.put(SENSELESS_NULL_IN_WHEN, "Expression under 'when' is never equal to null.")
         map.put(LEAKED_LOCAL, "Local ''{0}'' leaks.", SYMBOL)
         map.put(LEAKED_LOCAL_THROUGH_CALL, "Local ''{0}'' may leak through this call.", SYMBOL)
-        map.put(LEAKED_LOCAL_THROUGH_CAPTURE, "Local ''{0}'' leaked through lambda capture.", SYMBOL)
+        map.put(LEAKED_LOCAL_THROUGH_CAPTURE, "Locals leaked through lambda capture:{0}.", SYMBOLS_ON_NEXT_LINES)
 
         // Nullability
         map.put(

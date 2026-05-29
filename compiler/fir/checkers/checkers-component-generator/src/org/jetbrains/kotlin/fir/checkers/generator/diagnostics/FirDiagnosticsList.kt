@@ -1888,7 +1888,7 @@ object DIAGNOSTICS_LIST : DiagnosticList("FirErrors") {
             parameter<Symbol>("parameter")
         }
         val LEAKED_LOCAL_THROUGH_CAPTURE by warning<KtElement> {
-            parameter<Symbol>("parameter")
+            parameter<List<Symbol>>("parameters")
         }
     }
 

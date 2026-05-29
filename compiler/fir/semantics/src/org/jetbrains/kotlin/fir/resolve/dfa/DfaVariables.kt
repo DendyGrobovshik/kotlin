@@ -228,5 +228,5 @@ sealed interface DomainReference {
     /**
      * Record accesses, they leak local if they are captured
      */
-    data class Access(override val statement: FirStatement) : DomainReference.WithStatement
+    data class Access(val access: FirStatement) : DomainReference
 }
