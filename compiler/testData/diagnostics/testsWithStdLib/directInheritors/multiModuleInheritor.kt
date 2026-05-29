@@ -1,6 +1,5 @@
 // RUN_PIPELINE_TILL: BACKEND
 // RENDER_DIAGNOSTIC_ARGUMENTS
-// LANGUAGE: +DirectClassInheritors
 
 // MODULE: lib
 // FILE: Lib.kt

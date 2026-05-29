@@ -5,12 +5,10 @@
 
 package org.jetbrains.kotlin.fir.resolve.transformers.body.resolve
 
-import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.fir.FirElement
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirFile
 import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
-import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.resolve.ResolutionMode
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.transformers.AdapterForResolveProcessor
@@ -18,7 +16,6 @@ import org.jetbrains.kotlin.fir.resolve.transformers.DirectClassInheritorsCollec
 import org.jetbrains.kotlin.fir.resolve.transformers.FirTransformerBasedResolveProcessor
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.withFileAnalysisExceptionWrapping
-import org.jetbrains.kotlin.utils.addToStdlib.runIf
 
 @OptIn(AdapterForResolveProcessor::class)
 class FirBodyResolveProcessor(session: FirSession, scopeSession: ScopeSession) : FirTransformerBasedResolveProcessor(
@@ -36,10 +33,7 @@ class FirBodyResolveTransformerAdapter(session: FirSession, scopeSession: ScopeS
         scopeSession = scopeSession
     )
 
-    private val directClassInheritorsCollector =
-        runIf(session.languageVersionSettings.supportsFeature(LanguageFeature.DirectClassInheritors)) {
-            DirectClassInheritorsCollector(session)
-        }
+    private val directClassInheritorsCollector = DirectClassInheritorsCollector(session)
 
     override fun <E : FirElement> transformElement(element: E, data: Any?): E {
         return element
@@ -48,7 +42,7 @@ class FirBodyResolveTransformerAdapter(session: FirSession, scopeSession: ScopeS
     override fun transformFile(file: FirFile, data: Any?): FirFile {
         return withFileAnalysisExceptionWrapping(file) {
             file.transform<FirFile, ResolutionMode.ContextIndependent>(transformer, ResolutionMode.ContextIndependent).apply {
-                directClassInheritorsCollector?.let(::accept)
+                accept(directClassInheritorsCollector)
             }
         }
     }

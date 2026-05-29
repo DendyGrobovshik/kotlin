@@ -77,7 +77,6 @@ class DirectClassInheritorsCollector(
             val parent = extractClassFromTypeRef(typeRef) ?: continue
             parent.addDirectInheritors(symbol)
         }
-
         collectInheritorsOfCorrespondingExpectClass(symbol.classId, regularClass)
     }
 
