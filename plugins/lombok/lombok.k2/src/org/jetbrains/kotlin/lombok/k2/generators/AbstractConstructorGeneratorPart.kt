@@ -12,12 +12,15 @@ import org.jetbrains.kotlin.fakeElement
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.containingClassForStaticMemberAttr
 import org.jetbrains.kotlin.fir.declarations.DirectDeclarationsAccess
+import org.jetbrains.kotlin.fir.declarations.FirConstructor
 import org.jetbrains.kotlin.fir.declarations.FirFunction
+import org.jetbrains.kotlin.fir.declarations.FirNamedFunction
 import org.jetbrains.kotlin.fir.declarations.builder.buildConstructedClassTypeParameterRef
 import org.jetbrains.kotlin.fir.declarations.builder.buildTypeParameterCopy
 import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.java.declarations.*
 import org.jetbrains.kotlin.fir.resolve.defaultType
+import org.jetbrains.kotlin.fir.scopes.impl.FirClassDeclaredMemberScope
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.toEffectiveVisibility
@@ -46,15 +49,40 @@ abstract class AbstractConstructorGeneratorPart<T : ConeLombokAnnotations.Constr
         return classSymbol.declarationSymbols.any { it is FirConstructorSymbol && it.source?.kind is KtRealSourceElementKind }
     }
 
+    /**
+     * Checks clashing with already generated constructors (regular or static functions).
+     * The generated constructors don't have vararg parameters, so don't check them.
+     */
+    private inline fun <reified T : FirFunction> MutableList<FirFunction>.checkClashing(valueParametersCount: Int): Boolean {
+        return any { it is T && it.valueParameters.size == valueParametersCount }
+    }
+
     @OptIn(SymbolInternals::class)
-    fun createConstructor(classSymbol: FirClassSymbol<*>): FirFunction? {
-        val constructorInfo = getConstructorInfo(classSymbol) ?: return null
-        val visibility = constructorInfo.visibility ?: return null
+    fun MutableList<FirFunction>.addIfNonClashing(classSymbol: FirClassSymbol<*>, declaredScope: FirClassDeclaredMemberScope?) {
+        val constructorInfo = getConstructorInfo(classSymbol) ?: return
+        val visibility = constructorInfo.visibility ?: return
+        val fields = getFieldsForParameters(classSymbol)
+        val valuesParameterCount = fields.size
         val staticName = constructorInfo.staticName?.let { Name.identifier(it) }
+
+        // Checks clashing with explicit constructors, vararg doesn't cause a conflict
+        fun FirFunctionSymbol<*>.checkParametersClashing(): Boolean {
+            return valueParameterSymbols.let { parameters ->
+                parameters.none { it.isVararg } && parameters.size == valuesParameterCount
+            }
+        }
 
         val substitutor: JavaTypeSubstitutor
         val constructorSymbol: FirFunctionSymbol<*>
         val builder = if (staticName == null) {
+            if (checkClashing<FirConstructor>(valuesParameterCount)) return
+
+            var hasConflict = false
+            declaredScope?.processDeclaredConstructors { constructor ->
+                hasConflict = hasConflict || constructor.checkParametersClashing()
+            }
+            if (hasConflict) return
+
             FirJavaConstructorBuilder().apply {
                 containingClassSymbol = classSymbol
                 symbol = FirConstructorSymbol(classSymbol.classId.callableIdForConstructor()).also { constructorSymbol = it }
@@ -69,6 +97,14 @@ abstract class AbstractConstructorGeneratorPart<T : ConeLombokAnnotations.Constr
                 isFromSource = true
             }
         } else {
+            if (checkClashing<FirNamedFunction>(valuesParameterCount)) return
+
+            var hasConflict = false
+            declaredScope?.processFunctionsByName(staticName) { function ->
+                hasConflict = hasConflict || function.checkParametersClashing()
+            }
+            if (hasConflict) return
+
             FirJavaMethodBuilder().apply {
                 containingClassSymbol = classSymbol
                 name = staticName
@@ -122,7 +158,6 @@ abstract class AbstractConstructorGeneratorPart<T : ConeLombokAnnotations.Constr
                 }
             }
 
-            val fields = getFieldsForParameters(classSymbol)
             fields.mapTo(valueParameters) { field ->
                 buildJavaValueParameter {
                     moduleData = field.moduleData
@@ -142,9 +177,9 @@ abstract class AbstractConstructorGeneratorPart<T : ConeLombokAnnotations.Constr
             }
         }
 
-        return builder.build().apply {
+        add(builder.build().apply {
             containingClassForStaticMemberAttr = classSymbol.toLookupTag()
-        }
+        })
     }
 }
 
