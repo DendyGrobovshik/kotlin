@@ -68,6 +68,7 @@ class AnalysisApiBasedDtsGeneratorFacade(
                 ),
                 compileLongAsBigInt = JsEnvironmentConfigurationDirectives.ES6_MODE in module.directives,
                 implementableInterfaces = configuration.languageVersionSettings.supportsFeature(LanguageFeature.JsExportInterfacesInImplementableWay),
+                exportableSuspendLambdas = configuration.languageVersionSettings.supportsFeature(LanguageFeature.JsAllowExportingSuspendLambdas),
             )
             val runtimeKlibs = JsEnvironmentConfigurator.getRuntimePathsForModule(module, testServices)
             val regularDependencies = module.transitiveRegularDependencies(reverseOrder = true)

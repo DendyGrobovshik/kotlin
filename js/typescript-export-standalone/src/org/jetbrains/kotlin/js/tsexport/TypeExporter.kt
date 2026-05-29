@@ -21,9 +21,11 @@ import org.jetbrains.kotlin.ir.backend.js.tsexport.ExportedType
 import org.jetbrains.kotlin.ir.backend.js.tsexport.ExportedType.*
 import org.jetbrains.kotlin.ir.backend.js.tsexport.ExportedType.Array
 import org.jetbrains.kotlin.ir.backend.js.tsexport.ExportedType.Function
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.types.Variance
+import org.jetbrains.kotlin.utils.addToStdlib.butIf
 
 internal class TypeExporter(private val config: TypeScriptExportConfig, private val scope: TypeParameterScope) {
     /**
@@ -97,7 +99,7 @@ internal class TypeExporter(private val config: TypeScriptExportConfig, private 
         if (type.isClassType(StandardClassIds.Throwable))
             return Primitive.Throwable
         if (type is KaFunctionType && !type.isKFunctionType && !type.isKSuspendFunctionType) {
-            return if (type.isSuspend) {
+            return if (type.isSuspend && !config.exportableSuspendLambdas) {
                 ErrorType("Suspend functions are not supported")
             } else {
                 Function(
@@ -123,7 +125,9 @@ internal class TypeExporter(private val config: TypeScriptExportConfig, private 
                             )
                         }
                     },
-                    returnType = exportType(type.returnType),
+                    returnType = exportType(type.returnType).butIf(type.isSuspend) {
+                        ClassType(name = FqName("Promise"), arguments = listOf(it))
+                    },
                 )
             }
         }
