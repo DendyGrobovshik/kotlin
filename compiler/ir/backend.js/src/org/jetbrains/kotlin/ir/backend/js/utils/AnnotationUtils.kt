@@ -80,14 +80,18 @@ fun IrAnnotationContainer.couldBeConvertedToExplicitExport(): Boolean? =
     getAnnotation(JsAnnotations.jsImplicitExportFqn)?.getSingleConstBooleanArgument()
 
 fun IrAnnotationContainer.isJsExportDefault(): Boolean =
-    // Using `IrAnnotation.isAnnotationWithEqualFqName(FqName)` instead of a usual `hasAnnotation` call, because `JsExport.Default` is a nested class,
-    // whose FQ name cannot be computed by traversing IR tree parents because it lacks `JsExport` for some reason.
-    annotations.any { it.isAnnotationWithEqualFqName(JsAnnotations.jsExportDefaultFqn) }
+    annotations.any {
+        // Using `IrSymbol.hasEqualFqName(FqName)` instead of a usual `hasAnnotation` call, because `JsExport.Default` is a nested class,
+        // whose FQ name cannot be computed by traversing IR tree parents because it lacks `JsExport` for some reason.
+        it.classSymbol.hasEqualFqName(JsAnnotations.jsExportDefaultFqn)
+    }
 
 fun IrAnnotationContainer.isJsExportIgnore(): Boolean =
-    // Using `IrAnnotation.isAnnotationWithEqualFqName(FqName)` instead of a usual `hasAnnotation` call, because `JsExport.Ignore` is a nested class,
-    // whose FQ name cannot be computed by traversing IR tree parents because it lacks `JsExport` for some reason.
-    annotations.any { it.isAnnotationWithEqualFqName(JsAnnotations.jsExportIgnoreFqn) }
+    annotations.any {
+        // Using `IrSymbol.hasEqualFqName(FqName)` instead of a usual `hasAnnotation` call, because `JsExport.Ignore` is a nested class,
+        // whose FQ name cannot be computed by traversing IR tree parents because it lacks `JsExport` for some reason.
+        it.classSymbol.hasEqualFqName(JsAnnotations.jsExportIgnoreFqn)
+    }
 
 fun IrAnnotationContainer.isJsNativeGetter(): Boolean = hasAnnotation(JsAnnotations.jsNativeGetter)
 
