@@ -21,20 +21,21 @@ public data class SwiftModuleConfig(
     val experimentalFeatures: Map<String, String> = emptyMap(),
     val shouldBeFullyExported: Boolean,
     /**
-     * When non-null, the module is a user cinterop klib whose types originate from an ObjC module with the
-     * given Swift-level name. Swift Export does not generate a separate Swift module for it; references emit
-     * `import <reexportAsObjCModule>` and qualify types as `<reexportAsObjCModule>.Type`.
+     * When true, the module is a user cinterop klib whose types originate from a pre-existing ObjC module.
+     * Swift Export does not generate a separate Swift module for it; references emit `import <name>`
+     * and qualify types as `<name>.Type`, where `<name>` is the module's [InputModule.name]. The caller
+     * must set [InputModule.name] to the desired Objective-C / Swift module name.
      * Must be combined with `shouldBeFullyExported = false`.
      */
-    val reexportAsObjCModule: String? = null,
+    val moduleProvidedThroughCinterop: Boolean = false,
 ) {
 
     val targetPackageFqName: FqName? = rootPackage?.rootPackageToFqn()
     val unsupportedDeclarationReporter: UnsupportedDeclarationReporter = unsupportedDeclarationReporterKind.toReporter()
 
     init {
-        require(reexportAsObjCModule == null || !shouldBeFullyExported) {
-            "reexportAsObjCModule is incompatible with shouldBeFullyExported = true"
+        require(!moduleProvidedThroughCinterop || !shouldBeFullyExported) {
+            "moduleProvidedThroughCinterop is incompatible with shouldBeFullyExported = true"
         }
     }
 
@@ -42,6 +43,5 @@ public data class SwiftModuleConfig(
         public const val ROOT_PACKAGE: String = "packageRoot"
         public const val DEFAULT_BRIDGE_MODULE_NAME: String = "KotlinBridges"
         public const val UNSUPPORTED_DECLARATIONS_REPORTER_KIND: String = "unsupportedDeclarationsReporterKind"
-        public const val REEXPORT_AS_OBJC_MODULE: String = "reexportAsObjCModule"
     }
 }

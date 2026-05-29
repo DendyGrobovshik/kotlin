@@ -154,18 +154,11 @@ private fun translateModules(
     inputModules: Set<InputModule>,
     config: SwiftExportConfig,
 ): List<TranslationResult> {
-    val (reexportedInputs, ordinaryInputs) = inputModules.partition { it.config.reexportAsObjCModule != null }
-    // Override each reexported module's name with the user-specified ObjC module name so it propagates through
-    // KaLibraryModule.libraryName and ends up as SirCinteropModule.name / the `import <name>` in Swift output.
-    val cinteropReexportLibs = reexportedInputs.map { original ->
-        InputModule(
-            name = original.config.reexportAsObjCModule!!,
-            path = original.path,
-            config = original.config,
-        )
-    }.toSet()
+    val [cinteropReexportLibs, ordinaryInputs] = inputModules
+        .partition { it.config.moduleProvidedThroughCinterop }
+        .let { it.first.toSet() to it.second.toSet() }
 
-    val allModules = ordinaryInputs.toSet() + config.stdlibInputModule
+    val allModules = ordinaryInputs + config.stdlibInputModule
     val kaModules = createKaModulesForStandaloneAnalysis(
         inputs = allModules,
         targetPlatform = config.targetPlatform,
