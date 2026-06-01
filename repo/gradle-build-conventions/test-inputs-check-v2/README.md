@@ -78,7 +78,8 @@ Some examples:
    almost never change) or catastrophic (every OS update busts every cache). The correct model is "this test requires tool X to be present",
    not "this test's output depends on the bytes of `/bin/tar`".
 5. Konan — mostly we read `kotlin-native/dist`. We only read `~/.konan` in case the bootstrap version of K/N is required (for that we use
-   `NativeCompilerDownloader` and pass the path via system property). In both cases, the Konan dist is declared as a Gradle input.
+   `NativeCompilerDownloader` and pass the path via system property). In both cases, the Konan dist is declared as a Gradle input (in the
+   second case it's not strictly necessary because `konanVersion == kotlinBootstrapVersion`, which is already tracked as an input).
 6. Xcode — we track the Xcode toolchain version via `XcodeValueSource`; no need to add particular binaries like `clang`, `ld`, or `libtool`
    as inputs
 7. `/dev/random`, `/dev/urandom` — these cannot be inputs in any meaningful sense.
