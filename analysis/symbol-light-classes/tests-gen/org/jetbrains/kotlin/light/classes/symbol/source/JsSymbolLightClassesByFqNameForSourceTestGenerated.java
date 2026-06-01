@@ -651,6 +651,12 @@ public class JsSymbolLightClassesByFqNameForSourceTestGenerated extends Abstract
     }
 
     @Test
+    @TestMetadata("ActualConstructorAllDefaultsNoArgOverload.kt")
+    public void testActualConstructorAllDefaultsNoArgOverload() {
+      run("ActualConstructorAllDefaultsNoArgOverload.kt");
+    }
+
+    @Test
     @TestMetadata("ActualTypeAlias.kt")
     public void testActualTypeAlias() {
       run("ActualTypeAlias.kt");
@@ -755,6 +761,18 @@ public class JsSymbolLightClassesByFqNameForSourceTestGenerated extends Abstract
     @TestMetadata("FunctionWithoutName.kt")
     public void testFunctionWithoutName() {
       run("FunctionWithoutName.kt");
+    }
+
+    @Test
+    @TestMetadata("JvmOverloadsActualConstructorWithInheritedDefaults.kt")
+    public void testJvmOverloadsActualConstructorWithInheritedDefaults() {
+      run("JvmOverloadsActualConstructorWithInheritedDefaults.kt");
+    }
+
+    @Test
+    @TestMetadata("JvmOverloadsActualWithInheritedDefaults.kt")
+    public void testJvmOverloadsActualWithInheritedDefaults() {
+      run("JvmOverloadsActualWithInheritedDefaults.kt");
     }
 
     @Test
