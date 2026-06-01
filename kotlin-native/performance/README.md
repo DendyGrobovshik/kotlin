@@ -62,3 +62,6 @@ benchmarks using `kotlinx-benchmark`. Additionally:
 - when using `Random`, don't forget to initialize it with a fixed seed; otherwise the benchmark might be flaky
 - by default, annotate all benchmarks with `@Measurement(time = 100, timeUnit = BenchmarkTimeUnit.MILLISECONDS)`. For longer benchmarks,
   use 1 second.
+- even though `kotlinx-benchmark` allows the benchmarks to return a result instead of using a `Blackhole`, don't use it. In Native
+  returning an `Int` from a benchmark will force boxing, which will skew the results for some microbenchmarks. `Blackhole` has the
+  appropriate overloads to avoid boxing.
