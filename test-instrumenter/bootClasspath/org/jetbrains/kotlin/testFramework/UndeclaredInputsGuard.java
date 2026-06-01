@@ -9,16 +9,17 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings({"CallToPrintStackTrace", "UseOfSystemOutOrSystemErr"})
 public class UndeclaredInputsGuard {
 
     private static Set<String> declaredInputs;
-    private static final Set<String> undeclaredInputs = new HashSet<>();
+    private static final Set<String> undeclaredInputs = new ConcurrentSkipListSet<>();
     private static final String rootDir = System.getProperty("test.instrumenter.root.dir");
     private static final String buildDir = System.getProperty("test.instrumenter.build.dir");
 
@@ -27,7 +28,7 @@ public class UndeclaredInputsGuard {
             Path declaredInputsFile = Paths.get(System.getProperty("test.instrumenter.declared.inputs.file"));
             InputStream inputStream = Files.newInputStream(declaredInputsFile);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            declaredInputs = reader.lines().collect(toCollection(HashSet::new));
+            declaredInputs = Collections.unmodifiableSet(reader.lines().collect(toSet()));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +62,7 @@ public class UndeclaredInputsGuard {
     }
 
     /**
-     * Filter out files outside the root project directory (like Gradle caches or Konan files)
+     * Filter out files outside the root project directory (like Gradle caches)
      */
     private static boolean insideRootProjectDir(File file) {
         return file.getPath().startsWith(rootDir);
@@ -89,5 +90,9 @@ public class UndeclaredInputsGuard {
             }
         }
         return file;
+    }
+
+    public static Set<String> getUndeclaredInputs() {
+        return Collections.unmodifiableSet(undeclaredInputs);
     }
 }

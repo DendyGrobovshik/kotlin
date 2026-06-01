@@ -21,6 +21,12 @@ sourceSets {
         projectDefault()
         compileClasspath += sourceSets["bootClasspath"].output
     }
+
+    test {
+        projectDefault()
+        compileClasspath += sourceSets["bootClasspath"].output
+        runtimeClasspath += sourceSets["bootClasspath"].output
+    }
 }
 
 val agentJar by task<ShadowJar> {
@@ -49,5 +55,9 @@ configurations {
             artifact(bootClasspathJar)
         }
     }
+}
+
+testing.suites.withType<JvmTestSuite>().configureEach {
+    useJUnitJupiter()
 }
 
