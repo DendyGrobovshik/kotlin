@@ -173,7 +173,7 @@ flowchart TD
     Test -->|"jvmArgumentProviders.add()"| TestInstrumentationArgumentProvider
     Test -->|"doFirst { writeText() }"| declaredInputsTxt@{shape: cyl, label: "declared-inputs.txt"}
     declaredInputsTxt -->|"-Dtest.instrumenter..."| TestInstrumentationAgent
-    Test --> |"finalizedBy()"| CheckUndeclaredInputsTask
+    Test --> |"finalizedBy()"| CheckUndeclaredInputs
     TestInstrumentationArgumentProvider -->|"-javaagent"| agentJar
     TestInstrumentationArgumentProvider -->|"-Xbootclasspath/a"| bootClasspathJar
     subgraph bootClasspathJar
@@ -186,8 +186,8 @@ flowchart TD
         FileExistsAdvice --> UndeclaredInputsGuard
     end
     UndeclaredInputEvent -->|"JFR magic :)"| testJfr@{shape: cyl, label: "test.jfr"}
-    testJfr --> CheckUndeclaredInputsTask
-    CheckUndeclaredInputsTask --> undeclaredInputsTxt@{shape: cyl, label: "undeclared-inputs.txt"}
+    testJfr --> CheckUndeclaredInputs
+    CheckUndeclaredInputs --> undeclaredInputsTxt@{shape: cyl, label: "undeclared-inputs.txt"}
 ```
 
 ### How is the Java Agent registered?
@@ -220,7 +220,7 @@ It provides the following JVM options:
 
 ### How is the user informed about verification results?
 
-Every `Test` task is finalized by its `CheckUndeclaredInputsTask` counterpart.
+Every `Test` task is finalized by its `CheckUndeclaredInputs` counterpart.
 
 For example:
 
@@ -228,8 +228,8 @@ For example:
 - `functionalTest` -> `checkUndeclaredInputsForFunctionalTest`
 - etc.
 
-The `CheckUndeclaredInputsTask` takes `test.jfr` snapshot, reads its contents via built-in Java API, and throws an error if there is at
+The `CheckUndeclaredInputs` task takes `test.jfr` snapshot, reads its contents via built-in Java API, and throws an error if there is at
 least one undeclared input.
 
-In any case, it produces the `undeclared-inputs.txt` file (can be empty), so the `CheckUndeclaredInputsTask` can be cached.
+In any case, it produces the `undeclared-inputs-for-{taskName}.txt` file (can be empty), so the `CheckUndeclaredInputs` task  can be cached.
 

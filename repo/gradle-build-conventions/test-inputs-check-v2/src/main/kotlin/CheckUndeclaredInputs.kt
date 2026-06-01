@@ -38,7 +38,7 @@ abstract class CheckUndeclaredInputs : DefaultTask() {
     @TaskAction
     fun execute() {
         if (verificationTasksDisabled.get()) {
-            println("Skipping undeclared inputs checking because `kotlin.build.disable.verification.tasks` is true")
+            logger.warn("Skipping undeclared inputs checking because `kotlin.build.disable.verification.tasks` is true")
             return
         }
         val jfrFile = jfrFile.singleFile
