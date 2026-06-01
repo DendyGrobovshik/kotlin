@@ -470,12 +470,12 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
                 )
             ) {
                 // Legacy prelude must still be present (back-compat with any existing user tooling that scrapes it).
-                assertOutputContains("error: Synthetic project regenerated")
+                assertOutputContains("Synthetic project regenerated")
                 // The Gradle exception message surfaced by error(...) in the task.
                 assertOutputContains("Synthetic project state updated")
 
                 // The new diagnostic: file-level breakdown.
-                assertOutputContains("error: Synthetic linkage package files changed during the build:")
+                assertOutputContains("Synthetic linkage package files changed during the build:")
                 assertOutputContains("Sources/$SYNTHETIC_IMPORT_TARGET_MAGIC_NAME/$SYNTHETIC_IMPORT_TARGET_MAGIC_NAME.m (modified)")
             }
         }
