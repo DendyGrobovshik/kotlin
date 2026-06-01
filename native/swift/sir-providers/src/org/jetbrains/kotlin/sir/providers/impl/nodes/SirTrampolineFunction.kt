@@ -69,4 +69,10 @@ public class SirTrampolineFunction(
     )
 }
 
-private val SirParameter.forward: String? get() = this.name?.let { name -> this.argumentName?.let { "$it: $name" } ?: name }
+private val SirParameter.forward: String?
+    get() = name?.let { name ->
+        argumentName
+            ?.takeUnless { it.isEmpty() }
+            ?.let { "$it: $name" }
+            ?: name
+    }
