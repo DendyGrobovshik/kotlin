@@ -11,8 +11,9 @@ tasks.withType<Test>().configureEach {
     val jfrExtension = extensions.create<JfrExtension>("javaFlightRecorder").apply {
         jfcFile.convention(defaultJfcFile())
         jfrFile.convention(defaultJfrFileFor(testTask.name))
-            .builtBy(testTask) // inform testTask that it builds jfrFile
-            .also { testTask.outputs.file(it) } // inform other tasks that jfrFile is built by testTask
+
+        testTask.outputs.file(jfrFile) // inform testTask that it builds jfrFile
+        jfrFile.builtBy(testTask) // inform other tasks that jfrFile is built by testTask
     }
 
     testTask.jvmArgumentProviders += objects.newInstance<JfrArgumentProvider>().apply {
