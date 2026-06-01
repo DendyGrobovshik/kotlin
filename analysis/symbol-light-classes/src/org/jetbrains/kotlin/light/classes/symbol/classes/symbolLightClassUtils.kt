@@ -227,9 +227,9 @@ internal fun <T : KaFunctionSymbol> KaSession.createMethodsJvmOverloadsAware(
 
     val parameterMaskFilter = valueParameterMaskFilter(valueParameters, parameterCount)
 
+    val defaultValueMask = defaultParameterValueMask(declaration)
     for (index in parameterCount - 1 downTo 0) {
-        val valueParameter = valueParameters[index]
-        if (!valueParameter.hasDeclaredDefaultValue || !pickMask[index]) continue
+        if (!defaultValueMask[index] || !pickMask[index]) continue
         pickMask.clear(index)
 
         if (parameterMaskFilter.accepts(pickMask)) {
@@ -240,6 +240,35 @@ internal fun <T : KaFunctionSymbol> KaSession.createMethodsJvmOverloadsAware(
             )
         }
     }
+}
+
+/**
+ * For each value parameter of the [declaration] (a function or a constructor), tells whether it has a default value
+ * that the compiler takes into account when generating `@JvmOverloads` variants (or the synthetic no-arg constructor)
+ * *on this very declaration*.
+ *
+ * This mirrors the compiler's `FirOverloadsChecker`:
+ * - A default value declared on the parameter itself always counts;
+ * - For an `actual` declaration, a default value declared on the corresponding `expect` parameter counts, because the
+ *   overloads are emitted on the `actual` declaration (the `expect` one has no body);
+ * - A default value inherited from an *overridden* function is intentionally ignored: `@JvmOverloads` has no effect on
+ *   an override, the overloads belong to the base declaration.
+ */
+internal fun KaSession.defaultParameterValueMask(declaration: KaFunctionSymbol): BooleanArray {
+    val valueParameters = declaration.valueParameters
+    val mask = BooleanArray(valueParameters.size) { valueParameters[it].hasDeclaredDefaultValue }
+    if (declaration.isActual) {
+        for (expectSymbol in declaration.getExpectsForActual()) {
+            val expectParameters = (expectSymbol as? KaFunctionSymbol)?.valueParameters ?: continue
+            for (index in mask.indices) {
+                if (!mask[index] && expectParameters.getOrNull(index)?.hasDeclaredDefaultValue == true) {
+                    mask[index] = true
+                }
+            }
+        }
+    }
+
+    return mask
 }
 
 private sealed class ValueParameterMaskFilter {

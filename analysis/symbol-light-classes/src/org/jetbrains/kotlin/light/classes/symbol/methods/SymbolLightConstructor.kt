@@ -160,26 +160,28 @@ internal class SymbolLightConstructor private constructor(
             }
         }
 
-        private fun shouldGenerateNoArgOverload(
+        private fun KaSession.shouldGenerateNoArgOverload(
             lightClass: SymbolLightClassBase,
             primaryConstructor: KaConstructorSymbol,
             constructors: Iterable<KaConstructorSymbol>,
         ): Boolean {
             val classOrObject = lightClass.kotlinOrigin ?: return false
+            val valueParameters = primaryConstructor.valueParameters
+            val defaultValueMask = defaultParameterValueMask(primaryConstructor)
             return !classOrObject.hasModifier(INNER_KEYWORD) &&
                     !classOrObject.hasModifier(SEALED_KEYWORD) &&
                     !lightClass.isEnum &&
-                    primaryConstructor.valueParameters.all { it.hasDeclaredDefaultValue && !it.hasIntroducedAtAnnotation() } &&
-                    constructors.none { it.isEffectivelyParameterless } &&
+                    valueParameters.indices.all { defaultValueMask[it] && !valueParameters[it].hasIntroducedAtAnnotation() } &&
+                    constructors.none { isEffectivelyParameterless(it) } &&
                     primaryConstructor.visibility != KaSymbolVisibility.PRIVATE
         }
 
         /**
          * Whether the constructor either has no arguments or has [JvmOverloads] which would result in a method with no arguments.
          * */
-        private val KaConstructorSymbol.isEffectivelyParameterless: Boolean
-            get() = valueParameters.isEmpty() ||
-                    valueParameters.all(KaValueParameterSymbol::hasDeclaredDefaultValue) && hasJvmOverloadsAnnotation()
+        private fun KaSession.isEffectivelyParameterless(constructor: KaConstructorSymbol): Boolean =
+            constructor.valueParameters.isEmpty() ||
+                    defaultParameterValueMask(constructor).all { it } && constructor.hasJvmOverloadsAnnotation()
 
         private fun SymbolLightClassBase.defaultConstructor(): KtLightMethod {
             val classOrObject = kotlinOrigin
