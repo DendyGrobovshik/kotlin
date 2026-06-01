@@ -535,6 +535,49 @@ class ProjectCompilerOptionsTests {
         }
     }
 
+    @Test
+    fun multiTargetCompilerOptionsAreIsolated() {
+        // jvm, js and native are configured simultaneously with distinct values; each task must keep only its own,
+        // i.e. no option leaks across targets (regression guard ported from KGP `CompilerOptionsProjectIT`).
+        // `progressiveMode` (a common option) is set on the native target only, so it is the cross-target leak probe.
+        val project = buildProjectWithMPP {
+            with(multiplatformExtension) {
+                jvm {
+                    compilerOptions {
+                        jvmTarget.set(JvmTarget.JVM_11)
+                        javaParameters.set(true)
+                    }
+                }
+                js {
+                    compilerOptions {
+                        friendModulesDisabled.set(true)
+                    }
+                }
+                linuxX64 {
+                    compilerOptions {
+                        progressiveMode.set(true)
+                    }
+                }
+
+                applyDefaultHierarchyTemplate()
+            }
+        }
+
+        project.evaluate()
+
+        val jvm = project.kotlinJvmTask("compileKotlinJvm").compilerOptions
+        assertEquals(JvmTarget.JVM_11, jvm.jvmTarget.orNull)
+        assertEquals(true, jvm.javaParameters.get())
+        assertEquals(false, jvm.progressiveMode.get()) // native's progressiveMode must not leak here
+
+        val js = project.kotlinJsTask("compileKotlinJs").compilerOptions
+        assertEquals(true, js.friendModulesDisabled.get())
+        assertEquals(false, js.progressiveMode.get()) // native's progressiveMode must not leak here
+
+        val native = project.kotlinNativeTask("compileKotlinLinuxX64").compilerOptions
+        assertEquals(true, native.progressiveMode.get())
+    }
+
     private fun Project.kotlinNativeTask(name: String): KotlinCompilationTask<KotlinNativeCompilerOptions> = tasks
         .named<KotlinCompilationTask<KotlinNativeCompilerOptions>>(name)
         .get()
