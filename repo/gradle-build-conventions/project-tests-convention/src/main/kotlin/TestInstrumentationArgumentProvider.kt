@@ -4,11 +4,8 @@
  */
 
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
 import org.gradle.process.CommandLineArgumentProvider
 
 abstract class TestInstrumentationArgumentProvider : CommandLineArgumentProvider {
@@ -21,13 +18,9 @@ abstract class TestInstrumentationArgumentProvider : CommandLineArgumentProvider
     @get:Classpath
     abstract val bootClasspathJar: ConfigurableFileCollection
 
-    @get:Input
-    @get:Optional
-    abstract val agentArgs: Property<String>
-
     override fun asArguments(): Iterable<String> =
         listOf(
-            "-javaagent:${agentJar.singleFile}" + agentArgs.orNull?.let { "=$it" }.orEmpty(),
+            "-javaagent:${agentJar.singleFile}",
             "-Xbootclasspath/a:${bootClasspathJar.singleFile}"
         )
 }

@@ -15,7 +15,7 @@ import java.lang.instrument.Instrumentation
 object TestInstrumentationAgent {
     @JvmStatic
     fun premain(args: String?, instrumentation: Instrumentation) {
-        val debug = "debug" in args?.split(",").orEmpty()
+        val debug = System.getProperty("test.instrumenter.debug") == "true"
         if (debug) {
             println("org.jetbrains.kotlin.testFramework.TestInstrumentationAgent: premain")
         }

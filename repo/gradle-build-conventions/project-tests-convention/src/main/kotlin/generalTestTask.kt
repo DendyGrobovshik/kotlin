@@ -177,12 +177,12 @@ internal fun Project.createGeneralTestTask(
         if (shouldInstrument) {
             val agentJar = configurations.detachedConfiguration(dependencies.project(":test-instrumenter")).apply { isTransitive = false }
             val bootClasspathJar = configurations.detachedConfiguration(dependencies.project(":test-instrumenter", "bootClasspath"))
-            val agentArgs = project.providers.gradleProperty("kotlin.test.instrumentation.args")
+
+            systemProperty("test.instrumenter.debug", kotlinBuildProperties.booleanProperty("test.instrumenter.debug").get())
 
             val testInstrumentationProvider = objects.newInstance<TestInstrumentationArgumentProvider>().apply {
                 this.agentJar.from(agentJar)
                 this.bootClasspathJar.from(bootClasspathJar)
-                this.agentArgs.set(agentArgs)
             }
             jvmArgumentProviders.add(testInstrumentationProvider)
         }
