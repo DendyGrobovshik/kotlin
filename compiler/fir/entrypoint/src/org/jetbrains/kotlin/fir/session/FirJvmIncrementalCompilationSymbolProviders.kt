@@ -68,7 +68,7 @@ fun createIncrementalProvidersForNonLeafMppModules(
 ): FirJvmIncrementalCompilationSymbolProviders? {
     val moduleStructure = configuration.hmppModuleStructure ?: return null
     val incrementalClasspath = moduleStructure.incrementalDependencies.firstNotNullOfOrNull { [module, classpath] ->
-        runIf("<${module.name}>" == moduleData.name.asString()) { classpath }
+        runIf(module.name == moduleData.name.asStringStripSpecialMarkers()) { classpath }
     } ?: return null
     val resolvedLibraries = loadMetadataKlibs(incrementalClasspath, configuration).all
     val provider = KlibBasedSymbolProvider(
