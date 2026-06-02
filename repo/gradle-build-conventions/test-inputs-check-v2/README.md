@@ -180,10 +180,10 @@ flowchart TD
         UndeclaredInputsGuard -->|"emit()"| UndeclaredInputEvent
     end
     subgraph agentJar
-        TestInstrumentationAgent -->|"File.exists()"| FileExistsAdvice
-        TestInstrumentationAgent -->|"FileInputStream.read(), ..."| FileReadAdvice
-        FileReadAdvice --> UndeclaredInputsGuard     
-        FileExistsAdvice --> UndeclaredInputsGuard
+        TestInstrumentationAgent -->|"File.exists()"| InputCheckingFileExistsAdvice
+        TestInstrumentationAgent -->|"FileInputStream.read(), ..."| InputCheckingFileReadAdvice
+        InputCheckingFileExistsAdvice --> UndeclaredInputsGuard
+        InputCheckingFileReadAdvice --> UndeclaredInputsGuard     
     end
     UndeclaredInputEvent -->|"JFR magic :)"| testJfr@{shape: cyl, label: "test.jfr"}
     testJfr --> CheckUndeclaredInputs
@@ -210,7 +210,7 @@ It provides the following JVM options:
 
 - As its first action, `Test` task writes its input paths to `declared-inputs.txt`
 - A path to that file is passed via system property to `TestInstrumentationAgent`
-- The `TestInstrumentationAgent` uses ByteBuddy to register advices: `FileExistsAdvice` and `FileReadAdvice`
+- The `TestInstrumentationAgent` uses ByteBuddy to register advices: `InputCheckingFileExistsAdvice` and `InputCheckingFileReadAdvice`
 - The bytecode from advices is injected at the end of instrumented methods
 - Both of the advices delegate execution to `UndeclaredInputsGuard`
 - The `UndeclaredInputsGuard` takes a file path as argument and checks whether it's not found in `declared-inputs.txt` (among other checks)
