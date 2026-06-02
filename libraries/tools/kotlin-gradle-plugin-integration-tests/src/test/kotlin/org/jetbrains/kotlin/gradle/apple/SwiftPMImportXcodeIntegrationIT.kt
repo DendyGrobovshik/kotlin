@@ -1342,6 +1342,64 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
             }
         }
     }
+
+    @GradleTest
+    fun `integrateLinkagePackage without XCODEPROJ_PATH fails with actionable error`(version: GradleVersion) {
+        project("emptyxcode", version) {
+            initDefaultKmpWithLocalSPM()
+
+            buildAndFail(
+                "integrateLinkagePackage",
+                // No XCODEPROJ_PATH — intentional
+                environmentVariables = EnvironmentalVariables(),
+            ) {
+                assertOutputContains("XCODEPROJ_PATH")
+                assertOutputContains("Xcode project")
+                assertOutputDoesNotContain("syntheticImportProjectRoot")
+                assertOutputDoesNotContain("because it has no value available")
+            }
+        }
+    }
+
+    @GradleTest
+    fun `integrateEmbedAndSign without XCODEPROJ_PATH fails with actionable error`(version: GradleVersion) {
+        project("emptyxcode", version) {
+            initDefaultKmpWithLocalSPM()
+
+            buildAndFail(
+                "integrateEmbedAndSign",
+                environmentVariables = EnvironmentalVariables(),
+            ) {
+                assertOutputContains("XCODEPROJ_PATH")
+                assertOutputDoesNotContain("syntheticImportProjectRoot")
+                assertOutputDoesNotContain("because it has no value available")
+            }
+        }
+    }
+
+    @GradleTest
+    fun `integrateLinkagePackage still places synthetic package next to xcodeproj when XCODEPROJ_PATH is set`(version: GradleVersion) {
+        project("emptyxcode", version) {
+            initDefaultKmpWithLocalSPM()
+
+            build(
+                "integrateLinkagePackage",
+                environmentVariables = EnvironmentalVariables(
+                    "XCODEPROJ_PATH" to "iosApp/iosApp.xcodeproj",
+                )
+            ) {
+                assertTrue(
+                    projectPath.resolve("iosApp/$SYNTHETIC_IMPORT_TARGET_MAGIC_NAME").exists(),
+                    "Synthetic package should live next to the .xcodeproj when XCODEPROJ_PATH is provided"
+                )
+                // Sanity: the build-dir fallback must NOT have been used
+                assertFalse(
+                    projectPath.resolve("build/tmp/swiftImport-unconfigured/$SYNTHETIC_IMPORT_TARGET_MAGIC_NAME").exists(),
+                    "Build-dir fallback must not be used when XCODEPROJ_PATH is provided"
+                )
+            }
+        }
+    }
 }
 
 private fun createSymlinkedDeveloperDir(projectPath: Path): Path {
