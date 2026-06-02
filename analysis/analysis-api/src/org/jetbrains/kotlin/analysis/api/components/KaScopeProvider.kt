@@ -351,6 +351,13 @@ public interface KaImplicitReceiver : KaScopeImplicitReceiverValue {
     override val ownerSymbol: KaSymbol
     override val scopeIndexInTower: Int
 
+    /**
+     * A label for the implicit receiver, if any.
+     *
+     * If not null, `this@$label` can be used to refer to the implicit receiver.
+     */
+    @KaExperimentalApi
+    @KaK1Unsupported
     public val label: String?
 }
 
