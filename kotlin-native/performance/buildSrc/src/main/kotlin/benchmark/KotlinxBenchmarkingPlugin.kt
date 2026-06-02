@@ -134,6 +134,7 @@ open class KotlinxBenchmarkingPlugin : BenchmarkingPlugin() {
             // For some reason, the generated `*Benchmark` compilations do not inherit a dependency on cinterops from
             // the main compilations (even though they `associateWith` them). Just create a new cinterop in the new
             // compilation and copy the important configuration bits over.
+            // See https://github.com/Kotlin/kotlinx-benchmark/issues/190
             kotlin.apply {
                 targets.filterIsInstance<KotlinNativeTarget>().forEach {
                     val main by it.compilations.getting
