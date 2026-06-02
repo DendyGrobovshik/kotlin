@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toSet;
 
 public class UndeclaredInputsGuard {
 
-    private static Set<String> declaredInputs;
+    private static final Set<String> declaredInputs;
     private static final Set<String> undeclaredInputs = new ConcurrentSkipListSet<>();
     private static final String rootDir = System.getProperty("test.instrumenter.root.dir");
     private static final String buildDir = System.getProperty("test.instrumenter.build.dir");
