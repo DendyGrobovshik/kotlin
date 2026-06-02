@@ -5,20 +5,22 @@
 
 package org.jetbrains.kotlin.testFramework.inputchecking;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toSet;
 
 public class UndeclaredInputsGuard {
 
     private static final Set<String> declaredInputs;
-    private static final Set<String> undeclaredInputs = new ConcurrentSkipListSet<>();
+    private static final Set<String> undeclaredInputs = ConcurrentHashMap.newKeySet();
     private static final String rootDir = System.getProperty("test.instrumenter.root.dir");
     private static final String buildDir = System.getProperty("test.instrumenter.build.dir");
 
