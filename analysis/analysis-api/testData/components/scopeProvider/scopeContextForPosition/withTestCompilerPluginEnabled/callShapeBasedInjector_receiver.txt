@@ -8,6 +8,8 @@ implicit values:
       type: <local>/Scope1
     ownerSymbol = KaNamedFunctionSymbol:
       /test_1(df: DataFrame<*>): kotlin.Unit
+    label = test_1
+
 
 scopes:
   TypeScope, index = 0
