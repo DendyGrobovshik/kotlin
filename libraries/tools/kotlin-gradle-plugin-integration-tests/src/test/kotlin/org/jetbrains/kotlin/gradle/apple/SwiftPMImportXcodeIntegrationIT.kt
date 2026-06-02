@@ -1354,6 +1354,7 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
                 environmentVariables = EnvironmentalVariables(),
             ) {
                 assertOutputContains("Please specify the path to the Xcode project in the XCODEPROJ_PATH environment variable")
+                assertOutputContains("./gradlew :integrateLinkagePackage")
                 assertOutputDoesNotContain("syntheticImportProjectRoot")
                 assertOutputDoesNotContain("because it has no value available")
             }
@@ -1370,6 +1371,7 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
                 environmentVariables = EnvironmentalVariables(),
             ) {
                 assertOutputContains("Please specify the path to the Xcode project in the XCODEPROJ_PATH environment variable")
+                assertOutputContains("./gradlew :integrateEmbedAndSign")
                 assertOutputDoesNotContain("syntheticImportProjectRoot")
                 assertOutputDoesNotContain("because it has no value available")
             }

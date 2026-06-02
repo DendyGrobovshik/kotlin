@@ -9,6 +9,7 @@ package org.jetbrains.kotlin.gradle.unitTests
 
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftimport.IntegrateEmbedAndSignIntoXcodeProject
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftimport.IntegrateLinkagePackageIntoXcodeProject
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftimport.XCODEPROJ_PATH_ENV
 import org.jetbrains.kotlin.gradle.util.buildProjectWithMPP
 import org.jetbrains.kotlin.gradle.util.kotlin
 import kotlin.test.Test
@@ -29,12 +30,16 @@ class IntegrateLinkagePackageMissingEnvTests {
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
         assertTrue(
-            failure.message!!.contains("XCODEPROJ_PATH"),
-            "Error must mention XCODEPROJ_PATH, was: ${failure.message}"
+            failure.message!!.contains(XCODEPROJ_PATH_ENV),
+            "Error must mention $XCODEPROJ_PATH_ENV, was: ${failure.message}"
         )
         assertTrue(
             failure.message!!.contains("Xcode project"),
             "Error must explain that the user has to point the task at an Xcode project, was: ${failure.message}"
+        )
+        assertTrue(
+            failure.message!!.contains("./gradlew ${task.path}"),
+            "Error must include copy-pasteable command with task path '${task.path}', was: ${failure.message}"
         )
     }
 
@@ -50,8 +55,12 @@ class IntegrateLinkagePackageMissingEnvTests {
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
         assertTrue(
-            failure.message!!.contains("XCODEPROJ_PATH"),
-            "Error must mention XCODEPROJ_PATH, was: ${failure.message}"
+            failure.message!!.contains(XCODEPROJ_PATH_ENV),
+            "Error must mention $XCODEPROJ_PATH_ENV, was: ${failure.message}"
+        )
+        assertTrue(
+            failure.message!!.contains("./gradlew ${task.path}"),
+            "Error must include copy-pasteable command with task path '${task.path}', was: ${failure.message}"
         )
     }
 }

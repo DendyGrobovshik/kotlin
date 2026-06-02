@@ -21,14 +21,13 @@ import javax.inject.Inject
 
 internal const val XCODEPROJ_PATH_ENV = "XCODEPROJ_PATH"
 
-private fun requireXcodeprojPath(xcodeprojPath: Property<String>): String {
+private fun requireXcodeprojPath(xcodeprojPath: Property<String>, taskPath: String): String {
     val raw = xcodeprojPath.orNull
     check(!raw.isNullOrBlank()) {
         """
         Please specify the path to the Xcode project in the $XCODEPROJ_PATH_ENV environment variable.
         For example:
-            export $XCODEPROJ_PATH_ENV=iosApp/iosApp.xcodeproj
-            ./gradlew integrateLinkagePackage
+            $XCODEPROJ_PATH_ENV=iosApp/iosApp.xcodeproj ./gradlew $taskPath
         Both relative (from the Gradle invocation directory) and absolute paths are supported.
         """.trimIndent()
     }
@@ -54,7 +53,7 @@ internal abstract class IntegrateEmbedAndSignIntoXcodeProject : DefaultTask() {
 
     @TaskAction
     fun integrate() {
-        var projectPath = File(requireXcodeprojPath(xcodeprojPath))
+        var projectPath = File(requireXcodeprojPath(xcodeprojPath, path))
         if (!projectPath.isAbsolute) {
             projectPath = currentDir.get().resolve(projectPath)
         }
@@ -158,7 +157,7 @@ internal abstract class IntegrateLinkagePackageIntoXcodeProject : DefaultTask() 
 
     @TaskAction
     fun integrate() {
-        var projectPath = File(requireXcodeprojPath(xcodeprojPath))
+        var projectPath = File(requireXcodeprojPath(xcodeprojPath, path))
         if (!projectPath.isAbsolute) {
             projectPath = currentDir.get().resolve(projectPath)
         }
