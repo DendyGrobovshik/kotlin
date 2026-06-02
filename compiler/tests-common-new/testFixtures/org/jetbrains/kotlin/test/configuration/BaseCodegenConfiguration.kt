@@ -52,16 +52,27 @@ import org.jetbrains.kotlin.utils.bind
  *
  * There are handler steps after each facade step.
  */
-fun TestConfigurationBuilder.setupJvmPipelineSteps(parser: FirParser) {
+fun TestConfigurationBuilder.setupJvmPipelineStepsWithoutCompilationErrorHandlers(parser: FirParser) {
     commonServicesConfigurationForCodegenAndDebugTest()
     configureFirParser(parser)
 
     facadeStep(::FirCliJvmFacade)
-    firHandlersStep { useHandlers(::NoFirCompilationErrorsHandler) }
+    firHandlersStep(init = {})
     facadeStep(::Fir2IrCliJvmFacade)
-    irHandlersStep { useHandlers(::NoIrCompilationErrorsHandler) }
+    irHandlersStep(init = {})
     facadeStep(::BackendCliJvmFacade)
     jvmArtifactsHandlersStep(init = {})
+}
+
+/**
+ * Sets up the pipeline for all JVM backend tests (the same as [setupJvmPipelineStepsWithoutCompilationErrorHandlers]).
+ * Also includes default compilation error handlers for all the steps.
+ */
+fun TestConfigurationBuilder.setupJvmPipelineSteps(parser: FirParser) {
+    setupJvmPipelineStepsWithoutCompilationErrorHandlers(parser)
+    configureFirHandlersStep { useHandlers(::NoFirCompilationErrorsHandler) }
+    configureIrHandlersStep { useHandlers(::NoIrCompilationErrorsHandler) }
+    configureJvmArtifactsHandlersStep { useHandlers(::NoJvmSpecificCompilationErrorsHandler) }
 }
 
 /**
