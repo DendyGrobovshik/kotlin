@@ -1353,8 +1353,7 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
                 // No XCODEPROJ_PATH — intentional
                 environmentVariables = EnvironmentalVariables(),
             ) {
-                assertOutputContains("XCODEPROJ_PATH")
-                assertOutputContains("Xcode project")
+                assertOutputContains("Please specify the path to the Xcode project in the XCODEPROJ_PATH environment variable")
                 assertOutputDoesNotContain("syntheticImportProjectRoot")
                 assertOutputDoesNotContain("because it has no value available")
             }
@@ -1370,7 +1369,7 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
                 "integrateEmbedAndSign",
                 environmentVariables = EnvironmentalVariables(),
             ) {
-                assertOutputContains("XCODEPROJ_PATH")
+                assertOutputContains("Please specify the path to the Xcode project in the XCODEPROJ_PATH environment variable")
                 assertOutputDoesNotContain("syntheticImportProjectRoot")
                 assertOutputDoesNotContain("because it has no value available")
             }
