@@ -3,14 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.testFramework;
+package org.jetbrains.kotlin.testFramework.inputchecking;
 
 import net.bytebuddy.asm.Advice;
 
-public class FileReadAdvice {
+public class InputCheckingFileReadAdvice {
 
     @Advice.OnMethodExit
     public static void advice(@Advice.FieldValue("path") String path) {
-        UndeclaredInputsGuard.checkFile(path);
+        UndeclaredInputsGuard.checkPath(path);
     }
 }

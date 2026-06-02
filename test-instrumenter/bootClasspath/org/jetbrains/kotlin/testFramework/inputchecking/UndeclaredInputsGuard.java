@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.testFramework;
+package org.jetbrains.kotlin.testFramework.inputchecking;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static java.util.stream.Collectors.toSet;
 
-@SuppressWarnings({"CallToPrintStackTrace", "UseOfSystemOutOrSystemErr"})
 public class UndeclaredInputsGuard {
 
     private static Set<String> declaredInputs;
@@ -24,18 +23,17 @@ public class UndeclaredInputsGuard {
     private static final String buildDir = System.getProperty("test.instrumenter.build.dir");
 
     static {
-        try {
-            Path declaredInputsFile = Paths.get(System.getProperty("test.instrumenter.declared.inputs.file"));
-            InputStream inputStream = Files.newInputStream(declaredInputsFile);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        Path declaredInputsFilePath = Paths.get(System.getProperty("test.instrumenter.declared.inputs.file"));
+
+        try (BufferedReader reader = Files.newBufferedReader(declaredInputsFilePath)) {
             declaredInputs = Collections.unmodifiableSet(reader.lines().collect(toSet()));
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (IOException e) {
+            throw new RuntimeException("Unable to read file: " + declaredInputsFilePath, e);
         }
     }
 
-    public static void checkFile(String path) {
+    public static void checkPath(String path) {
         // Short circuit and deduplication
         if (path == null || declaredInputs == null || undeclaredInputs.contains(path)) {
             return;
@@ -86,7 +84,7 @@ public class UndeclaredInputsGuard {
                 return file.getCanonicalFile();
             }
             catch (IOException e) {
-                System.out.println("Unable to get canonical path for " + file.getPath());
+                throw new RuntimeException("Unable to get canonical path for: " + file.getPath(), e);
             }
         }
         return file;

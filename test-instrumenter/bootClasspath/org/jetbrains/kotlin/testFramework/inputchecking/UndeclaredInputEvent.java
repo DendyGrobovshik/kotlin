@@ -3,11 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.testFramework;
+package org.jetbrains.kotlin.testFramework.inputchecking;
 
 import jdk.jfr.Event;
 import jdk.jfr.Name;
-import jdk.jfr.StackTrace;
 
 @Name("jetbrains.UndeclaredInput")
 public class UndeclaredInputEvent extends Event {

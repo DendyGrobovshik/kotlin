@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.testFramework
 
+import org.jetbrains.kotlin.testFramework.inputchecking.UndeclaredInputsGuard
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +36,7 @@ class UndeclaredInputsGuardTest {
     @Test
     fun `guard detects undeclared inout`() {
         // when
-        UndeclaredInputsGuard.checkFile("foo.txt")
+        UndeclaredInputsGuard.checkPath("foo.txt")
 
         // then
         assertTrue { UndeclaredInputsGuard.getUndeclaredInputs().isNotEmpty() }
@@ -48,7 +49,7 @@ class UndeclaredInputsGuardTest {
             .map {
                 thread {
                     Thread.sleep(Random.nextLong(0, 500))
-                    UndeclaredInputsGuard.checkFile("$it.txt")
+                    UndeclaredInputsGuard.checkPath("$it.txt")
                 }
             }
             .forEach { it.join() }

@@ -10,6 +10,8 @@ import net.bytebuddy.asm.Advice
 import net.bytebuddy.asm.AsmVisitorWrapper
 import net.bytebuddy.matcher.ElementMatchers.named
 import net.bytebuddy.matcher.ElementMatchers.none
+import org.jetbrains.kotlin.testFramework.inputchecking.InputCheckingFileExistsAdvice
+import org.jetbrains.kotlin.testFramework.inputchecking.InputCheckingFileReadAdvice
 import java.lang.instrument.Instrumentation
 
 object TestInstrumentationAgent {
@@ -47,14 +49,14 @@ object TestInstrumentationAgent {
             // The resulting bytecode is the same as if we had used REDEFINE, but illegal changes are caught earlier (by ByteBuddy, not JVM).
             .with(AgentBuilder.TypeStrategy.Default.DECORATE)
             .type(named("java.io.File"))
-            .advice(Advice.to(FileExistsAdvice::class.java).on(named("exists")))
+            .advice(Advice.to(InputCheckingFileExistsAdvice::class.java).on(named("exists")))
             .type(named("java.io.FileInputStream"))
-            .advice(Advice.to(FileReadAdvice::class.java).on(named("read")))
+            .advice(Advice.to(InputCheckingFileReadAdvice::class.java).on(named("read")))
             .type(named("java.io.RandomAccessFile"))
-            .advice(Advice.to(FileReadAdvice::class.java).on(named("read")))
-            .advice(Advice.to(FileReadAdvice::class.java).on(named("readLine")))
+            .advice(Advice.to(InputCheckingFileReadAdvice::class.java).on(named("read")))
+            .advice(Advice.to(InputCheckingFileReadAdvice::class.java).on(named("readLine")))
             .type(named("sun.nio.ch.FileChannelImpl"))
-            .advice(Advice.to(FileReadAdvice::class.java).on(named("read")))
+            .advice(Advice.to(InputCheckingFileReadAdvice::class.java).on(named("read")))
             .installOn(instrumentation)
     }
 }
