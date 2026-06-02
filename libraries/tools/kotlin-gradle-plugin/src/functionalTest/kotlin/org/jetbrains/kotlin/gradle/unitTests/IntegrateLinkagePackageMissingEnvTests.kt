@@ -24,7 +24,7 @@ class IntegrateLinkagePackageMissingEnvTests {
         }.evaluate()
 
         val task = project.tasks.getByName(IntegrateLinkagePackageIntoXcodeProject.TASK_NAME)
-            as IntegrateLinkagePackageIntoXcodeProject
+                as IntegrateLinkagePackageIntoXcodeProject
 
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
@@ -45,7 +45,7 @@ class IntegrateLinkagePackageMissingEnvTests {
         }.evaluate()
 
         val task = project.tasks.getByName(IntegrateEmbedAndSignIntoXcodeProject.TASK_NAME)
-            as IntegrateEmbedAndSignIntoXcodeProject
+                as IntegrateEmbedAndSignIntoXcodeProject
 
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
