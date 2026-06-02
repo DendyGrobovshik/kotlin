@@ -2651,45 +2651,45 @@ internal class CodeGeneratorVisitor(
             return
 
         context(llvm) {
-            overrideRuntimeGlobal(NativeCompilerConstants.GC_MUTATORS_COOPERATE, context.config.gcMutatorsCooperate.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.AUX_GC_THREADS, context.config.auxGCThreads.toInt().toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.CONCURRENT_MARK_MAX_ITERATIONS, context.config.concurrentMarkMaxIterations.toInt().toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.SUSPEND_FUNCTIONS_FROM_ANY_THREAD_FROM_OBJC, context.config.suspendFunctionsFromAnyThreadFromObjC.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.GC_MUTATORS_COOPERATE, context.config.gcMutatorsCooperate.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.AUX_GC_THREADS, context.config.auxGCThreads.toInt().toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.CONCURRENT_MARK_MAX_ITERATIONS, context.config.concurrentMarkMaxIterations.toInt().toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.SUSPEND_FUNCTIONS_FROM_ANY_THREAD_FROM_OBJC, context.config.suspendFunctionsFromAnyThreadFromObjC.toLlvmConstInt32())
 
             val getSourceInfoFunctionName = when (context.config.sourceInfoType) {
                 SourceInfoType.NOOP -> null
-                SourceInfoType.LIBBACKTRACE -> NativeCompilerConstants.GET_SOURCE_INFO_LIB_BACKTRACE
-                SourceInfoType.CORESYMBOLICATION -> NativeCompilerConstants.GET_SOURCE_INFO_CORE_SYMBOLICATION
+                SourceInfoType.LIBBACKTRACE -> NativeRuntimeOverridableConstants.GET_SOURCE_INFO_LIB_BACKTRACE
+                SourceInfoType.CORESYMBOLICATION -> NativeRuntimeOverridableConstants.GET_SOURCE_INFO_CORE_SYMBOLICATION
             }
             if (getSourceInfoFunctionName != null) {
                 val getSourceInfoFunction = LLVMGetNamedFunction(llvm.module, getSourceInfoFunctionName)
                         ?: LLVMAddFunction(llvm.module, getSourceInfoFunctionName,
                                 functionType(llvm.int32Type, false, llvm.pointerType, llvm.pointerType, llvm.int32Type))
-                overrideRuntimeGlobal(NativeCompilerConstants.GET_SOURCE_INFO_FUNCTION, constValue(getSourceInfoFunction!!))
+                overrideRuntimeGlobal(NativeRuntimeOverridableConstants.GET_SOURCE_INFO_FUNCTION, constValue(getSourceInfoFunction!!))
             }
 
-            overrideRuntimeGlobal(NativeCompilerConstants.CORE_SYMBOLICATION_USE_ONLY_KOTLIN_IMAGE, context.config.coreSymbolicationUseOnlyKotlinImage.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.CORE_SYMBOLICATION_USE_ONLY_KOTLIN_IMAGE, context.config.coreSymbolicationUseOnlyKotlinImage.toLlvmConstInt32())
 
             if (context.config.target.family == Family.ANDROID && context.config.produce == CompilerOutputKind.PROGRAM) {
                 val configuration = context.config.configuration
                 val programType = configuration[BinaryOptions.androidProgramType] ?: AndroidProgramType.Default
-                overrideRuntimeGlobal(NativeCompilerConstants.PRINT_TO_ANDROID_LOGCAT, programType.consolePrintsToLogcat.toLlvmConstInt32())
+                overrideRuntimeGlobal(NativeRuntimeOverridableConstants.PRINT_TO_ANDROID_LOGCAT, programType.consolePrintsToLogcat.toLlvmConstInt32())
             }
-            overrideRuntimeGlobal(NativeCompilerConstants.APP_STATE_TRACKING, context.config.appStateTracking.value.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.APP_STATE_TRACKING, context.config.appStateTracking.value.toLlvmConstInt32())
 
-            overrideRuntimeGlobal(NativeCompilerConstants.OBJC_DISPOSE_ON_MAIN, context.config.objcDisposeOnMain.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.OBJC_DSIPOSE_WITH_RUN_LOOP, context.config.objcDisposeWithRunLoop.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.OBJC_DISPOSE_ON_MAIN, context.config.objcDisposeOnMain.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.OBJC_DSIPOSE_WITH_RUN_LOOP, context.config.objcDisposeWithRunLoop.toLlvmConstInt32())
 
-            overrideRuntimeGlobal(NativeCompilerConstants.ENABLE_SAFEPOINT_SIGNPOSTS, context.config.enableSafepointSignposts.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.GLOBAL_DATA_LAZY_INIT, context.config.globalDataLazyInit.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.SWIFT_EXPORT, context.config.swiftExport.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.LATIN1_STRINGS, context.config.latin1Strings.toLlvmConstInt32())
-            overrideRuntimeGlobal(NativeCompilerConstants.MMAP_TAG, context.config.mmapTag.toLlvmConstUInt8())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.ENABLE_SAFEPOINT_SIGNPOSTS, context.config.enableSafepointSignposts.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.GLOBAL_DATA_LAZY_INIT, context.config.globalDataLazyInit.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.SWIFT_EXPORT, context.config.swiftExport.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.LATIN1_STRINGS, context.config.latin1Strings.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.MMAP_TAG, context.config.mmapTag.toLlvmConstUInt8())
 
-            overrideRuntimeGlobal(NativeCompilerConstants.MINIDUMP_LOCATION, context.config.minidumpLocation.toCStringLiteral())
-            overrideRuntimeGlobal(NativeCompilerConstants.MINIDUMP_ON_SIGTERM, context.config.minidumpOnSIGTERM.toLlvmConstInt32())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.MINIDUMP_LOCATION, context.config.minidumpLocation.toCStringLiteral())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.MINIDUMP_ON_SIGTERM, context.config.minidumpOnSIGTERM.toLlvmConstInt32())
 
-            overrideRuntimeGlobal(NativeCompilerConstants.RUNTIME_LOGS, context.config.runtimeLogs.toLLVMConstArray())
+            overrideRuntimeGlobal(NativeRuntimeOverridableConstants.RUNTIME_LOGS, context.config.runtimeLogs.toLLVMConstArray())
         }
     }
 

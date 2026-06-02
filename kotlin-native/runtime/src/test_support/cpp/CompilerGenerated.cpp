@@ -59,7 +59,7 @@ struct KBox {
 
 extern "C" {
 
-extern const int32_t Kotlin_needDebugInfo = 1;
+extern const int32_t Kotlin_needDebugInfo = 0;
 extern const int32_t Kotlin_runtimeAssertsMode = static_cast<int32_t>(kotlin::compiler::RuntimeAssertsMode::kPanic);
 #if KONAN_WINDOWS
 extern const int32_t Kotlin_disableMmap = 1;

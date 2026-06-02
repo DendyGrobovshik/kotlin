@@ -5,7 +5,18 @@
 
 package org.jetbrains.kotlin.backend.konan.llvm
 
-object NativeCompilerConstants {
+/**
+ * Set of overridable variables used to customize runtime behavior.
+ *
+ * Note that there are two ways of defining variables for runtime usage. The other way can is located within
+ * [NativeRuntimeConstants] file.
+ *
+ * Those variables are **not eligible** for runtime optimizations, but they can be changed after compiling caches.
+ * Therefore, use this way of variables when they are rarely accessed.
+ *
+ * Definitions of those variables within runtime code can be found in `CompilerConstants.cpp` file.
+ */
+object NativeRuntimeOverridableConstants {
     const val GC_MUTATORS_COOPERATE: String = "Kotlin_gcMutatorsCooperate"
     const val AUX_GC_THREADS: String = "Kotlin_auxGCThreads"
     const val CONCURRENT_MARK_MAX_ITERATIONS: String = "Kotlin_concurrentMarkMaxIterations"
