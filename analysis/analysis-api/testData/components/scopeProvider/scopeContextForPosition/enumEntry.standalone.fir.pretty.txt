@@ -13,7 +13,7 @@ implicit values:
     type = kotlin.Enum.Companion
     ownerSymbol = KaNamedClassSymbol:
       kotlin/Enum.Companion
-    label = Companion
+    label = null
 
 
 scopes:

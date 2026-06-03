@@ -31,12 +31,19 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.DirectDeclarationsAccess
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
+import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.delegateFields
+import org.jetbrains.kotlin.fir.declarations.utils.isCompanion
+import org.jetbrains.kotlin.fir.declarations.utils.isEnumEntry
+import org.jetbrains.kotlin.fir.expressions.FirThisReceiverExpression
 import org.jetbrains.kotlin.fir.java.JavaScopeProvider
 import org.jetbrains.kotlin.fir.java.declarations.FirJavaClass
+import org.jetbrains.kotlin.fir.references.FirThisReference
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.calls.FirSyntheticPropertiesScope
+import org.jetbrains.kotlin.fir.resolve.calls.ImplicitReceiverValue
 import org.jetbrains.kotlin.fir.resolve.calls.referencedMemberSymbol
+import org.jetbrains.kotlin.fir.resolve.getContainingDeclaration
 import org.jetbrains.kotlin.fir.resolve.scope
 import org.jetbrains.kotlin.fir.resolve.scopeSessionKey
 import org.jetbrains.kotlin.fir.scopes.*
@@ -48,6 +55,7 @@ import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.kdoc.psi.api.KDoc
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
@@ -309,10 +317,8 @@ internal class KaFirScopeProvider(
             buildList {
                 val receiver = towerDataElement.implicitReceiver
                 if (receiver != null) {
-                    val label =
-                        receiver.referencedMemberSymbol.label()
-                            ?.takeIf { !labelsForShadowing.contains(it) }
-                            ?.also(labelsForShadowing::add)
+                    val label = receiver.referencedMemberSymbol.label()
+                        ?.takeIf(labelsForShadowing::add)
                     val receiverValue = KaBaseScopeImplicitReceiverValue(
                         backingType = firSymbolBuilder.typeBuilder.buildKtType(receiver.type),
                         ownerSymbol = firSymbolBuilder.buildSymbol(receiver.referencedMemberSymbol),
@@ -429,7 +435,14 @@ internal class KaFirScopeProvider(
             is FirAnonymousFunctionSymbol -> label?.name
             is FirAnonymousObjectSymbol -> null
             is FirNamedFunctionSymbol -> name.asString()
-            is FirClassSymbol -> name.asString()
+            is FirClassSymbol -> {
+                if (this.isCompanion && this.classId.outerClassId == StandardClassIds.Enum) {
+                    // kotlin.Enum.Companion cannot be referenced in enum functions,
+                    // see the scopeContextForPosition/enumEntry.kt test
+                    return null
+                }
+                name.asString()
+            }
             is FirReceiverParameterSymbol -> containingDeclarationSymbol.label()
             else -> null
         }
