@@ -117,6 +117,18 @@ public class FirStandaloneNormalAnalysisSourceModuleScopeContextForPositionTestG
   }
 
   @Test
+  @TestMetadata("explicitLabel.kt")
+  public void testExplicitLabel() {
+    run("explicitLabel.kt");
+  }
+
+  @Test
+  @TestMetadata("explicitLabelNested.kt")
+  public void testExplicitLabelNested() {
+    run("explicitLabelNested.kt");
+  }
+
+  @Test
   @TestMetadata("forLoopVariable.kt")
   public void testForLoopVariable() {
     run("forLoopVariable.kt");
@@ -138,6 +150,12 @@ public class FirStandaloneNormalAnalysisSourceModuleScopeContextForPositionTestG
   @TestMetadata("kDocWithoutDeclaration.kt")
   public void testKDocWithoutDeclaration() {
     run("kDocWithoutDeclaration.kt");
+  }
+
+  @Test
+  @TestMetadata("labelShadowing.kt")
+  public void testLabelShadowing() {
+    run("labelShadowing.kt");
   }
 
   @Test
