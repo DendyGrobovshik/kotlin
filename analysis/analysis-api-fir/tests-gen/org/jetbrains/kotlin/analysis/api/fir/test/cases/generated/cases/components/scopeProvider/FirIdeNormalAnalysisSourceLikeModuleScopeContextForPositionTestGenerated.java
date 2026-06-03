@@ -69,6 +69,12 @@ public class FirIdeNormalAnalysisSourceLikeModuleScopeContextForPositionTestGene
   }
 
   @Test
+  @TestMetadata("classShadowing.kt")
+  public void testClassShadowing() {
+    run("classShadowing.kt");
+  }
+
+  @Test
   @TestMetadata("classifiersCompanionObject.kt")
   public void testClassifiersCompanionObject() {
     run("classifiersCompanionObject.kt");
@@ -162,6 +168,12 @@ public class FirIdeNormalAnalysisSourceLikeModuleScopeContextForPositionTestGene
   @TestMetadata("localTypeScope.kt")
   public void testLocalTypeScope() {
     run("localTypeScope.kt");
+  }
+
+  @Test
+  @TestMetadata("nonLocalClass.kt")
+  public void testNonLocalClass() {
+    run("nonLocalClass.kt");
   }
 
   @Test
