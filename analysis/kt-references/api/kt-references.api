@@ -108,13 +108,6 @@ public abstract class org/jetbrains/kotlin/idea/references/KtPropertyDelegationM
 public final class org/jetbrains/kotlin/idea/references/KtPropertyDelegationMethodsReference$Companion {
 }
 
-public abstract interface class org/jetbrains/kotlin/idea/references/KtReference : com/intellij/psi/PsiPolyVariantReference {
-	public synthetic fun getElement ()Lcom/intellij/psi/PsiElement;
-	public abstract fun getElement ()Lorg/jetbrains/kotlin/psi/KtElement;
-	public abstract fun getResolver ()Lcom/intellij/psi/impl/source/resolve/ResolveCache$PolyVariantResolver;
-	public abstract fun getResolvesByNames ()Ljava/util/Collection;
-}
-
 public abstract interface class org/jetbrains/kotlin/idea/references/KtReferenceMutateService {
 	public abstract fun bindToElement (Lorg/jetbrains/kotlin/idea/references/KtReference;Lcom/intellij/psi/PsiElement;)Lcom/intellij/psi/PsiElement;
 	public abstract fun bindToElement (Lorg/jetbrains/kotlin/idea/references/KtSimpleNameReference;Lcom/intellij/psi/PsiElement;Lorg/jetbrains/kotlin/idea/references/KtSimpleNameReference$ShorteningMode;)Lcom/intellij/psi/PsiElement;
