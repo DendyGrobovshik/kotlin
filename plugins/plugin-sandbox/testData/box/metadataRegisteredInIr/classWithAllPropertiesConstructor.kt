@@ -3,6 +3,8 @@
 // WITH_STDLIB
 // WITH_REFLECT
 // FULL_JDK
+// MUTE_LL_FIR
+// ^ backend plugins are not executed -> declarations in dependent module are not visible
 
 // MODULE: a
 import org.jetbrains.kotlin.plugin.sandbox.AllPropertiesConstructor
