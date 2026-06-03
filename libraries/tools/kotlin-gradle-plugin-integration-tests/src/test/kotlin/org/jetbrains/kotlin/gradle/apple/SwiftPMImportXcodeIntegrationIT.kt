@@ -1377,6 +1377,24 @@ class SwiftPMImportXcodeIntegrationIT : KGPBaseTest() {
             }
         }
     }
+
+    @GradleTest
+    fun `integrateLinkagePackage with invalid XCODEPROJ_PATH fails with actionable error`(version: GradleVersion) {
+        project("emptyxcode", version) {
+            initDefaultKmpWithLocalSPM()
+
+            buildAndFail(
+                "integrateLinkagePackage",
+                environmentVariables = EnvironmentalVariables(
+                    "XCODEPROJ_PATH" to "does-not-exist/iosApp.xcodeproj",
+                ),
+            ) {
+                assertOutputContains("does not point to an Xcode project directory")
+                assertOutputContains("does-not-exist/iosApp.xcodeproj")
+                assertOutputDoesNotContain("plutil")
+            }
+        }
+    }
 }
 
 private fun createSymlinkedDeveloperDir(projectPath: Path): Path {
