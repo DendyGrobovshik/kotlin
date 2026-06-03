@@ -29,7 +29,11 @@ bool HideSymbolsPass::run(Module &M) {
   for (auto *V : Used) {
     AlwaysPreserved.insert(V->getName());
   }
-  AlwaysPreserved.insert("llvm.used");
+  // `InternalizePass` also preserves special llvm globals like `llvm.used`.
+  // We don't need to do that, because these globals don't end up in the binary anyway,
+  // they are treated specially in machine code generator.
+  // TODO: `InternalizePass` also preserves `__stack_chk_*`. Figure out, if we also need to do
+  //       that.
 
   for (Function &F : M) {
     if (!maybeHide(F))
