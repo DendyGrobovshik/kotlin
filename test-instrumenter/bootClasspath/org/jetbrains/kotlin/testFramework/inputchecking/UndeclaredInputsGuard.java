@@ -30,7 +30,7 @@ public class UndeclaredInputsGuard {
 
         try (BufferedReader reader = Files.newBufferedReader(declaredInputsFilePath)) {
             declaredInputs = reader.lines()
-                    .filter(it -> !it.isEmpty())
+                    .filter(line -> !line.isEmpty())
                     .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
         }
         catch (IOException e) {
