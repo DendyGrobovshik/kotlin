@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 
 public class UndeclaredInputsGuard {
@@ -28,7 +29,9 @@ public class UndeclaredInputsGuard {
         Path declaredInputsFilePath = Paths.get(System.getProperty("test.instrumenter.declared.inputs.file"));
 
         try (BufferedReader reader = Files.newBufferedReader(declaredInputsFilePath)) {
-            declaredInputs = Collections.unmodifiableSet(reader.lines().collect(toSet()));
+            declaredInputs = reader.lines()
+                    .filter(it -> !it.isEmpty())
+                    .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
         }
         catch (IOException e) {
             throw new RuntimeException("Unable to read file: " + declaredInputsFilePath, e);
