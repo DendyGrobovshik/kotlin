@@ -241,11 +241,13 @@ sealed class ClangArgs(
      */
     class Jni(configurables: Configurables) : ClangArgs(configurables, forJni = true) {
         private val jdkDir by lazy {
-            val home = File.javaHome.absoluteFile
-            if (home.child("include").exists)
-                home.absolutePath
-            else
-                home.parentFile.absolutePath
+            val home = File(System.getProperty("java.home")).canonicalFile
+            val parent = home.parentFile
+            val javaHome = System.getenv("JAVA_HOME")?.let(::File)
+
+            listOfNotNull(home, parent, javaHome)
+                .firstOrNull { it.child("include").exists }?.absolutePath
+                ?: error("JNI headers not found")
         }
 
         val hostCompilerArgsForJni: Array<String> by lazy {
