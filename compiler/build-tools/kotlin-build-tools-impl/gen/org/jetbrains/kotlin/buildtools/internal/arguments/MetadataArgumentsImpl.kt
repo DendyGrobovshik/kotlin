@@ -96,7 +96,7 @@ internal class MetadataArgumentsImpl(
     if (X_KLIB_ZIP_FILE_ACCESSOR_CACHE_LIMIT in this) { arguments.klibZipFileAccessorCacheLimit = get(X_KLIB_ZIP_FILE_ACCESSOR_CACHE_LIMIT).toString()}
     if (X_LEGACY_METADATA_JAR_K2 in this) { arguments.legacyMetadataJar = get(X_LEGACY_METADATA_JAR_K2)}
     if (X_REFINES_PATHS in this) { arguments.refinesPaths = get(X_REFINES_PATHS) ?: emptyArray()}
-    if (X_TARGET_PLATFORM in this) { arguments.targetPlatform = get(X_TARGET_PLATFORM)?.map { it.stringValue }?.toTypedArray() ?: emptyArray()}
+    if (X_TARGET_PLATFORM in this) { arguments.targetPlatform = get(X_TARGET_PLATFORM).map { it.stringValue }.toTypedArray()}
     if (CLASSPATH in this) { arguments.classpath = get(CLASSPATH)}
     if (D in this) { arguments.destination = get(D)}
     if (MODULE_NAME in this) { arguments.moduleName = get(MODULE_NAME)}
@@ -126,7 +126,7 @@ internal class MetadataArgumentsImpl(
     if (X_KLIB_ZIP_FILE_ACCESSOR_CACHE_LIMIT in this) { arguments.klibZipFileAccessorCacheLimit = get(X_KLIB_ZIP_FILE_ACCESSOR_CACHE_LIMIT).toString()}
     if (X_LEGACY_METADATA_JAR_K2 in this) { arguments.legacyMetadataJar = get(X_LEGACY_METADATA_JAR_K2)}
     if (X_REFINES_PATHS in this) { arguments.refinesPaths = get(X_REFINES_PATHS) ?: emptyArray()}
-    if (X_TARGET_PLATFORM in this) { arguments.targetPlatform = get(X_TARGET_PLATFORM)?.map { it.stringValue }?.toTypedArray() ?: emptyArray()}
+    if (X_TARGET_PLATFORM in this) { arguments.targetPlatform = get(X_TARGET_PLATFORM).map { it.stringValue }.toTypedArray()}
     if (CLASSPATH in this) { arguments.classpath = get(CLASSPATH)}
     if (D in this) { arguments.destination = get(D)}
     if (MODULE_NAME in this) { arguments.moduleName = get(MODULE_NAME)}
@@ -182,7 +182,7 @@ internal class MetadataArgumentsImpl(
     public val X_REFINES_PATHS: MetadataArgument<Array<String>?> =
         MetadataArgument("X_REFINES_PATHS")
 
-    public val X_TARGET_PLATFORM: MetadataArgument<List<MetadataTargetPlatform>?> =
+    public val X_TARGET_PLATFORM: MetadataArgument<List<MetadataTargetPlatform>> =
         MetadataArgument("X_TARGET_PLATFORM")
 
     public val CLASSPATH: MetadataArgument<String?> = MetadataArgument("CLASSPATH")

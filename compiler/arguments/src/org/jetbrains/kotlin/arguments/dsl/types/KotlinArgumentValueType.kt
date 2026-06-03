@@ -166,12 +166,11 @@ sealed class EnumType<T : WithStringRepresentation>(
 }
 
 /**
- * A value which accepts an array of enums.
+ * A value which accepts a list of enums.
  */
 @Serializable
-sealed class EnumListType<T : WithStringRepresentation>(
-    override val isNullable: ReleaseDependent<Boolean> = ReleaseDependent(false),
-) : KotlinArgumentValueType<List<T>> {
+sealed class EnumListType<T : WithStringRepresentation> : KotlinArgumentValueType<List<T>> {
+    override val isNullable: ReleaseDependent<Boolean> = ReleaseDependent(false)
     override fun stringRepresentation(value: List<T>?): String {
         if (value == null) return "null"
         return value.joinToString(separator = ", ", prefix = "arrayOf(", postfix = ")") { it.stringRepresentation.valueOrNullStringLiteral }
@@ -457,8 +456,8 @@ class WasmTargetType : EnumType<WasmTarget>(ReleaseDependent(true)) {
  */
 @ExperimentalArgumentApi
 @Serializable
-class MetadataTargetPlatformType : EnumListType<MetadataTargetPlatform>(ReleaseDependent(true)) {
-    override val defaultValue: ReleaseDependent<List<MetadataTargetPlatform>?> = ReleaseDependent(null)
+class MetadataTargetPlatformType : EnumListType<MetadataTargetPlatform>() {
+    override val defaultValue: ReleaseDependent<List<MetadataTargetPlatform>?> = ReleaseDependent(emptyList())
 }
 
 private val String?.valueOrNullStringLiteral: String

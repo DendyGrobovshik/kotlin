@@ -18602,11 +18602,11 @@
                                 "argumentType": {
                                     "type": "org.jetbrains.kotlin.arguments.dsl.types.MetadataTargetPlatformType",
                                     "isNullable": {
-                                        "current": true,
+                                        "current": false,
                                         "valueInVersions": []
                                     },
                                     "defaultValue": {
-                                        "current": null,
+                                        "current": [],
                                         "valueInVersions": []
                                     }
                                 }

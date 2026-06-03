@@ -95,7 +95,7 @@ public interface MetadataArguments : CommonCompilerArguments {
      */
     @JvmField
     @ExperimentalCompilerArgument
-    public val X_TARGET_PLATFORM: MetadataArgument<List<MetadataTargetPlatform>?> =
+    public val X_TARGET_PLATFORM: MetadataArgument<List<MetadataTargetPlatform>> =
         MetadataArgument("X_TARGET_PLATFORM", KotlinReleaseVersion(2, 3, 20))
 
     /**
