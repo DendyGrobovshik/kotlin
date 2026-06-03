@@ -5,9 +5,10 @@
 
 package org.jetbrains.kotlin.konan.test.klib
 
+import org.jetbrains.kotlin.config.LanguageVersion
 import org.jetbrains.kotlin.konan.test.blackbox.AbstractNativeCoreTest
 import org.jetbrains.kotlin.konan.test.blackbox.support.TestDirectives
-import org.jetbrains.kotlin.konan.test.blackbox.support.settings.KotlinNativeClassLoader
+import org.jetbrains.kotlin.konan.test.blackbox.support.TestDirectives.FREE_COMPILER_ARGS
 import org.jetbrains.kotlin.konan.test.handlers.NativeBoxRunner
 import org.jetbrains.kotlin.konan.test.services.CInteropTestSkipper
 import org.jetbrains.kotlin.konan.test.services.DisabledNativeTestSkipper
@@ -56,6 +57,11 @@ open class AbstractCustomNativeCompilerFirstStageTest : AbstractNativeCoreTest()
 
             // K/N does not have minimized stdlib for tests, so need to use the full stdlib
             +WITH_STDLIB
+            if (customNativeCompilerSettings.defaultLanguageVersion <= LanguageVersion.KOTLIN_2_0) {
+                // KT-68933: In klibs version 2.0 and before, IR vararg types were inconsistent.
+                // IrVarargTypesChecker detects it and stops compilation, though current backends can consume it during backward compatibility tests.
+                FREE_COMPILER_ARGS with "-Xdisable-ir-checkers=IrVarargTypesChecker"
+            }
         }
 
         useConfigurators(
