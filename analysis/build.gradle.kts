@@ -1,14 +1,13 @@
 tasks.register("analysisApiArtifactTests") {
     group = "verification"
 
-    dependsOn(
-        ":prepare:analysis-api:kotlin-analysis-api:check",
-        ":prepare:analysis-api:kotlin-analysis-api-surface:check",
-        ":prepare:analysis-api:kotlin-analysis-api-platform-interface:check",
-        ":prepare:analysis-api:kotlin-analysis-api-implementation:check",
-        ":prepare:analysis-api:kotlin-analysis-api-intellij-api-surface-components:check",
-        ":prepare:analysis-api:kotlin-analysis-api-intellij-implementation-components:check",
-    )
+    @Suppress("UNCHECKED_CAST")
+    val analysisApiProjects = rootProject.extra["analysisApiArtifacts"] as List<String>
+
+    val analysisApiProjectChecks = analysisApiProjects
+        .map { "$it:check" }
+
+    dependsOn(*analysisApiProjectChecks.toTypedArray())
 }
 
 tasks.register("analysisAllTests") {
