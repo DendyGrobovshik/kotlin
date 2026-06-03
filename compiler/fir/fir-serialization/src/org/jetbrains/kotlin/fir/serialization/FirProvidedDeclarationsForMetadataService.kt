@@ -92,7 +92,7 @@ private class FirProvidedDeclarationsForMetadataServiceImpl(private val session:
                 }
             }
 
-            else -> error("Containing declaration could be either `FirFile` or `FirRegularClass`, but got ${containingDeclaration.render()}")
+            else -> error("Containing declaration must be either `FirFile` or `FirRegularClass`, but got ${containingDeclaration.render()}")
         }
     }
 
