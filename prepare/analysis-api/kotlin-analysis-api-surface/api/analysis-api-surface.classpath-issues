@@ -7,7 +7,6 @@ org/jetbrains/kotlin/contracts/description/EventOccurrencesRange
 org/jetbrains/kotlin/descriptors/Visibility
 org/jetbrains/kotlin/descriptors/annotations/KotlinTarget
 org/jetbrains/kotlin/diagnostics/WhenMissingCase
-org/jetbrains/kotlin/idea/references/KtReference
 org/jetbrains/kotlin/load/kotlin/TypeMappingMode
 org/jetbrains/kotlin/resolve/deprecation/DeprecationInfo
 org/jetbrains/kotlin/util/ImplementationStatus
