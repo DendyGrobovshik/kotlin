@@ -13,8 +13,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftimport.XCODEPROJ_PATH_E
 import org.jetbrains.kotlin.gradle.util.buildProjectWithMPP
 import org.jetbrains.kotlin.gradle.util.kotlin
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class IntegrateLinkagePackageMissingEnvTests {
 
@@ -29,17 +29,14 @@ class IntegrateLinkagePackageMissingEnvTests {
 
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
-        assertTrue(
-            failure.message!!.contains(XCODEPROJ_PATH_ENV),
-            "Error must mention $XCODEPROJ_PATH_ENV, was: ${failure.message}"
-        )
-        assertTrue(
-            failure.message!!.contains("Xcode project"),
-            "Error must explain that the user has to point the task at an Xcode project, was: ${failure.message}"
-        )
-        assertTrue(
-            failure.message!!.contains("./gradlew ${task.path}"),
-            "Error must include copy-pasteable command with task path '${task.path}', was: ${failure.message}"
+        assertEquals(
+            """
+            Please specify the path to the Xcode project in the $XCODEPROJ_PATH_ENV environment variable.
+            For example:
+                $XCODEPROJ_PATH_ENV=iosApp/iosApp.xcodeproj ./gradlew ${task.path}
+            Both relative (from the Gradle invocation directory) and absolute paths are supported.
+            """.trimIndent(),
+            failure.message,
         )
     }
 
@@ -54,13 +51,14 @@ class IntegrateLinkagePackageMissingEnvTests {
 
         val failure = assertFailsWith<IllegalStateException> { task.integrate() }
 
-        assertTrue(
-            failure.message!!.contains(XCODEPROJ_PATH_ENV),
-            "Error must mention $XCODEPROJ_PATH_ENV, was: ${failure.message}"
-        )
-        assertTrue(
-            failure.message!!.contains("./gradlew ${task.path}"),
-            "Error must include copy-pasteable command with task path '${task.path}', was: ${failure.message}"
+        assertEquals(
+            """
+            Please specify the path to the Xcode project in the $XCODEPROJ_PATH_ENV environment variable.
+            For example:
+                $XCODEPROJ_PATH_ENV=iosApp/iosApp.xcodeproj ./gradlew ${task.path}
+            Both relative (from the Gradle invocation directory) and absolute paths are supported.
+            """.trimIndent(),
+            failure.message,
         )
     }
 }
