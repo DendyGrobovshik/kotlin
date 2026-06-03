@@ -81,8 +81,8 @@ internal fun ThrowOutOfMemoryError() : Nothing {
 }
 
 @UsedFromCompilerGeneratedCode
-internal fun ThrowNoWhenBranchMatchedException(): Nothing {
-    throw NoWhenBranchMatchedException()
+internal fun ThrowNoWhenBranchMatchedException(message: String): Nothing {
+    throw NoWhenBranchMatchedException(message)
 }
 
 @ExportForCppRuntime

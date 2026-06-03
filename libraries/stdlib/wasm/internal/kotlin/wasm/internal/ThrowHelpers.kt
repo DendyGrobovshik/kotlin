@@ -55,8 +55,8 @@ internal fun THROW_IAE(message: String): Nothing {
 }
 
 @UsedFromCompilerGeneratedCode
-internal fun throwNoBranchMatchedException(): Nothing {
-    throw NoWhenBranchMatchedException()
+internal fun throwNoBranchMatchedException(message: String): Nothing {
+    throw NoWhenBranchMatchedException(message)
 }
 
 @UsedFromCompilerGeneratedCode

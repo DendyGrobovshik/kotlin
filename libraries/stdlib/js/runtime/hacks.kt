@@ -12,7 +12,7 @@ internal fun throwKotlinNothingValueException(): Nothing =
     throw KotlinNothingValueException()
 
 @UsedFromCompilerGeneratedCode
-internal fun noWhenBranchMatchedException(): Nothing = throw NoWhenBranchMatchedException()
+internal fun noWhenBranchMatchedException(msg: String): Nothing = throw NoWhenBranchMatchedException(msg)
 
 @UsedFromCompilerGeneratedCode
 internal fun THROW_ISE(): Nothing {
