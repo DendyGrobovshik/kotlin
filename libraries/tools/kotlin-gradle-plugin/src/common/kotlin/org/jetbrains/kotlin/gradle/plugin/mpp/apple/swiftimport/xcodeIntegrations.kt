@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.AppleXcodeTasks
 import org.jetbrains.kotlin.gradle.utils.getFile
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.Paths
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
@@ -38,12 +39,12 @@ internal abstract class IntegrateEmbedAndSignIntoXcodeProject : DefaultTask() {
 
     @TaskAction
     fun integrate() {
-        var projectPath = File(xcodeprojPath.get())
+        var projectPath = Paths.get(xcodeprojPath.get())
         if (!projectPath.isAbsolute) {
-            projectPath = currentDir.get().resolve(projectPath)
+            projectPath = currentDir.get().toPath().resolve(projectPath)
         }
 
-        val gradlewPath = System.getenv(GRADLEW_PATH_ENV)?.let { File(it) }
+        val gradlewPath = System.getenv(GRADLEW_PATH_ENV)?.let { Paths.get(it) }
             ?: searchForGradlew(projectPath)
             ?: error("Couldn't find path to Gradle executable. Please specify path using ${GRADLEW_PATH_ENV} environment variable")
 
@@ -69,11 +70,11 @@ internal abstract class IntegrateEmbedAndSignIntoXcodeProject : DefaultTask() {
             error("Couldn't find targets to insert embedAndSign integration")
         }
 
-        val srcrootPath = projectPath.parentFile
-        val relativeGradlewPath = gradlewPath.parentFile.relativeTo(srcrootPath)
+        val srcrootPath = projectPath.parent
+        val relativeGradlewPath = srcrootPath.relativize(gradlewPath.parent)
         nativeTargets.forEach {
             val scriptPhase = generateScriptReference(
-                relativeGradlewPath.path,
+                relativeGradlewPath.toString(),
                 gradleProjectPath,
             )
             val scriptPhaseReference = generateRandomPBXObjectReference()
@@ -88,7 +89,7 @@ internal abstract class IntegrateEmbedAndSignIntoXcodeProject : DefaultTask() {
             execOps,
             xcodeprojTemporaries.getFile(),
             project,
-            pbxprojPath.path,
+            pbxprojPath.toString(),
         )
     }
 
@@ -142,9 +143,9 @@ internal abstract class IntegrateLinkagePackageIntoXcodeProject : DefaultTask() 
 
     @TaskAction
     fun integrate() {
-        var projectPath = File(xcodeprojPath.get())
+        var projectPath = Paths.get(xcodeprojPath.get())
         if (!projectPath.isAbsolute) {
-            projectPath = currentDir.get().resolve(projectPath)
+            projectPath = currentDir.get().toPath().resolve(projectPath)
         }
 
         val pbxprojPath = projectPath.resolve("project.pbxproj")
@@ -193,7 +194,7 @@ internal abstract class IntegrateLinkagePackageIntoXcodeProject : DefaultTask() 
             execOps,
             xcodeprojTemporaries.getFile(),
             project,
-            pbxprojPath.path,
+            pbxprojPath.toString(),
         )
     }
 
@@ -295,7 +296,7 @@ private fun saveJsonBackIntoPbxproj(
         it.commandLine("swift", "build", "--show-bin-path")
         it.standardOutput = output
     }
-    val outputsPath = File(output.toString().lineSequence().first()).resolve(binName)
+    val outputsPath = Paths.get(output.toString().lineSequence().first()).resolve(binName)
 
     // Get Xcode developer path dynamically using xcode-select -p
     val xcodeSelectOutput = ByteArrayOutputStream()
@@ -306,11 +307,11 @@ private fun saveJsonBackIntoPbxproj(
     val developerPath = xcodeSelectOutput.toString().trim()
     // developerPath is typically /Applications/Xcode.app/Contents/Developer
     // SharedFrameworks is at /Applications/Xcode.app/Contents/SharedFrameworks (sibling of Developer)
-    val sharedFrameworksPath = File(developerPath).parentFile.resolve("SharedFrameworks").path
+    val sharedFrameworksPath = Paths.get(developerPath).parent.resolve("SharedFrameworks")
 
     execOps.exec {
         it.workingDir(xcodeprojTemporaries)
-        it.commandLine(outputsPath.path)
+        it.commandLine(outputsPath.toString())
         it.environment("DYLD_FALLBACK_FRAMEWORK_PATH", "$sharedFrameworksPath:/Applications/Xcode.app/Contents/SharedFrameworks")
         it.environment("XCODE_DEVELOPER_PATH", developerPath)
         it.environment(IntegrateLinkagePackageIntoXcodeProject.INPUT_PBXPROJ_JSON_PATH_ENV, jsonPbxprojPath.path)
