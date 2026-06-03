@@ -45,6 +45,11 @@ FILE: src.kt
         }
 
     }
+    public abstract interface Box<T> : R|kotlin/Any| {
+        public abstract val value: R|T|
+            public get(): R|T|
+
+    }
     @R|org/jetbrains/kotlin/plugin/sandbox/GenerateClassFamily|() public final class Marker : R|kotlin/Any| {
         public constructor(): R|Marker| {
             super<R|kotlin/Any|>()
@@ -229,6 +234,62 @@ FILE: main.kt
         when () {
             !=(R|<local>/innerE|.R|SubstitutionOverride</WithInnerFamily.Inner.foo: R|kotlin/String|>|(), String(ok)) ->  {
                 ^box <strcat>(String(FAIL innerE.foo: ), R|<local>/innerE|.R|SubstitutionOverride</WithInnerFamily.Inner.foo: R|kotlin/String|>|())
+            }
+        }
+
+        lval deep: R|WithDeepInnerFamily.Inner.DeeplyInner<kotlin/Double, kotlin/String, kotlin/Int>| = R|/WithDeepInnerFamily.WithDeepInnerFamily|<R|kotlin/Int|>().R|SubstitutionOverride</WithDeepInnerFamily.Inner.Inner>|<R|kotlin/String|>().R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.DeeplyInner>|<R|kotlin/Double|>()
+        when () {
+            !=(R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.x: R|kotlin/Int|>|, Int(42)) ->  {
+                ^box <strcat>(String(FAIL deep.x: ), R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.x: R|kotlin/Int|>|)
+            }
+        }
+
+        when () {
+            !=(R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.foo: R|kotlin/String|>|(), String(ok)) ->  {
+                ^box <strcat>(String(FAIL deep.foo: ), R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.foo: R|kotlin/String|>|())
+            }
+        }
+
+        lval deepSelf: R|WithDeepInnerFamily.Inner.DeeplyInner<kotlin/Double, kotlin/String, kotlin/Int>| = R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.self: R|WithDeepInnerFamily.Inner.DeeplyInner<kotlin/Double, kotlin/String, kotlin/Int>|>|()
+        when () {
+            !=(R|<local>/deepSelf|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.x: R|kotlin/Int|>|, Int(42)) ->  {
+                ^box <strcat>(String(FAIL deepSelf.x: ), R|<local>/deepSelf|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.x: R|kotlin/Int|>|)
+            }
+        }
+
+        lval c: R|kotlin/Double| = R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.idC: R|kotlin/Double|>|(Double(3.14))
+        when () {
+            !=(R|<local>/c|, Double(3.14)) ->  {
+                ^box <strcat>(String(FAIL deep.idC: ), R|<local>/c|)
+            }
+        }
+
+        lval b: R|kotlin/String| = R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.idB: R|kotlin/String|>|(String(hi))
+        when () {
+            !=(R|<local>/b|, String(hi)) ->  {
+                ^box <strcat>(String(FAIL deep.idB: ), R|<local>/b|)
+            }
+        }
+
+        lval a: R|kotlin/Int| = R|<local>/deep|.R|SubstitutionOverride</WithDeepInnerFamily.Inner.DeeplyInner.idA: R|kotlin/Int|>|(Int(7))
+        when () {
+            !=(R|<local>/a|, Int(7)) ->  {
+                ^box <strcat>(String(FAIL deep.idA: ), R|<local>/a|)
+            }
+        }
+
+        lval outerBox: R|Outer<kotlin/String>| = R|/Outer.Outer|<R|kotlin/String|>()
+        lval ib: R|Box<kotlin/String>| = R|<local>/outerBox|.R|SubstitutionOverride</Outer.InnerBox.InnerBox>|(String(boxed))
+        when () {
+            !=(R|<local>/ib|.R|SubstitutionOverride</Box.value: R|kotlin/String|>|, String(boxed)) ->  {
+                ^box <strcat>(String(FAIL ib.value: ), R|<local>/ib|.R|SubstitutionOverride</Box.value: R|kotlin/String|>|)
+            }
+        }
+
+        lval ib2: R|Outer.InnerBox<kotlin/String>| = R|<local>/outerBox|.R|SubstitutionOverride</Outer.InnerBox.InnerBox>|(String(direct))
+        when () {
+            !=(R|<local>/ib2|.R|SubstitutionOverride</Outer.InnerBox.value: R|kotlin/String|>|, String(direct)) ->  {
+                ^box <strcat>(String(FAIL ib2.value: ), R|<local>/ib2|.R|SubstitutionOverride</Outer.InnerBox.value: R|kotlin/String|>|)
             }
         }
 

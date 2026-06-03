@@ -23,6 +23,12 @@ class SourceOuterPlain2
 class SourceOuterGeneric<T>
 class SourceOuterGenericPaired<T>
 
+// Test (16): source-declared interface used as the supertype of a generated inner class, where the
+// outer class's type parameter is captured in the supertype (`InnerBox : Box<T>`).
+interface Box<T> {
+    val value: T
+}
+
 @GenerateClassFamily
 class Marker
 
@@ -98,6 +104,34 @@ fun box(): String {
     val innerE = withInner.Inner<String>()
     if (innerE.x != 42) return "FAIL innerE.x: ${innerE.x}"
     if (innerE.foo() != "ok") return "FAIL innerE.foo: ${innerE.foo()}"
+
+    // (14) Deep generic inner chain: three levels of inner-class generics, all plugin-generated.
+    val deep = WithDeepInnerFamily<Int>().Inner<String>().DeeplyInner<Double>()
+    if (deep.x != 42) return "FAIL deep.x: ${deep.x}"
+    if (deep.foo() != "ok") return "FAIL deep.foo: ${deep.foo()}"
+    // `self()`'s metadata return type must round-trip with all three type arguments in canonical
+    // (own-first) order. This explicitly-typed assignment only compiles if the inner-class type
+    // parameters were registered correctly across the whole enclosing chain.
+    val deepSelf: WithDeepInnerFamily<Int>.Inner<String>.DeeplyInner<Double> = deep.self()
+    if (deepSelf.x != 42) return "FAIL deepSelf.x: ${deepSelf.x}"
+
+    // (15) Functions on DeeplyInner returning the type parameter at each level of the chain:
+    // own C (Double), captured B from Inner (String), captured A from WithDeepInnerFamily (Int).
+    val c: Double = deep.idC(3.14)
+    if (c != 3.14) return "FAIL deep.idC: $c"
+    val b: String = deep.idB("hi")
+    if (b != "hi") return "FAIL deep.idB: $b"
+    val a: Int = deep.idA(7)
+    if (a != 7) return "FAIL deep.idA: $a"
+
+    // (16) The outer type parameter is captured in the inner class's supertype: InnerBox : Box<T>.
+    // Using the inner instance through the Box<String> supertype only type-checks if the captured
+    // type parameter was substituted correctly during IR -> cone conversion of the supertype.
+    val outerBox = Outer<String>()
+    val ib: Box<String> = outerBox.InnerBox("boxed")
+    if (ib.value != "boxed") return "FAIL ib.value: ${ib.value}"
+    val ib2 = outerBox.InnerBox("direct")
+    if (ib2.value != "direct") return "FAIL ib2.value: ${ib2.value}"
 
     return "OK"
 }
