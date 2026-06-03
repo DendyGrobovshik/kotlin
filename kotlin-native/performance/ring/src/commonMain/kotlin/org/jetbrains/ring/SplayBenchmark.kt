@@ -259,7 +259,11 @@ class SplayHideName {
     val splayTreePayloadDepth = 5;
     val splayTree = splaySetup()
 
-    fun generateKey(): Int = random.nextInt()
+    private val randomInts = IntArray(1000) { random.nextInt() }
+    private var nextKeyIndex = 0
+    fun generateKey(): Int = randomInts[nextKeyIndex].also {
+        nextKeyIndex = (nextKeyIndex + 1) % randomInts.size
+    }
 
     fun generatePayloadTree(depth: Int, tag: String): Pair<Any, Any> {
         return if (depth == 0) {

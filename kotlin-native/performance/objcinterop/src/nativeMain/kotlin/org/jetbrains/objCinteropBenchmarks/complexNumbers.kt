@@ -40,6 +40,10 @@ class ComplexNumbersBenchmarkHideName : SkipWhenBaseOnly() {
         return result
     }
 
+    private val randomNumbers = DoubleArray(BENCHMARK_SIZE * 2) {
+        randomNumber()
+    }
+
     @Benchmark
     fun generateNumbersSequence(bh: Blackhole) {
         skipWhenBaseOnly()
@@ -77,9 +81,15 @@ class ComplexNumbersBenchmarkHideName : SkipWhenBaseOnly() {
 
         val result = InvertedNumber(0.0)
 
-        for (i in 1..BENCHMARK_SIZE) {
-            result.add(InvertedNumber(randomNumber()))
-            result.sub(InvertedNumber(randomNumber()))
+        var doAdd = true
+        for (number in randomNumbers) {
+            val inverted = InvertedNumber(number)
+            if (doAdd) {
+                result = result.add(inverted)
+            } else {
+                result = result.sub(inverted)
+            }
+            doAdd = !doAdd
         }
 
         bh.consume(result)
