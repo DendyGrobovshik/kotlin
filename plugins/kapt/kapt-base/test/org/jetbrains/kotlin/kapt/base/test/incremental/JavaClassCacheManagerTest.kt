@@ -11,11 +11,15 @@ import org.jetbrains.kotlin.kapt.base.incremental.SourcesToReprocess
 import org.jetbrains.kotlin.kapt.base.test.newCompiledSourcesFolder
 import org.jetbrains.kotlin.kapt.base.test.newFolder
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.io.Serializable
 
 class JavaClassCacheManagerTest {
     private lateinit var cache: JavaClassCacheManager
@@ -36,6 +40,26 @@ class JavaClassCacheManagerTest {
 
         assertTrue(cacheDir.resolve("java-cache.bin").exists())
         assertTrue(cacheDir.resolve("apt-cache.bin").exists())
+    }
+
+    @Test
+    fun testRejectedJavaCacheDoesNotDeserializePayload() {
+        DeserializationProbe.wasDeserialized = false
+        writePoisonedObject(cacheDir.resolve("java-cache.bin"))
+
+        JavaClassCacheManager(cacheDir).close()
+
+        assertFalse(DeserializationProbe.wasDeserialized)
+    }
+
+    @Test
+    fun testRejectedAptCacheDoesNotDeserializePayload() {
+        DeserializationProbe.wasDeserialized = false
+        writePoisonedObject(cacheDir.resolve("apt-cache.bin"))
+
+        JavaClassCacheManager(cacheDir).close()
+
+        assertFalse(DeserializationProbe.wasDeserialized)
     }
 
     @Test
@@ -194,6 +218,26 @@ class JavaClassCacheManagerTest {
     private fun prepareForIncremental() {
         cache.close()
         cache = JavaClassCacheManager(cacheDir)
+    }
+
+    private fun writePoisonedObject(file: File) {
+        file.parentFile.mkdirs()
+        ObjectOutputStream(file.outputStream()).use {
+            it.writeObject(DeserializationProbe())
+        }
+    }
+
+    private class DeserializationProbe : Serializable {
+        private fun readObject(input: ObjectInputStream) {
+            input.defaultReadObject()
+            wasDeserialized = true
+        }
+
+        companion object {
+            private const val serialVersionUID = 0L
+
+            var wasDeserialized = false
+        }
     }
 }
 
