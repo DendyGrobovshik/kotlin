@@ -149,9 +149,9 @@ class SourceMap3Builder(
             if (paths.size < 2) return 0
 
             // The idea is to find common path between least common paths - first one and last one of sorted paths list.
-            val sortedPaths = paths.sortedDescending()
+            val first = paths.max()
+            val last = paths.min()
 
-            val [first, last] = sortedPaths.first() to sortedPaths.last()
             val [shorter, longer] = if (first.length < last.length) first to last else last to first
 
             var latestSeparatorIndex = -1
@@ -164,12 +164,13 @@ class SourceMap3Builder(
             return latestSeparatorIndex + 1
         }
 
-        val sourceRootLength = commonUnixPathPrefixLength(paths.filter { !it.shouldKeepOriginalPrefix() })
+        val applicablePaths = paths.filter { !it.shouldKeepOriginalPrefix() }
+        val sourceRootLength = commonUnixPathPrefixLength(applicablePaths)
         if (sourceRootLength == 0) return null to paths
 
         // Common prefix should contain the leading '/', so upper index also includes it
-        val commonPrefix = paths
-            .first { !it.shouldKeepOriginalPrefix() }
+        val commonPrefix = applicablePaths
+            .first()
             .substring(0, sourceRootLength)
 
         return commonPrefix to paths.map {
