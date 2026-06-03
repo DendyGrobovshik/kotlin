@@ -45,11 +45,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.antlr.runtime)
 
-    val embeddedProjects = buildList {
+    val embeddedProjects = buildSet {
         addAll(compilerModules)
         addAll(additionalCompilerProjects)
         removeAll(excludedCompilerProjects)
-        removeAll(analysisApiImplementationProjects)
         addAll(analysisApiImplementationProjects)
     }
 
