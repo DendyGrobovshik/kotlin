@@ -40,45 +40,26 @@ abstract class AbstractKotlinPassesFileCheckTest {
     }
 
     private fun opt(inputFile: File, outputFile: File, args: List<String>) {
-        ByteArrayOutputStream().use { output ->
-            val request = ExecuteRequest(llvmExecutable("opt").absolutePath).apply {
-                this.args.add("-S")
-                this.args.add("--load-pass-plugin=$llvmPlugin")
-                this.args.add("-o")
-                this.args.add(outputFile.absolutePath)
-                this.args.addAll(args)
-                this.args.add(inputFile.absolutePath)
-                this.stdout = output
-                this.stderr = output
-                this.timeout = optTimeout
-                this.workingDirectory = File("").absoluteFile
-            }
-            val response = executor.execute(request)
-            try {
-                response.assertSuccess()
-            } catch (e: IllegalStateException) {
-                fail("${e.message}: ${output.toString("UTF-8").trim()}")
-            }
+        runProcess(
+            llvmExecutable("opt").absolutePath,
+            "-S",
+            "--load-pass-plugin=$llvmPlugin",
+            "-o", outputFile.absolutePath,
+            *args.toTypedArray(),
+            inputFile.absolutePath,
+        ) {
+            this.timeout = optTimeout
         }
     }
 
     private fun fileCheck(inputFile: File, testedFile: File, args: List<String>) {
-        ByteArrayOutputStream().use { output ->
-            val request = ExecuteRequest(llvmExecutable("FileCheck").absolutePath).apply {
-                this.args.add("--input-file=$testedFile")
-                this.args.addAll(args)
-                this.args.add(inputFile.absolutePath)
-                this.stdout = output
-                this.stderr = output
-                this.timeout = fileCheckTimeout
-                this.workingDirectory = File("").absoluteFile
-            }
-            val response = executor.execute(request)
-            try {
-                response.assertSuccess()
-            } catch (e: IllegalStateException) {
-                fail("${e.message}: ${output.toString("UTF-8").trim()}")
-            }
+        runProcess(
+            llvmExecutable("FileCheck").absolutePath,
+            "--input-file=$testedFile",
+            *args.toTypedArray(),
+            inputFile.absolutePath,
+        ) {
+            this.timeout = fileCheckTimeout
         }
     }
 
