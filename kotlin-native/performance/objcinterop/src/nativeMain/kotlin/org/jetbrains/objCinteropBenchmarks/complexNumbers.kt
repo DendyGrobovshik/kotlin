@@ -79,15 +79,15 @@ class ComplexNumbersBenchmarkHideName : SkipWhenBaseOnly() {
                         error("Expected object of InvertedNumber class")
         }
 
-        val result = InvertedNumber(0.0)
+        var result = InvertedNumber(0.0)
 
         var doAdd = true
         for (number in randomNumbers) {
             val inverted = InvertedNumber(number)
             if (doAdd) {
-                result = result.add(inverted)
+                result = result.add(inverted) as InvertedNumber
             } else {
-                result = result.sub(inverted)
+                result = result.sub(inverted) as InvertedNumber
             }
             doAdd = !doAdd
         }
