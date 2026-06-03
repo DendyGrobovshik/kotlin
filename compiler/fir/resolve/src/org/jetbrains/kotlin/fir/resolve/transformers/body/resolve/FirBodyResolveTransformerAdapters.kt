@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
 import org.jetbrains.kotlin.fir.resolve.ResolutionMode
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.transformers.AdapterForResolveProcessor
-import org.jetbrains.kotlin.fir.resolve.transformers.DirectClassInheritorsCollector
 import org.jetbrains.kotlin.fir.resolve.transformers.FirTransformerBasedResolveProcessor
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.withFileAnalysisExceptionWrapping
@@ -33,17 +32,13 @@ class FirBodyResolveTransformerAdapter(session: FirSession, scopeSession: ScopeS
         scopeSession = scopeSession
     )
 
-    private val directClassInheritorsCollector = DirectClassInheritorsCollector(session)
-
     override fun <E : FirElement> transformElement(element: E, data: Any?): E {
         return element
     }
 
     override fun transformFile(file: FirFile, data: Any?): FirFile {
         return withFileAnalysisExceptionWrapping(file) {
-            file.transform<FirFile, ResolutionMode.ContextIndependent>(transformer, ResolutionMode.ContextIndependent).apply {
-                accept(directClassInheritorsCollector)
-            }
+            file.transform(transformer, ResolutionMode.ContextIndependent)
         }
     }
 }
