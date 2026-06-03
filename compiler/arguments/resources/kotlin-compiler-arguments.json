@@ -3236,50 +3236,6 @@
                         }
                     },
                     {
-                        "name": "Xdirect-class-inheritors",
-                        "shortName": null,
-                        "deprecatedName": null,
-                        "description": {
-                            "current": "Enable experimental direct class inheritors resolution.",
-                            "valueInVersions": []
-                        },
-                        "delimiter": null,
-                        "affectsCompilationOutcome": true,
-                        "restrictedToCompilerPhase": null,
-                        "valueType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.BooleanType",
-                            "isNullable": {
-                                "current": false,
-                                "valueInVersions": []
-                            },
-                            "defaultValue": {
-                                "current": false,
-                                "valueInVersions": []
-                            }
-                        },
-                        "valueDescription": {
-                            "current": null,
-                            "valueInVersions": []
-                        },
-                        "releaseVersionsMetadata": {
-                            "introducedVersion": "2.4.0",
-                            "stabilizedVersion": null,
-                            "deprecatedVersion": null,
-                            "removedVersion": null
-                        },
-                        "argumentType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.BooleanType",
-                            "isNullable": {
-                                "current": false,
-                                "valueInVersions": []
-                            },
-                            "defaultValue": {
-                                "current": false,
-                                "valueInVersions": []
-                            }
-                        }
-                    },
-                    {
                         "name": "Xdirect-java-actualization",
                         "shortName": null,
                         "deprecatedName": null,
@@ -3363,50 +3319,6 @@
                             },
                             "defaultValue": {
                                 "current": false,
-                                "valueInVersions": []
-                            }
-                        }
-                    },
-                    {
-                        "name": "Xdisable-ir-checkers",
-                        "shortName": null,
-                        "deprecatedName": null,
-                        "description": {
-                            "current": "A list of IR checkers to disable, specified by a simple name of the checker class. A name of an annotation can also be used to match all tagged checkers.\nOnly has effect if '-Xverify-ir' is not 'none'.",
-                            "valueInVersions": []
-                        },
-                        "delimiter": null,
-                        "affectsCompilationOutcome": true,
-                        "restrictedToCompilerPhase": null,
-                        "valueType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.StringArrayType",
-                            "defaultValue": {
-                                "current": null,
-                                "valueInVersions": []
-                            },
-                            "isNullable": {
-                                "current": true,
-                                "valueInVersions": []
-                            }
-                        },
-                        "valueDescription": {
-                            "current": "<checker1>,<checker2>",
-                            "valueInVersions": []
-                        },
-                        "releaseVersionsMetadata": {
-                            "introducedVersion": "2.4.20",
-                            "stabilizedVersion": null,
-                            "deprecatedVersion": null,
-                            "removedVersion": null
-                        },
-                        "argumentType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.StringArrayType",
-                            "defaultValue": {
-                                "current": null,
-                                "valueInVersions": []
-                            },
-                            "isNullable": {
-                                "current": true,
                                 "valueInVersions": []
                             }
                         }
@@ -3671,50 +3583,6 @@
                             },
                             "defaultValue": {
                                 "current": null,
-                                "valueInVersions": []
-                            }
-                        }
-                    },
-                    {
-                        "name": "Xenable-additional-ir-checkers",
-                        "shortName": null,
-                        "deprecatedName": null,
-                        "description": {
-                            "current": "A list of IR checkers to enable, specified by a simple name of the checker class.\nIt may only be used with specific checkers that are not enabled by default, and which are prepared to be enabled this way. Only has effect if '-Xverify-ir' is not 'none'.",
-                            "valueInVersions": []
-                        },
-                        "delimiter": null,
-                        "affectsCompilationOutcome": true,
-                        "restrictedToCompilerPhase": null,
-                        "valueType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.StringArrayType",
-                            "defaultValue": {
-                                "current": null,
-                                "valueInVersions": []
-                            },
-                            "isNullable": {
-                                "current": true,
-                                "valueInVersions": []
-                            }
-                        },
-                        "valueDescription": {
-                            "current": "<checker1>,<checker2>",
-                            "valueInVersions": []
-                        },
-                        "releaseVersionsMetadata": {
-                            "introducedVersion": "2.4.20",
-                            "stabilizedVersion": null,
-                            "deprecatedVersion": null,
-                            "removedVersion": null
-                        },
-                        "argumentType": {
-                            "type": "org.jetbrains.kotlin.arguments.dsl.types.StringArrayType",
-                            "defaultValue": {
-                                "current": null,
-                                "valueInVersions": []
-                            },
-                            "isNullable": {
-                                "current": true,
                                 "valueInVersions": []
                             }
                         }
@@ -6257,7 +6125,7 @@
                             "introducedVersion": "2.3.20",
                             "stabilizedVersion": null,
                             "deprecatedVersion": null,
-                            "removedVersion": "2.4.20"
+                            "removedVersion": null
                         },
                         "argumentType": {
                             "type": "org.jetbrains.kotlin.arguments.dsl.types.BooleanType",
@@ -6301,7 +6169,7 @@
                             "introducedVersion": "2.0.20",
                             "stabilizedVersion": null,
                             "deprecatedVersion": null,
-                            "removedVersion": "2.4.20"
+                            "removedVersion": null
                         },
                         "argumentType": {
                             "type": "org.jetbrains.kotlin.arguments.dsl.types.BooleanType",
@@ -9604,14 +9472,8 @@
                                 "shortName": null,
                                 "deprecatedName": null,
                                 "description": {
-                                    "current": "Select the code generation scheme for type-checking 'when' expressions:\n-Xwhen-expressions=indy         Generate type-checking 'when' expressions using 'invokedynamic' with 'SwitchBootstraps.typeSwitch(..)' and \n                                following 'tableswitch' or 'lookupswitch'. This requires '-jvm-target 21' or greater.\n-Xwhen-expressions=inline       Generate type-checking 'when' expressions as a chain of type checks.\nThe default value is 'indy' if the JVM target version is 21 or greater, and 'inline' otherwise.",
-                                    "valueInVersions": [
-                                        {
-                                            "minReleaseVersion": "2.2.20",
-                                            "maxReleaseVersion": "2.4.0",
-                                            "value": "Select the code generation scheme for type-checking 'when' expressions:\n-Xwhen-expressions=indy         Generate type-checking 'when' expressions using 'invokedynamic' with 'SwitchBootstraps.typeSwitch(..)' and \n                                following 'tableswitch' or 'lookupswitch'. This requires '-jvm-target 21' or greater.\n-Xwhen-expressions=inline       Generate type-checking 'when' expressions as a chain of type checks.\nThe default value is 'inline'."
-                                        }
-                                    ]
+                                    "current": "Select the code generation scheme for type-checking 'when' expressions:\n-Xwhen-expressions=indy         Generate type-checking 'when' expressions using 'invokedynamic' with 'SwitchBootstraps.typeSwitch(..)' and \n                                following 'tableswitch' or 'lookupswitch'. This requires '-jvm-target 21' or greater.\n-Xwhen-expressions=inline       Generate type-checking 'when' expressions as a chain of type checks.\nThe default value is 'inline'.",
+                                    "valueInVersions": []
                                 },
                                 "delimiter": null,
                                 "affectsCompilationOutcome": true,
