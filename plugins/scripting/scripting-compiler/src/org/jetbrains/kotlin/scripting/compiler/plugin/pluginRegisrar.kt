@@ -12,22 +12,27 @@ import org.jetbrains.kotlin.cli.common.extensions.ReplFactoryExtension
 import org.jetbrains.kotlin.cli.common.extensions.ScriptEvaluationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.registerExtension
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.MessageCollectorAccess
 import org.jetbrains.kotlin.config.scriptingHostConfiguration
 import org.jetbrains.kotlin.extensions.CollectAdditionalSourcesExtension
 import org.jetbrains.kotlin.extensions.CompilerConfigurationExtension
 import org.jetbrains.kotlin.extensions.ExtensionPointDescriptor
+import org.jetbrains.kotlin.extensions.ProcessSourcesBeforeCompilingExtension
 import org.jetbrains.kotlin.fir.extensions.CollectAdditionalSourceFilesExtension
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.resolve.extensions.ExtraImportsProviderExtension
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.definitions.CliScriptConfigurationsProvider
 import org.jetbrains.kotlin.scripting.compiler.plugin.definitions.CliScriptDefinitionProvider
+import org.jetbrains.kotlin.scripting.compiler.plugin.definitions.CliScriptReportSink
 import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.JvmStandardReplFactoryExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.ReplLoweringExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.ScriptLoweringExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.ScriptingCollectAdditionalSourcesExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.ScriptingIrExplainGenerationExtension
+import org.jetbrains.kotlin.scripting.compiler.plugin.extensions.ScriptingProcessSourcesBeforeCompilingExtension
 import org.jetbrains.kotlin.scripting.compiler.plugin.fir.CollectAdditionalScriptSourcesExtension
 import org.jetbrains.kotlin.scripting.configuration.ScriptingConfigurationKeys.ENABLE_SCRIPT_EXPLANATION_OPTION
 import org.jetbrains.kotlin.scripting.definitions.ScriptConfigurationsProvider
@@ -78,13 +83,20 @@ class ScriptingK2CompilerPluginRegistrar : CompilerPluginRegistrar() {
         ReplFactoryExtension.registerExtensionIfRequired(this, JvmStandardReplFactoryExtension())
         SyntheticResolveExtension.registerExtension(ScriptingResolveExtension())
         ExtraImportsProviderExtension.registerExtension(ScriptExtraImportsProviderExtension())
+        ProcessSourcesBeforeCompilingExtension.registerExtension(ScriptingProcessSourcesBeforeCompilingExtension())
 
         val scriptDefinitionProvider = CliScriptDefinitionProvider()
         ScriptDefinitionProvider.registerExtension(scriptDefinitionProvider)
 
+        @OptIn(MessageCollectorAccess::class) // TODO(KT-84516)
+        val messageCollector = configuration[CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY]
         ScriptConfigurationsProvider.registerExtension(
             CliScriptConfigurationsProvider(project = null) {
                 scriptDefinitionProvider
+            }.apply {
+                if (messageCollector != null) {
+                    reportSink = CliScriptReportSink(messageCollector)
+                }
             }
         )
 
