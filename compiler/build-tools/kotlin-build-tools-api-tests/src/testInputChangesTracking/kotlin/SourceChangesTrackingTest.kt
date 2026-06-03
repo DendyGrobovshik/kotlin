@@ -44,6 +44,40 @@ class SourceChangesTrackingTest : BaseCompilationTest() {
         }
     }
 
+    @DefaultStrategyAgnosticCompilationTest
+    @DisplayName("IC recompiles only the type alias declaration and its users when the aliased class changes")
+    @TestMetadata("type-alias-incremental")
+    fun testTypeAliasChange(strategyConfig: CompilerExecutionStrategyConfiguration) {
+        jvmScenario(strategyConfig) {
+            val module = module("type-alias-incremental")
+
+            module.changeFile("Curry.kt") { it.replace("class Curry", "internal class Curry") }
+
+            module.compile {
+                // `Dummy.kt` is intentionally absent: it neither declares nor references the changed type,
+                // so only the type alias declaration and its single user are recompiled.
+                assertCompiledSources("Curry.kt", "UseCurry.kt")
+            }
+        }
+    }
+
+    @DefaultStrategyAgnosticCompilationTest
+    @DisplayName("IC recompiles the Kotlin usage when an inlined Java constant changes")
+    @TestMetadata("kotlin-java-constant")
+    fun testKotlinTracksJavaConstantChange(strategyConfig: CompilerExecutionStrategyConfiguration) {
+        jvmScenario(strategyConfig) {
+            val module = module("kotlin-java-constant")
+
+            module.replaceFileWithVersion("JavaConstants.java", "new-value")
+
+            module.compile {
+                // Regression test for KT-69042: under K2 a changed Java constant must recompile the Kotlin
+                // file that reads it, otherwise the stale value stays inlined in the usage.
+                assertCompiledSources("usage.kt")
+            }
+        }
+    }
+
     @DisplayName("Explicit backing fields don't alter the compilability of a module")
     @BtaV2StrategyAgnosticCompilationTest
     @TestMetadata("explicit-backing-fields-incremental-1")
