@@ -123,7 +123,7 @@ class CacheUpdater(
 
     private val dirtyFileStats = KotlinSourceFileMutableMap<EnumSet<DirtyFileState>>()
 
-    private val mainLibraryFile = KotlinLibraryFile(File(compilerConfiguration.includes!!).canonicalPath)
+    private val mainLibraryFile = KotlinLibraryFile(File(compilerConfiguration.includes.last()).canonicalPath)
 
     private val icHasher = ICHasher(checkForClassStructuralChanges)
 
