@@ -5,24 +5,50 @@
 
 package org.jetbrains.kotlin.ir.backend.js.utils
 
+import org.jetbrains.kotlin.backend.common.serialization.cityHash64
+import java.io.File
+
+
+private const val BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+fun Long.toStableJsIdentifier(): String {
+    val hash = this and 0x7FFFFFFFFFFFFFFF
+
+    val char4 = BASE62[(hash % 62).toInt()]
+    val char3 = BASE62[((hash / 62) % 62).toInt()]
+    val char2 = BASE62[((hash / (62 * 62)) % 62).toInt()]
+    val char1 = BASE62[((hash / (62 * 62 * 62)) % 52).toInt()]
+
+    return "$char1$char2$char3$char4"
+}
+
+fun String.toStableJsIdentifier(used: MutableSet<String>): String {
+    val hashId = this.cityHash64().toStableJsIdentifier()
+    var name = hashId
+    var suffix = 1
+    while (name in used) {
+        name = "$hashId$suffix"
+        suffix++
+    }
+    used.add(name)
+    return name
+}
+
 class MinimizedNameGenerator {
     private var index = 0
     private val functionSignatureToName = hashMapOf<String, String>()
     private val reservedNames = hashSetOf<String>()
     private val keptNames = hashSetOf<String>()
 
-    fun generateNextName(): String {
-        var candidate = index++.toJsIdentifier()
-        while (candidate in reservedNames) {
-            candidate = index++.toJsIdentifier()
-        }
-        return candidate
+    fun generateNextName(seed: String): String {
+        val result = seed.toStableJsIdentifier(reservedNames)
+        return result
     }
 
     fun nameBySignature(signature: String): String {
         if (signature in keptNames) return signature
         return functionSignatureToName.getOrPut(signature) {
-            generateNextName()
+            generateNextName(signature)
         }
     }
 

@@ -242,8 +242,8 @@ class Merger(
 
         val exportStatements = declareAndCallJsExporter() + additionalExports + transitiveJsExport()
 
-        val importedJsModules = this.importedModulesMap.values.toList() + this.crossModuleReferences.importedModules
-        val importStatements = this.importStatements.values.toList() + this.importStatementsWithEffect.toList()
+        val importedJsModules = this.importedModulesMap.values.sortedBy { it.internalName.ident }.toList() + this.crossModuleReferences.importedModules
+        val importStatements = this.importStatements.entries.sortedBy { it.key }.map { it.value }.toList() + this.importStatementsWithEffect.toList()
 
         val program = JsProgram()
 
@@ -299,8 +299,8 @@ class Merger(
         }
 
         DFS.dfs(
-            classModelMap.keys,
-            { classModelMap[it]?.dependsOnClasses ?: emptyList() },
+            classModelMap.keys.sortedBy { it.ident },
+            { classModelMap[it]?.dependsOnClasses?.sortedBy { it.ident } ?: emptyList() },
             declarationHandler
         )
     }

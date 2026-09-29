@@ -45,7 +45,7 @@ private fun List<IrType>.joinTypes(context: JsIrBackendContext): String {
     if (isEmpty()) {
         return ""
     }
-    return joinToString("$", "$") { superType -> superType.asString(context) }
+    return map { it.asString(context) }.sorted().joinToString("$", "$")
 }
 
 private fun IrFunction.findOriginallyContainingModule(): IrModuleFragment? {
