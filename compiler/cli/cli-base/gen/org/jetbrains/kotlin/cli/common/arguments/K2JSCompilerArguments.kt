@@ -107,6 +107,16 @@ class K2JSCompilerArguments : K2WasmCompilerArguments() {
         }
 
     @Argument(
+        value = "-Xir-export-all",
+        description = "Export all top-level declarations from each module in the cross-module export table.",
+    )
+    var irExportAll: Boolean = false
+        set(value) {
+            checkFrozen()
+            field = value
+        }
+
+    @Argument(
         value = "-Xir-generate-inline-anonymous-functions",
         description = "Lambda expressions that capture values are translated into in-line anonymous JavaScript functions.",
     )

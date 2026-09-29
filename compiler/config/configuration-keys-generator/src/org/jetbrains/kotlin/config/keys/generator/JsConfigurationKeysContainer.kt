@@ -107,6 +107,7 @@ object JsConfigurationKeysContainer : KeysContainer("org.jetbrains.kotlin.js.con
     val SAFE_EXTERNAL_BOOLEAN by key<Boolean>("Wrap access to external 'Boolean' properties with an explicit conversion to 'Boolean'.")
     val SAFE_EXTERNAL_BOOLEAN_DIAGNOSTIC by key<String>("Enable runtime diagnostics when accessing external 'Boolean' properties.")
     val MINIMIZED_MEMBER_NAMES by key<Boolean>()
+    val EXPORT_ALL by key<Boolean>("Export all top-level declarations from each module in the cross-module export table.")
     val CALL_MAIN_MODE by key<String>("Specify whether the 'main' function should be called upon execution.")
     val IC_CACHE_DIRECTORY by key<String>(throwOnNull = false)
     val IC_CACHE_READ_ONLY by key<Boolean>()

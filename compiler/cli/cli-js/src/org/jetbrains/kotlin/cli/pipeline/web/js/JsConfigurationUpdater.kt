@@ -57,6 +57,7 @@ object JsConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
         configuration.keep = arguments.irKeep?.split(",")?.filterNot { it.isEmpty() }.orEmpty()
         configuration.safeExternalBoolean = arguments.irSafeExternalBoolean
         configuration.minimizedMemberNames = arguments.irMinimizedMemberNames
+        configuration.exportAll = arguments.irExportAll
         configuration.propertyLazyInitialization = arguments.irPropertyLazyInitialization
         configuration.generatePolyfills = arguments.generatePolyfills
         configuration.generateInlineAnonymousFunctions = arguments.irGenerateInlineAnonymousFunctions

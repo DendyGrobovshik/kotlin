@@ -143,7 +143,8 @@ class JsCodeGenerator(
     private val granularity: JsGenerationGranularity,
     private val mainModuleName: String,
     private val moduleKind: ModuleKind,
-    private val sourceMapsInfo: SourceMapsInfo?
+    private val sourceMapsInfo: SourceMapsInfo?,
+    private val exportAll: Boolean = false,
 ) {
     fun generateJsCode(relativeRequirePath: Boolean, outJsProgram: Boolean): CompilationOutputsBuilt {
         return generateWrappedModuleBody(
@@ -153,7 +154,8 @@ class JsCodeGenerator(
             program,
             sourceMapsInfo,
             relativeRequirePath,
-            outJsProgram
+            outJsProgram,
+            exportAll
         )
     }
 }
@@ -167,6 +169,7 @@ class IrModuleToJsTransformer(
     private val shouldGeneratePolyfills = backendContext.configuration.getBoolean(JSConfigurationKeys.GENERATE_POLYFILLS)
     private val generateRegionComments = backendContext.configuration.getBoolean(JSConfigurationKeys.GENERATE_REGION_COMMENTS)
     private val shouldGenerateTypeScriptDefinitions = backendContext.configuration.getBoolean(JSConfigurationKeys.GENERATE_DTS)
+    private val exportAll = backendContext.configuration.getBoolean(JSConfigurationKeys.EXPORT_ALL)
 
     private val mainModuleName = backendContext.configuration[CommonConfigurationKeys.MODULE_NAME]!!
     private val moduleKind = backendContext.configuration[JSConfigurationKeys.MODULE_KIND]!!
@@ -293,7 +296,7 @@ class IrModuleToJsTransformer(
 
         val program = JsIrProgram(ArtifactProducer(mode).generateArtifacts(exportData, mode.granularity))
 
-        return JsCodeGenerator(program, mode.granularity, mainModuleName, moduleKind, sourceMapInfo)
+        return JsCodeGenerator(program, mode.granularity, mainModuleName, moduleKind, sourceMapInfo, exportAll)
     }
 
     private inner class ArtifactProducer(
@@ -576,7 +579,8 @@ private fun generateWrappedModuleBody(
     program: JsIrProgram,
     sourceMapsInfo: SourceMapsInfo?,
     relativeRequirePath: Boolean,
-    outJsProgram: Boolean
+    outJsProgram: Boolean,
+    exportAll: Boolean = false
 ): CompilationOutputsBuilt {
     return when (granularity) {
         JsGenerationGranularity.WHOLE_PROGRAM -> generateSingleWrappedModuleBody(
@@ -594,7 +598,8 @@ private fun generateWrappedModuleBody(
             program,
             sourceMapsInfo,
             relativeRequirePath,
-            outJsProgram
+            outJsProgram,
+            exportAll
         )
     }
 }
@@ -605,12 +610,13 @@ private fun generateMultiWrappedModuleBody(
     program: JsIrProgram,
     sourceMapsInfo: SourceMapsInfo?,
     relativeRequirePath: Boolean,
-    outJsProgram: Boolean
+    outJsProgram: Boolean,
+    exportAll: Boolean = false
 ): CompilationOutputsBuilt {
     // mutable container allows explicitly remove elements from itself,
     // so we are able to help GC to free heavy JsIrModule objects
     // TODO: It makes sense to invent something better, because this logic can be easily broken
-    val moduleToRef = program.asCrossModuleDependencies(moduleKind, relativeRequirePath).toMutableList()
+    val moduleToRef = program.asCrossModuleDependencies(moduleKind, relativeRequirePath, exportAll).toMutableList()
 
     val mainModule = moduleToRef.removeLast().let { (main, mainRef) ->
         generateSingleWrappedModuleBody(

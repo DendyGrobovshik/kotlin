@@ -96,8 +96,8 @@ class JsIrModuleHeader(
 }
 
 class JsIrProgram(private var modules: List<JsIrModule>) {
-    fun asCrossModuleDependencies(moduleKind: ModuleKind, relativeRequirePath: Boolean): List<Pair<JsIrModule, CrossModuleReferences>> {
-        val resolver = CrossModuleDependenciesResolver(moduleKind, modules.map { it.makeModuleHeader() })
+    fun asCrossModuleDependencies(moduleKind: ModuleKind, relativeRequirePath: Boolean, exportAll: Boolean = false): List<Pair<JsIrModule, CrossModuleReferences>> {
+        val resolver = CrossModuleDependenciesResolver(moduleKind, modules.map { it.makeModuleHeader() }, exportAll)
         modules = emptyList()
         val crossModuleReferences = resolver.resolveCrossModuleDependencies(relativeRequirePath)
         return crossModuleReferences.entries.map {
@@ -114,7 +114,7 @@ class JsIrProgram(private var modules: List<JsIrModule>) {
     }
 }
 
-class CrossModuleDependenciesResolver(private val moduleKind: ModuleKind, private val headers: List<JsIrModuleHeader>) {
+class CrossModuleDependenciesResolver(private val moduleKind: ModuleKind, private val headers: List<JsIrModuleHeader>, private val exportAll: Boolean = false) {
     fun resolveCrossModuleDependencies(relativeRequirePath: Boolean): Map<JsIrModuleHeader, CrossModuleReferences> {
         val reexportModuleToHeader = headers.groupBy { it.reexportedInModuleWithName }
         val importedInModuleWithEffect = headers.groupBy { it.importedWithEffectInModuleWithName }
@@ -152,6 +152,12 @@ class CrossModuleDependenciesResolver(private val moduleKind: ModuleKind, privat
 
                 builder.imports += CrossModuleRef(fromModuleBuilder, tag)
                 fromModuleBuilder.exports += tag
+            }
+        }
+
+        if (exportAll) {
+            for (header in headers) {
+                headerToBuilder[header]!!.exports += header.definitions
             }
         }
 
