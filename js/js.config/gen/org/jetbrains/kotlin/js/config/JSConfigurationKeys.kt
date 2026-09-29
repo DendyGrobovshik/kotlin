@@ -164,6 +164,10 @@ object JSConfigurationKeys {
     @JvmField
     val MINIMIZED_MEMBER_NAMES = CompilerConfigurationKey.create<Boolean>("Minimize the names of members")
 
+    // Export all top-level declarations from each module in the cross-module export table.
+    @JvmField
+    val EXPORT_ALL = CompilerConfigurationKey.create<Boolean>("EXPORT_ALL")
+
     @JvmField
     val CALL_MAIN_MODE = CompilerConfigurationKey.create<String>("Specify whether the 'main' function should be called upon execution.")
 
@@ -369,6 +373,10 @@ var CompilerConfiguration.safeExternalBooleanDiagnostic: String?
 var CompilerConfiguration.minimizedMemberNames: Boolean
     get() = getBoolean(JSConfigurationKeys.MINIMIZED_MEMBER_NAMES)
     set(value) { put(JSConfigurationKeys.MINIMIZED_MEMBER_NAMES, value) }
+
+var CompilerConfiguration.exportAll: Boolean
+    get() = getBoolean(JSConfigurationKeys.EXPORT_ALL)
+    set(value) { put(JSConfigurationKeys.EXPORT_ALL, value) }
 
 var CompilerConfiguration.callMainMode: String?
     get() = get(JSConfigurationKeys.CALL_MAIN_MODE)

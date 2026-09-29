@@ -179,6 +179,16 @@ class K2JSCompilerArguments : K2WasmCompilerArguments() {
         }
 
     @Argument(
+        value = "-Xir-export-all",
+        description = "Export all top-level declarations from each module in the cross-module export table.",
+    )
+    var irExportAll: Boolean = false
+        set(value) {
+            checkFrozen()
+            field = value
+        }
+
+    @Argument(
         value = "-Xir-dce-print-reachability-info",
         description = "Print reachability information about declarations to 'stdout' while performing DCE.",
     )
