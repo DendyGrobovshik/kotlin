@@ -157,7 +157,7 @@ class CrossModuleDependenciesResolver(private val moduleKind: ModuleKind, privat
 
         if (exportAll) {
             for (header in headers) {
-                headerToBuilder[header]!!.exports += header.definitions
+                headerToBuilder[header]!!.exports += header.definitions intersect header.nameBindings.keys
             }
         }
 
