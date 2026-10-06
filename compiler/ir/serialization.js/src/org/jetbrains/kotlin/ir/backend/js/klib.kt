@@ -79,20 +79,30 @@ fun deserializeDependencies(
     klibs: LoadedKlibs,
     irLinker: JsIrLinker,
     filesToLoad: Set<String>?,
-    mapping: (KotlinLibrary) -> ModuleDescriptor
+    mapping: (KotlinLibrary) -> ModuleDescriptor,
+    exportAll: Boolean,
 ): IrModuleDependencies {
     val all: MutableList<IrModuleFragment> = mutableListOf()
     var stdlib: IrModuleFragment? = null
     var included: IrModuleFragment? = null
 
+    val dependencyStrategy: (String) -> DeserializationStrategy =
+        if (exportAll) {
+            { DeserializationStrategy.ALL }
+        } else {
+            { DeserializationStrategy.EXPLICITLY_EXPORTED }
+        }
+
     klibs.all.forEach { klib: KotlinLibrary ->
         val descriptor: ModuleDescriptor = mapping(klib)
         val module: IrModuleFragment = when {
-            klibs.included == null -> irLinker.deserializeIrModuleHeader(descriptor, klib, { DeserializationStrategy.EXPLICITLY_EXPORTED })
+            klibs.included == null -> irLinker.deserializeIrModuleHeader(descriptor, klib, dependencyStrategy)
             filesToLoad != null && klib == klibs.included -> irLinker.deserializeDirtyFiles(descriptor, klib, filesToLoad)
-            filesToLoad != null && klib != klibs.included -> irLinker.deserializeHeadersWithInlineBodies(descriptor, klib)
+            filesToLoad != null && klib != klibs.included ->
+                if (exportAll) irLinker.deserializeIrModuleHeader(descriptor, klib, dependencyStrategy)
+                else irLinker.deserializeHeadersWithInlineBodies(descriptor, klib)
             klib == klibs.included -> irLinker.deserializeIrModuleHeader(descriptor, klib, { DeserializationStrategy.ALL })
-            else -> irLinker.deserializeIrModuleHeader(descriptor, klib, { DeserializationStrategy.EXPLICITLY_EXPORTED })
+            else -> irLinker.deserializeIrModuleHeader(descriptor, klib, dependencyStrategy)
         }
 
         all += module
@@ -283,7 +293,8 @@ fun getIrModuleInfoForKlib(
         klibs = klibs,
         irLinker = irLinker,
         filesToLoad = filesToLoad,
-        mapping = mapping
+        mapping = mapping,
+        exportAll = configuration.getBoolean(JSConfigurationKeys.EXPORT_ALL),
     )
     irBuiltIns.functionFactory = IrDescriptorBasedFunctionFactory(
         irBuiltIns,
