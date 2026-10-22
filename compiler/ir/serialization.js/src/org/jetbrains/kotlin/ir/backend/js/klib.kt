@@ -406,7 +406,8 @@ fun getIrModuleInfoForSourceFiles(
         klibs = klibs,
         irLinker = irLinker,
         filesToLoad = null,
-        mapping = mapping
+        mapping = mapping,
+        exportAll = configuration.getBoolean(JSConfigurationKeys.EXPORT_ALL),
     )
     (irBuiltIns as IrBuiltInsOverDescriptors).functionFactory =
         IrDescriptorBasedFunctionFactory(
